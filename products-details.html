@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="ImagensRG/logo.png" />
+  <title>Detalhes do Carro - RG Auto Sales</title>
+
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+
+<body>
+  <!-- HEADER (Opção A) -->
+  <header class="header header--rg">
+    <div class="header__overlay">
+      <div class="container">
+
+        <div class="navbar">
+          <div class="logo">
+            <a href="index.html">
+              <img src="ImagensRG/logo.png" alt="RG Auto Sales" width="120" />
+            </a>
+          </div>
+
+          <nav>
+            <ul id="MenuItems">
+              <li><a href="index.html">Início</a></li>
+              <li><a href="products.html">Carros</a></li>
+              <li><a href="about.html">Sobre</a></li>
+              <li><a href="contacto.html">Contacto</a></li>
+              <li><a href="account.html">Conta</a></li>
+              <li><a href="test_drive.html">Test Drive</a></li>
+              <li><a href="leasing.html">Leasing</a></li>
+              <li><a href="vender_carro.html">Vender</a></li>
+            </ul>
+          </nav>
+
+          <a href="cart.html" aria-label="Carrinho">
+            <img src="ImagensRG/png-transparent-computer-icons-shopping-cart-basket-shopping-cart-text-hand-share-icon.png" alt="Carrinho" width="28" height="30" />
+          </a>
+
+          <button class="menu-icon" type="button" onclick="menutoggle()" aria-label="Abrir menu">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+        </div>
+
+        <div class="row header__hero">
+          <div class="col-2">
+            <h1 id="carTitle">Detalhes do Carro</h1>
+            <p id="carSubtitle">Veja fotos, características e agende o seu test drive.</p>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <a class="btn" id="whatsHeader" href="#" target="_blank" rel="noopener">WhatsApp</a>
+              <a class="btn btn--outline" href="Test_drive.html">Agendar Test Drive</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- DETALHES -->
+  <div class="small-container">
+    <h2 class="title">Detalhes</h2>
+
+    <div class="row single-products">
+      <!-- Imagem principal + mini galeria -->
+      <div class="col-2">
+        <img id="mainImg" src="ImagensRG/IMG_4940.jpeg" alt="Imagem principal do carro" />
+
+        <div class="small-img-row">
+          <div class="small-img-col"><img class="thumb" src="ImagensRG/IMG_4940.jpeg" alt="Miniatura 1" /></div>
+          <div class="small-img-col"><img class="thumb" src="ImagensRG/IMG_4939.jpeg" alt="Miniatura 2" /></div>
+          <div class="small-img-col"><img class="thumb" src="ImagensRG/IMG_4938.jpeg" alt="Miniatura 3" /></div>
+          <div class="small-img-col"><img class="thumb" src="ImagensRG/IMG_4934.jpeg" alt="Miniatura 4" /></div>
+        </div>
+      </div>
+
+      <!-- Info -->
+      <div class="col-2">
+        <h1 id="carName" style="text-align:left; color:#01203f;">Carro</h1>
+        <h4 id="carPrice" style="color:#f97316;">Preço: --</h4>
+
+        <p id="carDesc" style="color:#01203f; margin-top:12px;">
+          Descrição do veículo. (Ajuste conforme cada carro.)
+        </p>
+
+        <div class="rating" style="margin:10px 0;">
+          <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star-o"></i>
+        </div>
+
+        <div class="product-actions" style="justify-content:flex-start;">
+          <a class="btn" id="whatsBtn" href="#" target="_blank" rel="noopener">Falar no WhatsApp</a>
+          <a class="btn btn--outline" href="tel:+258862934721">Ligar</a>
+          <a class="btn btn--outline" href="Test_drive.html">Test Drive</a>
+        </div>
+
+        <h3 style="margin-top:18px; text-align:left; color:#01203f;">Características</h3>
+        <ul style="color:#01203f; margin-top:10px; padding-left:18px;">
+          <li><strong>Ano:</strong> <span id="specYear">—</span></li>
+          <li><strong>Combustível:</strong> <span id="specFuel">—</span></li>
+          <li><strong>Câmbio:</strong> <span id="specTrans">—</span></li>
+          <li><strong>Tração:</strong> <span id="specDrive">—</span></li>
+        </ul>
+
+        <p style="margin-top:12px; color:#01203f;">
+          <strong>Quer fechar rápido?</strong> Clique no WhatsApp e diga: “Quero este carro do site”.
+        </p>
+      </div>
+    </div>
+
+    <h2 class="title">Mais opções</h2>
+    <div class="row">
+      <div class="col-4 product-card">
+        <a href="products-details.html?id=mercedes" class="product-link">
+          <img src="ImagensRG/IMG_4934.jpeg" alt="Mercedes-Benz" />
+          <h4>Mercedes-Benz</h4>
+        </a>
+      </div>
+      <div class="col-4 product-card">
+        <a href="products-details.html?id=huracan" class="product-link">
+          <img src="ImagensRG/IMG_4939.jpeg" alt="Lamborghini Huracan" />
+          <h4>Lamborghini Huracan</h4>
+        </a>
+      </div>
+      <div class="col-4 product-card">
+        <a href="products-details.html?id=amg-gtr" class="product-link">
+          <img src="ImagensRG/IMG_4941.jpeg" alt="Mercedes-Benz AMG GT R" />
+          <h4>Mercedes-Benz AMG GT R</h4>
+        </a>
+      </div>
+      <div class="col-4 product-card">
+        <a href="products-details.html?id=urus" class="product-link">
+          <img src="ImagensRG/IMG_4947.jpeg" alt="Lamborghini Urus" />
+          <h4>Lamborghini Urus</h4>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER (contactos reforçados) -->
+  <div class="footer">
+    <div class="container">
+      <div class="row">
+
+        <div class="footer-col-1">
+          <h3>Contactos</h3>
+          <p>
+            WhatsApp: <a href="https://wa.me/258862934721" target="_blank" rel="noopener">+258 862 934 721</a><br />
+            Email: <a href="mailto:rgSolutions420@gmail.com">rgSolutions420@gmail.com</a>
+          </p>
+        </div>
+
+        <div class="footer-col-2">
+          <img src="ImagensRG/logo.png" alt="RG Auto Sales" />
+          <p>Nosso objetivo é tornar acessível o prazer de dirigir veículos de qualidade, com transparência e confiança.</p>
+        </div>
+
+        <div class="footer-col-4">
+          <h3>Siga a RG</h3>
+          <ul>
+            <li><a href="#">Instagram</a></li>
+            <li><a href="#">Facebook</a></li>
+            <li><a href="#">TikTok</a></li>
+            <li><a href="#">YouTube</a></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <hr />
+      <p class="copyright">Copyright 2026 - RG SALES</p>
+    </div>
+  </div>
+
+  <!-- JS: menu + carregar carro via ?id= -->
+  <script>
+    // Menu (compatível com teu CSS)
+    const menuItems = document.getElementById("MenuItems");
+    function menutoggle(){
+      menuItems.classList.toggle("show");
+    }
+
+    // Troca imagem principal ao clicar na miniatura
+    document.querySelectorAll(".thumb").forEach(t => {
+      t.addEventListener("click", () => {
+        document.getElementById("mainImg").src = t.src;
+      });
+    });
+
+    // Dados simples (depois tu pode ligar em BD)
+    const cars = {
+      "mercedes": {
+        name: "Mercedes-Benz",
+        price: "$87.400",
+        img: "ImagensRG/IMG_4934.jpeg",
+        desc: "Viatura com excelente conforto e performance. Ideal para quem quer elegância e potência.",
+        year: "2021",
+        fuel: "Gasolina",
+        trans: "Automático",
+        drive: "RWD"
+      },
+      "huracan-red": {
+        name: "Lamborghini Huracan Red Edition",
+        price: "$347.400",
+        img: "ImagensRG/IMG_4938.jpeg",
+        desc: "Edição especial com design agressivo e desempenho de supercarro.",
+        year: "2020",
+        fuel: "Gasolina",
+        trans: "Automático",
+        drive: "AWD"
+      },
+      "huracan": {
+        name: "Lamborghini Huracan",
+        price: "$287.000",
+        img: "ImagensRG/IMG_4939.jpeg",
+        desc: "Supercarro icônico com aceleração rápida e presença forte.",
+        year: "2019",
+        fuel: "Gasolina",
+        trans: "Automático",
+        drive: "AWD"
+      },
+      "ferrari-sf90": {
+        name: "Ferrari SF90",
+        price: "$530.000",
+        img: "ImagensRG/IMG_4940.jpeg",
+        desc: "Ferrari SF90: alta performance, tecnologia e design premium.",
+        year: "2022",
+        fuel: "Híbrido",
+        trans: "Automático",
+        drive: "AWD"
+      },
+      "amg-gtr": {
+        name: "Mercedes-Benz AMG GT R",
+        price: "$187.400",
+        img: "ImagensRG/IMG_4941.jpeg",
+        desc: "Performance esportiva de pista com conforto e tecnologia premium.",
+        year: "2021",
+        fuel: "Gasolina",
+        trans: "Automático",
+        drive: "RWD"
+      },
+      "gt3-rs": {
+        name: "Porsche GT3 RS",
+        price: "$222.400",
+        img: "ImagensRG/IMG_4942.jpeg",
+        desc: "Direção precisa e foco total em performance.",
+        year: "2021",
+        fuel: "Gasolina",
+        trans: "Automático",
+        drive: "RWD"
+      },
+      "bmw-m3": {
+        name: "BMW M3 Competition",
+        price: "$87.110",
+        img: "ImagensRG/IMG_4946.jpeg",
+        desc: "Esportivo equilibrado: potência, conforto e presença.",
+        year: "2020",
+        fuel: "Gasolina",
+        trans: "Automático",
+        drive: "RWD"
+      },
+      "urus": {
+        name: "Lamborghini Urus",
+        price: "$273.000",
+        img: "ImagensRG/IMG_4947.jpeg",
+        desc: "SUV de luxo com performance de supercarro.",
+        year: "2022",
+        fuel: "Gasolina",
+        trans: "Automático",
+        drive: "AWD"
+      }
+    };
+
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id") || "ferrari-sf90";
+    const car = cars[id] || cars["ferrari-sf90"];
+
+    // Preencher UI
+    document.title = car.name + " - RG Auto Sales";
+    document.getElementById("carTitle").textContent = car.name;
+    document.getElementById("carName").textContent = car.name;
+    document.getElementById("carPrice").textContent = "Preço: " + car.price;
+    document.getElementById("carDesc").textContent = car.desc;
+    document.getElementById("mainImg").src = car.img;
+    document.getElementById("mainImg").alt = car.name;
+
+    document.getElementById("specYear").textContent = car.year;
+    document.getElementById("specFuel").textContent = car.fuel;
+    document.getElementById("specTrans").textContent = car.trans;
+    document.getElementById("specDrive").textContent = car.drive;
+
+    // WhatsApp
+    const wa = "https://wa.me/258862934721?text=" + encodeURIComponent("Olá RG Auto Sales, tenho interesse no " + car.name + " (" + car.price + ") do site. Ainda está disponível?");
+    document.getElementById("whatsBtn").href = wa;
+    document.getElementById("whatsHeader").href = wa;
+  </script>
+  <a
+  class="wa-float"
+  href="https://wa.me/258862934721?text=Olá%20RG%20Auto%20Sales,%20quero%20informações."
+  target="_blank"
+  rel="noopener"
+  aria-label="Falar no WhatsApp com a RG Auto Sales"
+>
+  <i class="fa-brands fa-whatsapp"></i>
+  <span>WhatsApp RG</span>
+</a>
+<a
+  class="wa-float"
+  id="waFloat"
+  href="#"
+  target="_blank"
+  rel="noopener"
+  aria-label="Falar no WhatsApp com a RG Auto Sales"
+>
+  <i class="fa-brands fa-whatsapp"></i>
+  <span>WhatsApp RG</span>
+</a>
+<script>
+        const menuItems = document.getElementById("MenuItems");
+        function menutoggle() {
+            menuItems.classList.toggle("show");
+        }
+
+        document.querySelectorAll(".thumb").forEach(t => {
+            t.addEventListener("click", () => {
+                document.getElementById("mainImg").src = t.src;
+            });
+        });
+
+  document.getElementById("waFloat").href = wa;
+</script>
+
+</body>
+</html>

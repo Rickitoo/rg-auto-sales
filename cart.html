@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="ImagensRG/logo.png">
+    <title>Cart-RG AUTO </title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+</head>
+<body>
+    
+    <div class="container">
+        <div class="navbar">
+        <div class="logo">
+           <a href="index.html"> <img src="ImagensRG/logo.png" width="100px"></a>
+        </div>
+        <nav>
+            <!-- Menu -->
+             <ul id="MenuItems">  
+                <li><a href="index.html">Início</a></li>
+                <li><a href="products.html">Carros</a></li>
+                <li><a href="about.html">Sobre</a></li>
+                <li><a href="contacto.html">Contacto</a></li>
+                <li><a href="account.html">Conta</a></li>
+                <li><a href="test_drive.html">Test Drive</a></li>
+                <li><a href="leasing.htm">Leasing</a></li>
+                <li><a href="vender_carro.html">Vender</a></li>
+            </ul>
+        </nav>
+        <a href="cart.html"><img src="ImagensRG/png-transparent-computer-icons-shopping-cart-basket-shopping-cart-text-hand-share-icon.png" width="30px" height="30px"></a>
+        <img src="ImagensRG/pngtree-hamburger-like-menu-black-glyph-ui-icon-icon-concept-settings-vector-png-image_47699556.jpg" class="menu-icon" onclick="menutoggle()">
+    </div>
+    </div>
+
+    <!--------cart items details------------->
+
+    <div class="small-container cart-page">
+        <table>
+            <tr>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Subtotal</th>
+            </tr>
+            <tr>
+                <td>
+                    <div class="cart-info">
+                        <img src="ImagensRG/IMG_5009.jpeg">
+                        <p>Audi Q5</p>
+                        <small>price: $35.000</small>
+                        <br>
+                        <a href="">Remove</a>
+                    </div>
+                </td>
+                <td><input type="number" value="1"></td>
+                 <td>$135.000</td>
+            </tr>
+             <tr>
+                <td>
+                    <div class="cart-info">
+                        <img src="ImagensRG/IMG_5010.jpeg">
+                        <p>Toyota Coaster 2024</p>
+                        <small>price: $105.000</small>
+                        <br>
+                        <a href="">Remove</a>
+                    </div>
+                </td>
+                <td><input type="number" value="1"></td>
+                 <td>$105.000</td>
+            </tr>
+             <tr>
+                <td>
+                    <div class="cart-info">
+                        <img src="ImagensRG/IMG_5011.jpeg">
+                        <p>Toyota Coaster 2011</p>
+                        <small>price: $65.000</small>
+                        <br>
+                        <a href="">Remove</a>
+                    </div>
+                </td>
+                <td><input type="number" value="1"></td>
+                 <td>$65.000</td>
+            </tr>
+        </table>
+
+        <div class="total-price">
+            <table>
+                <tr>
+                    <td>Subtotal</td>
+                    <td>$200.00</td>  
+                </tr>
+                 <tr>
+                    <td>Tax</td>
+                    <td>$200.00</td>  
+                </tr>
+                 <tr>
+                    <td>Total</td>
+                    <td>$200.00</td>  
+                </tr>
+            </table>
+        </div>
+
+
+
+    </div>
+
+<!----------footer------->
+
+<div class="footer">
+    <div class="container">
+        <div class="row">
+            <div class="footer-col-1">
+                <h3>Download our App</h3>
+                <p>Download App for Android and IOS mobile Phone.</p>
+                <div class="app-logo">
+                    <img src="ImagensRG/AppStore.png" >
+                    <img src="ImagensRG/pngtree-google-play-store-vector-png-image_9183318.png" >
+                </div>
+            </div>
+             <div class="footer-col-2">
+                <img src="ImagensRG/logo.png">
+                <p>Our purpose is to sustainably make the pleasure and Benefits of Sports Acessible to the Many</p>
+            </div>
+            <div class="footer-col-1">
+                <h3>Useful links</h3>
+                <ul>
+                    <li>Coupons</li>
+                     <li>Blog Post</li>
+                      <li>Return Policy</li>
+                       <li>Join Affiliate</li>
+                </ul>
+            </div>
+            <div class="footer-col-4">
+                <h3>Follow Us</h3>
+                <ul>
+                    <li>Facebook</li>
+                     <li>Instagram</li>
+                      <li>Twitter</li>
+                       <li>Youtube</li>
+                </ul>
+            </div>
+        </div>
+        <hr>
+        <p class="copyright">Copyright 2025 - RG SALES</p>
+    </div>
+</div>
+
+<!------------js for toggle menu------------------->
+
+<script>
+    var MenuItems = document.getElementById("MenuItems");
+
+    MenuItems.style.maxHeight = "0px";
+    function menutoggle(){
+        if( MenuItems.style.maxHeight == "0px");
+            {
+            MenuItems.style.maxHeight = "200px";
+            }
+     else   {
+            MenuItems.style.maxHeight = "0px";
+            }
+    }
+</script>
+<script>
+    function atualizarTotal() {
+        const linhas = document.querySelectorAll("table tr:not(:first-child)");
+        let total = 0;
+
+        linhas.forEach(linha => {
+            const precoText = linha.querySelector("small")?.innerText;
+            const input = linha.querySelector("input");
+            const subtotalTd = linha.querySelector("td:last-child");
+
+            if (precoText && input && subtotalTd) {
+                const preco = parseFloat(precoText.replace(/[^\d.]/g, ""));
+                const quantidade = parseInt(input.value);
+                const subtotal = preco * quantidade;
+
+                subtotalTd.innerText = `$${subtotal.toLocaleString()}`;
+                total += subtotal;
+            }
+        });
+
+        document.querySelector(".total-price table").innerHTML = `
+            <tr><td>Subtotal</td><td>$${total.toLocaleString()}</td></tr>
+            <tr><td>Tax</td><td>$0.00</td></tr>
+            <tr><td>Total</td><td>$${total.toLocaleString()}</td></tr>
+        `;
+    }
+
+    // Ativa cálculo ao mudar a quantidade
+    document.querySelectorAll("input[type='number']").forEach(input => {
+        input.addEventListener("change", atualizarTotal);
+    });
+
+    // Ativa cálculo ao carregar a página
+    window.onload = atualizarTotal;
+</script>
+
+<a
+  class="wa-float"
+  href="https://wa.me/258862934721?text=Olá%20RG%20Auto%20Sales,%20quero%20informações."
+  target="_blank"
+  rel="noopener"
+  aria-label="Falar no WhatsApp com a RG Auto Sales"
+>
+  <i class="fa-brands fa-whatsapp"></i>
+  <span>WhatsApp RG</span>
+</a>
+
+</body>
+</html>
