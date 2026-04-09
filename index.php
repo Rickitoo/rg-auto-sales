@@ -153,28 +153,14 @@ $currentSearch = trim($_GET['q'] ?? '');
                     <ul id="MenuItems">
                         <li><a href="index.php">Início</a></li>
                         <li><a href="products.php">Carros</a></li>
-                        <li><a href="about.html">Sobre</a></li>
-                        <li><a href="contacto.html">Contacto</a></li>
-                        <li><a href="account.html">Conta</a></li>
-                        <li><a href="Test_drive.html">Test Drive</a></li>
-                        <li><a href="leasing.html">Leasing</a></li>
-                        <li><a href="vender_carro.html">Vender</a></li>
+                        <li><a href="about.php">Sobre</a></li>
+                        <li><a href="contacto.php">Contacto</a></li>
+                        <li><a href="account.php">Conta</a></li>
+                        <li><a href="Test_drive.php">Test Drive</a></li>
+                        <li><a href="leasing.php">Leasing</a></li>
+                        <li><a href="vender_carro.php">Vender</a></li>
                     </ul>
                 </nav>
-
-                <form class="header-search" action="products.php" method="GET">
-                    <input
-                        type="text"
-                        name="q"
-                        value="<?= h($currentSearch) ?>"
-                        placeholder="Ex.: Prado, BMW X3, Hilux..."
-                        aria-label="Pesquisar carros"
-                    >
-                    <button type="submit" aria-label="Pesquisar">
-                        <i class="fas fa-search"></i>
-                    </button>
-                </form>
-
                 <button class="menu-icon" type="button" onclick="menutoggle()" aria-label="Abrir menu">
                     <i class="fa-solid fa-bars"></i>
                 </button>
@@ -211,7 +197,7 @@ $currentSearch = trim($_GET['q'] ?? '');
 
                     <div class="home-car-actions">
                         <a class="btn btn--small" href="product-details.php?id=<?= $id ?>">Detalhes</a>
-                        <a class="btn btn-outline-dark btn--small" href="Test_drive.html">Test Drive</a>
+                        <a class="btn btn-outline-dark btn--small" href="Test_drive.php">Test Drive</a>
                         <a class="btn btn--small" href="<?= h($wa) ?>" target="_blank" rel="noopener">WhatsApp</a>
                     </div>
                 </div>
@@ -244,7 +230,7 @@ $currentSearch = trim($_GET['q'] ?? '');
 
                     <div class="home-car-actions">
                         <a class="btn btn--small" href="product-details.php?id=<?= $id ?>">Detalhes</a>
-                        <a class="btn btn-outline-dark btn--small" href="Test_drive.html">Test Drive</a>
+                        <a class="btn btn-outline-dark btn--small" href="Test_drive.php">Test Drive</a>
                         <a class="btn btn--small" href="<?= h($wa) ?>" target="_blank" rel="noopener">WhatsApp</a>
                     </div>
                 </div>
@@ -273,10 +259,10 @@ $currentSearch = trim($_GET['q'] ?? '');
         <div class="footer-col-1">
           <h3>Links úteis</h3>
           <ul>
-            <li><a href="products.html">Carros</a></li>
-            <li><a href="Test_drive.html">Agendar Test Drive</a></li>
-            <li><a href="vender_carro.html">Vender viatura</a></li>
-            <li><a href="contacto.html">Contactos</a></li>
+            <li><a href="products.php">Carros</a></li>
+            <li><a href="Test_drive.php">Agendar Test Drive</a></li>
+            <li><a href="vender_carro.php">Vender viatura</a></li>
+            <li><a href="contacto.php">Contactos</a></li>
           </ul>
         </div>
 

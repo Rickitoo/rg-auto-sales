@@ -1,6 +1,8 @@
 <?php
 include("../auth.php");
 include("../conexao.php");
+include("auth_check.php");
+
 
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 if ($id <= 0) die("ID inválido.");

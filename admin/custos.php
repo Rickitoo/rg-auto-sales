@@ -1,6 +1,8 @@
 <?php
 include("../auth.php");
 include("../conexao.php");
+include("auth_check.php");
+include("admin/includes/db.php");
 if (session_status() === PHP_SESSION_NONE) session_start();
 
 // financeiro.php (para recalcular venda após mexer nos custos)

@@ -2,6 +2,8 @@
 // admin/funil.php
 include("../auth.php");      // se o teu admin usa auth
 include("../conexao.php");   // $conexao
+include("auth_check.php");
+include("admin/includes/db.php");
 
 function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
 

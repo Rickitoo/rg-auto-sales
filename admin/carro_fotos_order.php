@@ -2,6 +2,9 @@
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
+include("auth_check.php");
+include("admin/includes/db.php");
+
 require_once __DIR__ . "/../conexao.php";
 
 header('Content-Type: application/json');

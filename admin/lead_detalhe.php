@@ -1,6 +1,8 @@
 <?php
 include("../auth.php");
 include("../conexao.php");
+include("auth_check.php");
+include("admin/includes/db.php");
 function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
 
 $id = (int)($_GET['id'] ?? 0);

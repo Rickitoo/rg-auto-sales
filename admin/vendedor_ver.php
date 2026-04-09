@@ -5,6 +5,8 @@ error_reporting(E_ALL);
 
 include("../auth.php");     // se não tiveres auth, remove esta linha
 include("../conexao.php");
+include("auth_check.php");
+
 
 if (session_status() === PHP_SESSION_NONE) session_start();
 

@@ -3,7 +3,7 @@ ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
 include("conexao.php");
-include("includes/funcoes_carros.php");
+include("admin/includes/funcoes_carros.php");
 
 function nomeCarro($row) {
     return trim(($row['marca'] ?? '') . ' ' . ($row['modelo'] ?? ''));
@@ -61,7 +61,7 @@ $sql = "
         COALESCE(
             NULLIF(c.imagem, ''),
             (
-                SELECT cf.foto
+                SELECT cf.caminho
                 FROM carros_fotos cf
                 WHERE cf.carro_id = c.id
                 ORDER BY cf.ordem ASC, cf.id ASC
@@ -253,7 +253,7 @@ if ($res) {
 </head>
 
 <body>
-<?php include("includes/header_public.php"); ?>
+<?php include("admin/includes/header_public.php"); ?>
 
 <div class="page-hero">
     <div class="container">
@@ -274,6 +274,38 @@ if ($res) {
         </div>
     </div>
 </div>
+
+<header class="header header--rg">
+    <div class="header__overlay">
+        <div class="container">
+
+            <div class="navbar">
+                <div class="logo">
+                    <a href="index.php">
+                        <img src="ImagensRG/logo.png" alt="RG Auto Sales" width="120" />
+                    </a>
+                </div>
+
+                <nav>
+                    <ul id="MenuItems">
+                        <li><a href="index.php">Início</a></li>
+                        <li><a href="products.php">Carros</a></li>
+                        <li><a href="about.php">Sobre</a></li>
+                        <li><a href="contacto.php">Contacto</a></li>
+                        <li><a href="account.php">Conta</a></li>
+                        <li><a href="Test_drive.php">Test Drive</a></li>
+                        <li><a href="leasing.php">Leasing</a></li>
+                        <li><a href="vender_carro.php">Vender</a></li>
+                    </ul>
+                </nav>
+
+                <button class="menu-icon" type="button" onclick="menutoggle()" aria-label="Abrir menu">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</header>
 
     <div class="small-container">
         <div class="filters-box">
@@ -357,6 +389,7 @@ if ($res) {
                     $img = fotoCarroUrl($c);
                     $preco = precoFmt($c);
                     $ano = (int)($c['ano'] ?? 0);
+                    $novo = ($c['novo'] ?? 0) == 1;
 
                     $wa = "https://wa.me/258862934721?text=" . urlencode(
                         "Olá RG Auto Sales, tenho interesse no $titulo ($ano) no valor de $preco MT. Ainda está disponível?"
@@ -372,13 +405,13 @@ if ($res) {
 
                         <div class="product-actions">
                             <a class="btn btn--small" href="product-details.php?id=<?= (int)$c['id'] ?>">Detalhes</a>
-                            <a class="btn btn--outline btn--small" href="Test_drive.html">Test Drive</a>
+                            <a class="btn btn--outline btn--small" href="Test_drive.php">Test Drive</a>
                             <a class="btn btn--small" href="<?= h($wa) ?>" target="_blank" rel="noopener">WhatsApp</a>
                         </div>
                     </div>
                 <?php endforeach; ?>
             <?php endif; ?>
-            <?php if($novo): ?>
+            <?php if (($c['novo'] ?? 0) == 1): ?>
                 <span class="badge-novo">Novo</span>
             <?php endif; ?>
         </div>
@@ -405,9 +438,9 @@ if ($res) {
                     <h3>Links úteis</h3>
                     <ul>
                         <li><a href="products.php">Carros</a></li>
-                        <li><a href="Test_drive.html">Test Drive</a></li>
-                        <li><a href="vender_carro.html">Vender</a></li>
-                        <li><a href="contacto.html">Contactos</a></li>
+                        <li><a href="Test_drive.php">Test Drive</a></li>
+                        <li><a href="vender_carro.php">Vender</a></li>
+                        <li><a href="contacto.php">Contactos</a></li>
                     </ul>
                 </div>
 

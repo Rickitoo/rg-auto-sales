@@ -1,6 +1,8 @@
 <?php
 include("../auth.php");
 include("../conexao.php");
+include("auth_check.php");
+include("admin/includes/db.php");
 
 $id = intval($_GET['id'] ?? 0);
 $dir = $_GET['dir'] ?? '';

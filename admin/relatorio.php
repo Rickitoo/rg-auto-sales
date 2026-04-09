@@ -1,6 +1,8 @@
 <?php
 include("../auth.php");
 include("../conexao.php");
+include("auth_check.php");
+
 function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
 
 $q1 = mysqli_query($conexao, "SELECT COUNT(*) total FROM leads WHERE YEAR(criado_em)=YEAR(CURDATE()) AND MONTH(criado_em)=MONTH(CURDATE())");

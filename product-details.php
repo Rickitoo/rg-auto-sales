@@ -186,25 +186,25 @@ $mais = mysqli_query($conexao, $sqlMais);
 
             <div class="navbar">
             <div class="logo">
-                <a href="index.html">
+                <a href="index.php">
                 <img src="ImagensRG/logo.png" alt="RG Auto Sales" width="120" />
                 </a>
             </div>
 
             <nav>
                 <ul id="MenuItems">
-                <li><a href="index.html">Início</a></li>
-                <li><a href="products.html">Carros</a></li>
-                <li><a href="about.html">Sobre</a></li>
-                <li><a href="contacto.html">Contacto</a></li>
-                <li><a href="account.html">Conta</a></li>
-                <li><a href="test_drive.html">Test Drive</a></li>
-                <li><a href="leasing.html">Leasing</a></li>
-                <li><a href="vender_carro.html">Vender</a></li>
+                <li><a href="index.php">Início</a></li>
+                <li><a href="products.php">Carros</a></li>
+                <li><a href="about.php">Sobre</a></li>
+                <li><a href="contacto.php">Contacto</a></li>
+                <li><a href="account.php">Conta</a></li>
+                <li><a href="test_drive.php">Test Drive</a></li>
+                <li><a href="leasing.php">Leasing</a></li>
+                <li><a href="vender_carro.php">Vender</a></li>
                 </ul>
             </nav>
 
-            <a href="cart.html" aria-label="Carrinho">
+            <a href="cart.php" aria-label="Carrinho">
                 <img src="ImagensRG/png-transparent-computer-icons-shopping-cart-basket-shopping-cart-text-hand-share-icon.png" alt="Carrinho" width="28" height="30" />
             </a>
 
@@ -219,14 +219,14 @@ $mais = mysqli_query($conexao, $sqlMais);
                     <p id="carSubtitle">Veja fotos, características e agende o seu test drive.</p>
                     <div style="display:flex; gap:10px; flex-wrap:wrap;">
                         <a class="btn" id="whatsHeader" href="#" target="_blank" rel="noopener">WhatsApp</a>
-                        <a class="btn btn--outline" href="Test_drive.html">Agendar Test Drive</a>
+                        <a class="btn btn--outline" href="Test_drive.php">Agendar Test Drive</a>
                     </div>
                 </div>
             </div>
             </div>
         </div>
     </header>
-    <?php include("includes/header_public.php"); ?>
+    <?php include("admin/includes/header_public.php"); ?>
 
     <div class="page-hero">
         <div class="container">
@@ -236,7 +236,7 @@ $mais = mysqli_query($conexao, $sqlMais);
                     <p>Veja fotos, características e agende o seu test drive.</p>
                     <div style="display:flex; gap:10px; flex-wrap:wrap;">
                         <a class="btn" href="<?= h($wa) ?>" target="_blank" rel="noopener">WhatsApp</a>
-                        <a class="btn btn--outline" href="Test_drive.html">Agendar Test Drive</a>
+                        <a class="btn btn--outline" href="Test_drive.php">Agendar Test Drive</a>
                     </div>
                 </div>
             </div>
@@ -339,8 +339,8 @@ $mais = mysqli_query($conexao, $sqlMais);
                     <h3>Siga a RG</h3>
                     <ul>
                         <li><a href="#">Instagram</a></li>
-                        <li><a href="#">Facebook</a></li>
-                        <li><a href="#">TikTok</a></li>
+                        <li><a href="https://www.facebook.com/profile.php?id=61588204178280&locale=pt_BR">Facebook</a></li>
+                        <li><a href="https://www.instagram.com/rgauto_sales/">TikTok</a></li>
                         <li><a href="#">YouTube</a></li>
                     </ul>
                 </div>

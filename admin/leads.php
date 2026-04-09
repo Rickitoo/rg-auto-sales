@@ -1,5 +1,7 @@
 <?php
 include("../conexao.php"); // se teu admin usa auth, depois colocamos
+include("auth_check.php");
+include("admin/includes/db.php");
 
 function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
 

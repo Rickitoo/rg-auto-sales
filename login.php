@@ -4,22 +4,31 @@ include("config_admin.php");
 
 $erro = "";
 
+// Gerar CSRF token (sempre antes do form)
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
+
+    //  VALIDAR CSRF
+    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+        die("Erro de validação CSRF");
+    }
+
     $user = trim($_POST["user"] ?? "");
     $pass = trim($_POST["pass"] ?? "");
 
     if ($user === $ADMIN_USER && password_verify($pass, $ADMIN_HASH)) {
-       session_regenerate_id(true);
-        $_SESSION['admin_logado'] = true;
 
-        // token CSRF (para ações tipo apagar)
-        if (empty($_SESSION['csrf_token'])) {
-            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-        }
+        //  Segurança 
+        session_regenerate_id(true);
+
+        $_SESSION['admin_logado'] = true;
 
         header("Location: /RG_AUTO_SALES/admin/dashboard.php");
         exit;
+
     } else {
         $erro = "Credenciais inválidas.";
     }
@@ -74,21 +83,21 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       <!-- NAVBAR -->
       <div class="navbar">
         <div class="logo">
-          <a href="index.html">
+          <a href="index.php">
             <img src="ImagensRG/logo.png" alt="RG Auto Sales" width="120">
           </a>
         </div>
 
         <nav>
           <ul id="MenuItems">
-            <li><a href="index.html">Início</a></li>
-            <li><a href="products.html">Carros</a></li>
-            <li><a href="about.html">Sobre</a></li>
-            <li><a href="contacto.html">Contacto</a></li>
-            <li><a href="account.html">Conta</a></li>
-            <li><a href="Test_drive.html">Test Drive</a></li>
-            <li><a href="leasing.html">Leasing</a></li>
-            <li><a href="vender_carro.html">Vender</a></li>
+            <li><a href="index.php">Início</a></li>
+            <li><a href="products.php">Carros</a></li>
+            <li><a href="about.php">Sobre</a></li>
+            <li><a href="contacto.php">Contacto</a></li>
+            <li><a href="account.php">Conta</a></li>
+            <li><a href="Test_drive.php">Test Drive</a></li>
+            <li><a href="leasing.php">Leasing</a></li>
+            <li><a href="vender_carro.php">Vender</a></li>
           </ul>
         </nav>
 
@@ -108,7 +117,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <div class="err"><?php echo htmlspecialchars($erro); ?></div>
       <?php } ?>
 
-      <form method="POST">
+      <form method="POST"<input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
         <label>Usuário</label>
         <input type="text" name="user" required placeholder="admin">
 
@@ -143,10 +152,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <div class="footer-col-1">
           <h3>Links úteis</h3>
           <ul>
-            <li><a href="products.html">Carros</a></li>
-            <li><a href="Test_drive.html">Agendar Test Drive</a></li>
-            <li><a href="vender_carro.html">Vender viatura</a></li>
-            <li><a href="contacto.html">Contactos</a></li>
+            <li><a href="products.php">Carros</a></li>
+            <li><a href="Test_drive.php">Agendar Test Drive</a></li>
+            <li><a href="vender_carro.php">Vender viatura</a></li>
+            <li><a href="contacto.php">Contactos</a></li>
           </ul>
         </div>
 

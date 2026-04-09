@@ -2,7 +2,7 @@
 $servidor = "localhost";
 $usuario = "root";
 $senha = "";
-$banco = "rg_auto_sales"; // ✅ nome do banco exatamente igual ao phpMyAdmin
+$banco = "rg_auto_sales"; // ✅ nome do banco phpMyAdmin
 
 $conexao = mysqli_connect($servidor, $usuario, $senha, $banco);
 

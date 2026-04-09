@@ -1,6 +1,8 @@
 <?php
 include("../auth.php");
 include("../conexao.php");
+include("auth_check.php");
+include("admin/includes/db.php");
 
 $id = intval($_GET['id'] ?? 0);
 $carro_id = intval($_GET['carro_id'] ?? 0);

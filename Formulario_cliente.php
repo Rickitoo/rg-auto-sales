@@ -100,14 +100,14 @@ exit;
 
           <nav>
             <ul id="MenuItems">
-              <li><a href="index.html">Início</a></li>
-              <li><a href="products.html">Carros</a></li>
+              <li><a href="index.php">Início</a></li>
+              <li><a href="products.php">Carros</a></li>
               <li><a href="about.html">Sobre</a></li>
               <li><a href="contacto.html">Contacto</a></li>
               <li><a href="account.html">Conta</a></li>
               <li><a href="test_drive.html">Test Drive</a></li>
               <li><a href="leasing.html">Leasing</a></li>
-              <li><a href="vender_carro.html">Vender</a></li>
+              <li><a href="vender_carro.php">Vender</a></li>
             </ul>
           </nav>
 
@@ -231,9 +231,9 @@ exit;
         <div class="footer-col-1">
           <h3>Links úteis</h3>
           <ul>
-            <li><a href="products.html">Carros</a></li>
+            <li><a href="products.php">Carros</a></li>
             <li><a href="Test_drive.html">Agendar Test Drive</a></li>
-            <li><a href="vender_carro.html">Vender viatura</a></li>
+            <li><a href="vender_carro.php">Vender viatura</a></li>
             <li><a href="contacto.html">Contactos</a></li>
           </ul>
         </div>

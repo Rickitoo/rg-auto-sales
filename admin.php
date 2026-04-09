@@ -100,14 +100,14 @@ $msg = $_GET['msg'] ?? '';
 
         <nav>
           <ul id="MenuItems">
-            <li><a href="index.html">Início</a></li>
-            <li><a href="products.html">Carros</a></li>
+            <li><a href="index.php">Início</a></li>
+            <li><a href="products.php">Carros</a></li>
             <li><a href="about.html">Sobre</a></li>
             <li><a href="contacto.html">Contacto</a></li>
             <li><a href="account.html">Conta</a></li>
             <li><a href="Test_drive.html">Test Drive</a></li>
             <li><a href="leasing.html">Leasing</a></li>
-            <li><a href="vender_carro.html">Vender</a></li>
+            <li><a href="vender_carro.php">Vender</a></li>
           </ul>
         </nav>
 
@@ -119,7 +119,7 @@ $msg = $_GET['msg'] ?? '';
 <div class="top">
   <div class="brand">RG <span>Auto Sales</span> • Admin</div>
   <div style="display:flex; gap:10px;">
-    <a class="btn btn-outline" href="index.html">Site</a>
+    <a class="btn btn-outline" href="index.php">Site</a>
     <a class="btn btn-dark" href="logout.php">Sair</a>
   </div>
 </div>

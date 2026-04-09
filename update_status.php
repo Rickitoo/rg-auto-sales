@@ -1,9 +1,12 @@
 <?php
 include("auth.php");
+include("conexao.php");
+include("includes/db.php");
+
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-include("conexao.php");
+
 
 $id     = intval($_GET['id'] ?? 0);
 $status = $_GET['status'] ?? '';

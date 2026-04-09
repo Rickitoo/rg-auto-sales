@@ -106,8 +106,8 @@ if ($id <= 0) {
         </a>
       <?php } ?>
 
-      <a class="btn btn-outline" href="index.html">Voltar ao início</a>
-      <a class="btn btn-outline" href="test_drive.html">Novo agendamento</a>
+      <a class="btn btn-outline" href="index.php">Voltar ao início</a>
+      <a class="btn btn-outline" href="test_drive.php">Novo agendamento</a>
       <a class="btn btn-outline" href="admin.php">Admin</a>
     </div>
 
@@ -138,10 +138,10 @@ if ($id <= 0) {
         <div class="footer-col-1">
           <h3>Links úteis</h3>
           <ul>
-            <li><a href="products.html">Carros</a></li>
-            <li><a href="Test_drive.html">Agendar Test Drive</a></li>
-            <li><a href="vender_carro.html">Vender viatura</a></li>
-            <li><a href="contacto.html">Contactos</a></li>
+            <li><a href="products.php">Carros</a></li>
+            <li><a href="Test_drive.php">Agendar Test Drive</a></li>
+            <li><a href="vender_carro.php">Vender viatura</a></li>
+            <li><a href="contacto.php">Contactos</a></li>
           </ul>
         </div>
 

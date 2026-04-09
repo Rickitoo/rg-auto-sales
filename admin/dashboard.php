@@ -2,7 +2,10 @@
 // admin/dashboard.php
 include("../auth.php");
 include("../conexao.php");
-include("includes/config.php");
+include("admin/includes/config.php");
+include("auth_check.php");
+include("admin/includes/db.php");
+include("admin/includes/auth_admin.php");
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -258,6 +261,21 @@ for ($d=1; $d<=$diasNoMes; $d++) {
     $vendasSeries[] = $vendasPorDia[$d];
     $leadsSeries[]  = $leadsPorDia[$d];
 }
+
+$hojeAgora = date("Y-m-d H:i:s");
+
+                        $sqlFollow = "
+                        SELECT $selectLeads 
+                        FROM clientes 
+                        WHERE proximo_followup IS NOT NULL
+                        AND proximo_followup <= '$hojeAgora'
+                        ORDER BY proximo_followup ASC
+                        LIMIT 10
+                        ";
+
+                        $resF = mysqli_query($conexao, $sqlFollow);
+                        $leadsFollow = [];
+                        if ($resF) while ($r = mysqli_fetch_assoc($resF)) $leadsFollow[] = $r;
 
 include("includes/layout_top.php");
 ?>
@@ -538,6 +556,52 @@ include("includes/layout_top.php");
 
 <div style="height:20px;"></div>
 
+<div style="height:20px;"></div>
+
+<div class="section-head">
+    <div class="fw-semibold">🚨 Follow-ups Pendentes</div>
+</div>
+
+<div class="table-card">
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Cliente</th>
+                    <th>Telefone</th>
+                    <th>Follow-up</th>
+                    <th class="text-end">Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+
+            <?php if (!count($leadsFollow)): ?>
+                <tr>
+                    <td colspan="4" class="text-center text-muted">
+                        Nenhum follow-up pendente 👍
+                    </td>
+                </tr>
+            <?php else: foreach ($leadsFollow as $l): ?>
+                <tr style="background:#fff3cd;">
+                    <td><?= h($l["nome"]) ?></td>
+                    <td><?= h($l["telefone"]) ?></td>
+                    <td><?= date("d/m H:i", strtotime($l["proximo_followup"])) ?></td>
+
+                    <td class="text-end">
+                        <a class="action-link action-green"
+                           target="_blank"
+                           href="https://wa.me/<?= preg_replace('/[^0-9]/','',$l['telefone']) ?>?text=<?= urlencode("Olá ".$l['nome'].", estou a dar seguimento ao seu pedido de leasing. Ainda está interessado?") ?>">
+                           Follow-up
+                        </a>
+                    </td>
+                </tr>
+            <?php endforeach; endif; ?>
+
+            </tbody>
+        </table>
+    </div>
+</div>
+
 <div class="grid-2">
     <div>
         <div class="section-head">
@@ -556,9 +620,57 @@ include("includes/layout_top.php");
                             <th>Carro</th>
                             <th>Status</th>
                             <th class="text-end">Ação</th>
+                            <th>Follow-up</th>
                         </tr>
                     </thead>
                     <tbody>
+
+                    <div class="section-head">
+    <div class="fw-semibold">🚨 Follow-ups Pendentes</div>
+</div>
+
+<div class="table-card">
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Cliente</th>
+                    <th>Telefone</th>
+                    <th>Follow-up</th>
+                    <th class="text-end">Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+
+            <?php if (!count($leadsFollow)): ?>
+                <tr>
+                    <td colspan="4" class="text-center text-muted">
+                        Nenhum follow-up pendente 👍
+                    </td>
+                </tr>
+            <?php else: foreach ($leadsFollow as $l): ?>
+                <tr style="background:#fff3cd;">
+                    <td><?= h($l["nome"] ?? "-") ?></td>
+                    <td><?= h($l["telefone"] ?? "-") ?></td>
+
+                    <td>
+                        <?= date("d/m H:i", strtotime($l["proximo_followup"])) ?>
+                    </td>
+
+                    <td class="text-end">
+                        <a class="action-link action-green"
+                           target="_blank"
+                           href="https://wa.me/<?= preg_replace('/[^0-9]/','',$l['telefone']) ?>?text=<?= urlencode("Olá ".$l['nome'].", estou a dar seguimento ao seu pedido de leasing. Ainda está interessado?") ?>">
+                           Follow-up
+                        </a>
+                    </td>
+                </tr>
+                <?php endforeach; endif; ?>
+                </tbody>
+        </table>
+    </div>
+</div>
+                        
                     <?php if (!count($ultimosLeads)): ?>
                         <tr><td colspan="7" class="text-center text-muted">Ainda não há leads.</td></tr>
                     <?php else: foreach ($ultimosLeads as $l): ?>
@@ -605,6 +717,15 @@ include("includes/layout_top.php");
                                 <a class="action-link action-green" href="nova_venda.php?cliente_id=<?= (int)($l["id"] ?? 0) ?>">
                                     Criar venda
                                 </a>
+                            </td>
+                            <td>
+                                <?php 
+                                if (!empty($l['proximo_followup'])) {
+                                    echo date("d/m H:i", strtotime($l['proximo_followup']));
+                                } else {
+                                    echo "—";
+                                }
+                                ?>
                             </td>
                         </tr>
                     <?php endforeach; endif; ?>
@@ -700,7 +821,17 @@ include("includes/layout_top.php");
                         <td class="text-end"><?= !empty($c['preco_venda']) ? money($c['preco_venda']) : '—' ?></td>
                         <td><span class="badge badge-<?= $badge ?>"><?= h($c['status']) ?></span></td>
                         <td class="text-end">
-                            <a class="action-link action-blue" href="editar_carro.php?id=<?= (int)$c['id'] ?>">Editar</a>
+                            <a class="action-link action-green"
+                            target="_blank"
+                            href="https://wa.me/<?= preg_replace('/[^0-9]/','',$l['telefone']) ?>?text=<?= urlencode("Olá ".$l['nome'].", vi o seu pedido na RG Auto Sales. Ainda está interessado?") ?>">
+                            WhatsApp
+                            </a>
+
+                            <br><br>
+
+                            <a class="action-link action-blue" href="nova_venda.php?cliente_id=<?= (int)($l["id"] ?? 0) ?>">
+                                Criar venda
+                            </a>
                         </td>
                     </tr>
                 <?php endforeach; endif; ?>

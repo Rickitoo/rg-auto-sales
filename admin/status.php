@@ -2,6 +2,8 @@
 // admin/status.php
 include("../auth.php");
 include("../conexao.php");
+include("auth_check.php");
+include("admin/includes/db.php");
 
 if (session_status() === PHP_SESSION_NONE) session_start();
 
@@ -33,4 +35,20 @@ if (mysqli_stmt_execute($stmt)) {
 $err = mysqli_error($conexao);
 mysqli_stmt_close($stmt);
 back("Erro ao atualizar: " . $err);
+
+$proximo = null;
+
+if ($status == "NOVO") {
+    $proximo = date("Y-m-d H:i:s", strtotime("+10 minutes"));
+}
+elseif ($status == "CONTACTADO") {
+    $proximo = date("Y-m-d H:i:s", strtotime("+1 day"));
+}
+elseif ($status == "AGENDADO") {
+    $proximo = date("Y-m-d H:i:s", strtotime("+2 days"));
+}
+
+$sql = "UPDATE clientes 
+        SET status=?, proximo_followup=? 
+        WHERE id=?";
 ?>

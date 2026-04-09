@@ -2,6 +2,8 @@
 // admin/lead_move.php
 include("../auth.php");
 include("../conexao.php");
+include("auth_check.php");
+include("admin/includes/db.php");
 
 header('Content-Type: application/json; charset=utf-8');
 
