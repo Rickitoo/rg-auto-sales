@@ -1,22 +1,29 @@
 <?php
-include("auth.php"); // protege
+include("auth.php");
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
 include("conexao.php");
 
-$id = intval($_GET['id'] ?? 0);
-$token = $_GET['token'] ?? '';
+// Segurança: só POST
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    die("Método inválido.");
+}
+
+$id = intval($_POST['id'] ?? 0);
+$token = $_POST['token'] ?? '';
 
 if ($id <= 0) {
     die("ID inválido.");
 }
 
+// CSRF
 if (!isset($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $token)) {
     die("Ação bloqueada (token inválido).");
 }
 
-$stmt = mysqli_prepare($conexao, "DELETE FROM clientes WHERE id = ?");
+// Soft delete
+$stmt = mysqli_prepare($conexao, "UPDATE clientes SET status='inativo' WHERE id = ?");
 if (!$stmt) {
     die("Erro ao preparar: " . mysqli_error($conexao));
 }
@@ -24,16 +31,15 @@ if (!$stmt) {
 mysqli_stmt_bind_param($stmt, "i", $id);
 mysqli_stmt_execute($stmt);
 
-$apagou = (mysqli_stmt_affected_rows($stmt) > 0);
+$afetou = (mysqli_stmt_affected_rows($stmt) > 0);
 
 mysqli_stmt_close($stmt);
 mysqli_close($conexao);
 
-if ($apagou) {
-    header("Location: admin.php?msg=apagado");
-    exit;
+if ($afetou) {
+    header("Location: admin.php?msg=desativado");
 } else {
-    header("Location: admin.php?msg=nao_encontrado");
-    exit;
+    header("Location: admin.php?msg=erro");
 }
+exit;
 

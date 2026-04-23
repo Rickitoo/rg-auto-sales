@@ -3,6 +3,12 @@
 // - Desliga totalmente o modelo antigo (valor_carro / comissao 7%)
 // - Mostra apenas valor_venda, valor_proprietario, custos, lucro e comissões por lucro real
 // - Comissões devem ser calculadas em includes/financeiro.php (recalcular_venda)
+require_once(__DIR__ . "/../init.php");
+
+if (!isset($_SESSION['admin'])) {
+    header("Location: /RG_AUTO_SALES/login.php");
+    exit();
+}
 
 include("../auth.php");
 include("../conexao.php");

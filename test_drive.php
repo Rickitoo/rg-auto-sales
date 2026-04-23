@@ -90,10 +90,10 @@
             </select>
 
             <label for="data" style="margin-top:12px; display:block;"><strong>Data</strong></label>
-            <input type="date" name="data" id="data" required />
+            <input type="date" name="data_test_drive" id="data" required />
 
             <label for="hora" style="margin-top:12px; display:block;"><strong>Hora</strong></label>
-            <input type="time" name="hora" id="hora" required />
+            <input type="time" name="hora_test_drive" id="hora" required />
 
             <label for="marca" style="margin-top:12px; display:block;"><strong>Marca</strong></label>
             <select id="marca" name="marca" required>

@@ -1,18 +1,43 @@
 <?php
-include("../auth.php");
-include("../conexao.php");
-include("auth_check.php");
-include("admin/includes/db.php");
+require_once(__DIR__ . "/../init.php");
+
+// segurança
+if (!isset($_SESSION['admin'])) {
+    header("Location: /RG_AUTO_SALES/login.php");
+    exit();
+}
+
+// garante conexão
+if (!isset($conexao)) {
+    die("Erro: conexão não inicializada");
+}
 
 $id = (int)($_GET['id'] ?? 0);
-$s  = $_GET['s'] ?? '';
+$status = $_GET['s'] ?? '';
 
-$allowed = ['novo','contactado','qualificado','agendado','negociacao','fechado','perdido'];
-if ($id <= 0 || !in_array($s, $allowed, true)) die("Parâmetros inválidos.");
+$allowed = [
+    'novo',
+    'contactado',
+    'qualificado',
+    'agendado',
+    'negociacao',
+    'fechado',
+    'perdido'
+];
+
+if ($id <= 0 || !in_array($status, $allowed, true)) {
+    die("Parâmetros inválidos.");
+}
 
 $stmt = mysqli_prepare($conexao, "UPDATE leads SET status=? WHERE id=? LIMIT 1");
-mysqli_stmt_bind_param($stmt, "si", $s, $id);
+
+if (!$stmt) {
+    die("Erro na query: " . mysqli_error($conexao));
+}
+
+mysqli_stmt_bind_param($stmt, "si", $status, $id);
 mysqli_stmt_execute($stmt);
 
-header("Location: leads.php");
+header("Location: /RG_AUTO_SALES/admin/listar_leads.php");
 exit;
+?>

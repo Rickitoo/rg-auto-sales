@@ -1,19 +1,9 @@
 <?php
-// admin/marcar_venda.php
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
+require_once(__DIR__ . "/../init.php");
 
-include("../auth.php");
-include("../conexao.php");
-include("auth_check.php");
-include("admin/includes/db.php");
-
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-if (!isset($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+if (!isset($_SESSION['admin'])) {
+    header("Location: /RG_AUTO_SALES/login.php");
+    exit();
 }
 
 function h($v) {
@@ -24,296 +14,177 @@ function money($v) {
     return number_format((float)$v, 2, ',', '.') . " MT";
 }
 
-$id = intval($_GET['id'] ?? 0);
+$id = (int)($_GET['id'] ?? 0);
 
 if ($id <= 0) {
     die("ID inválido.");
 }
 
-// Buscar carro
-$sql = "SELECT * FROM carros WHERE id = $id LIMIT 1";
-$res = mysqli_query($conexao, $sql);
+/* ===============================
+   BUSCAR CARRO
+=============================== */
+$stmt = mysqli_prepare($conexao, "SELECT * FROM carros WHERE id = ?");
+mysqli_stmt_bind_param($stmt, "i", $id);
+mysqli_stmt_execute($stmt);
+$res = mysqli_stmt_get_result($stmt);
 
 if (!$res || mysqli_num_rows($res) === 0) {
     die("Carro não encontrado.");
 }
 
 $carro = mysqli_fetch_assoc($res);
+mysqli_stmt_close($stmt);
+
 $erro = "";
 $sucesso = "";
 
+/* ===============================
+   SUBMIT VENDA
+=============================== */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $csrf = $_POST['csrf_token'] ?? '';
 
-    if (!hash_equals($_SESSION['csrf_token'], $csrf)) {
+    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
         die("CSRF inválido.");
     }
 
-    $preco_venda = trim($_POST['preco_venda'] ?? '');
-    $comissao    = trim($_POST['comissao'] ?? '');
-    $data_venda  = trim($_POST['data_venda'] ?? '');
+    $preco_venda = (float) str_replace(',', '.', $_POST['preco_venda'] ?? 0);
+    $data_venda  = $_POST['data_venda'] ?? '';
 
-    $preco_venda = str_replace(',', '.', $preco_venda);
-    $comissao    = str_replace(',', '.', $comissao);
-
-    $preco_venda_num = is_numeric($preco_venda) ? (float)$preco_venda : 0;
-    $comissao_num    = ($comissao !== '' && is_numeric($comissao)) ? (float)$comissao : 0;
-
-    if ($preco_venda_num <= 0) {
-        $erro = "Informe um preço de venda válido.";
-    } elseif ($data_venda === '') {
-        $erro = "Informe a data da venda.";
+    if ($preco_venda <= 0) {
+        $erro = "Preço de venda inválido.";
+    } elseif (empty($data_venda)) {
+        $erro = "Data inválida.";
     } else {
+
+        $preco_compra = (float)$carro['preco'];
+
+        /* ===============================
+           CÁLCULO DE COMISSÕES
+        =============================== */
+        $lucro = $preco_venda - $preco_compra;
+
+        $comissao_vendedor = $lucro * 0.15;
+        $comissao_parceiro = $lucro * 0.10;
+        $comissao_rg = $lucro - ($comissao_vendedor + $comissao_parceiro);
+
+        /* ===============================
+           INSERIR VENDA
+        =============================== */
         $stmt = mysqli_prepare($conexao, "
-            UPDATE carros
-            SET status = 'vendido',
-                preco_venda = ?,
-                comissao = ?,
-                data_venda = ?
-            WHERE id = ?
+            INSERT INTO vendas (
+                cliente_id,
+                marca,
+                modelo,
+                valor_venda,
+                preco_compra,
+                lucro,
+                comissao_vendedor,
+                comissao_parceiro,
+                comissao_rg,
+                status,
+                data_venda
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDENTE', ?)
         ");
 
-        if (!$stmt) {
-            $erro = "Erro ao preparar atualização.";
-        } else {
-            mysqli_stmt_bind_param($stmt, "ddsi", $preco_venda_num, $comissao_num, $data_venda, $id);
+        mysqli_stmt_bind_param(
+            $stmt,
+            "issdddddds",
+            $carro['cliente_id'],
+            $carro['marca'],
+            $carro['modelo'],
+            $preco_venda,
+            $preco_compra,
+            $lucro,
+            $comissao_vendedor,
+            $comissao_parceiro,
+            $comissao_rg,
+            $data_venda
+        );
 
-            if (mysqli_stmt_execute($stmt)) {
-                $sucesso = "Venda registada com sucesso.";
-
-                // Recarregar dados atualizados
-                $res = mysqli_query($conexao, $sql);
-                if ($res && mysqli_num_rows($res) > 0) {
-                    $carro = mysqli_fetch_assoc($res);
-                }
-            } else {
-                $erro = "Erro ao guardar venda: " . mysqli_stmt_error($stmt);
-            }
+        if (mysqli_stmt_execute($stmt)) {
 
             mysqli_stmt_close($stmt);
+
+            /* ===============================
+               MARCAR CARRO COMO VENDIDO
+            =============================== */
+            $stmt2 = mysqli_prepare($conexao, "UPDATE carros SET status='vendido' WHERE id=?");
+            mysqli_stmt_bind_param($stmt2, "i", $id);
+            mysqli_stmt_execute($stmt2);
+            mysqli_stmt_close($stmt2);
+
+            $sucesso = "Venda registada com sucesso.";
+
+        } else {
+            $erro = "Erro ao registar venda.";
         }
     }
 }
 
-// Imagem de capa
-$capa = $carro['imagem'] ?? '';
-
-if (empty($capa)) {
-    $resFoto = mysqli_query($conexao, "SELECT foto FROM carros_fotos WHERE carro_id = $id ORDER BY ordem ASC, id ASC LIMIT 1");
-    if ($resFoto && mysqli_num_rows($resFoto) > 0) {
-        $fotoRow = mysqli_fetch_assoc($resFoto);
-        $capa = $fotoRow['foto'];
-    }
+/* ===============================
+   CSRF
+=============================== */
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
-
-$imgSrc = !empty($capa) ? "../uploads/" . $capa : "";
 ?>
+
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-    <meta charset="UTF-8">
-    <title>Marcar Venda</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-        *{box-sizing:border-box}
-        body{
-            margin:0;
-            font-family:Arial, sans-serif;
-            background:#f4f6f9;
-            color:#1f2937;
-        }
-        .container{
-            max-width:900px;
-            margin:0 auto;
-            padding:20px;
-        }
-        .card{
-            background:#fff;
-            border-radius:16px;
-            padding:22px;
-            box-shadow:0 4px 18px rgba(0,0,0,.08);
-            margin-bottom:20px;
-        }
-        .title{
-            margin:0 0 8px 0;
-            font-size:30px;
-        }
-        .muted{
-            color:#6b7280;
-        }
-        .carro-box{
-            display:grid;
-            grid-template-columns:160px 1fr;
-            gap:20px;
-            align-items:start;
-        }
-        .thumb{
-            width:160px;
-            height:120px;
-            object-fit:cover;
-            border-radius:10px;
-            border:1px solid #ddd;
-            background:#f3f4f6;
-        }
-        .noimg{
-            width:160px;
-            height:120px;
-            border-radius:10px;
-            border:1px solid #ddd;
-            background:#f3f4f6;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            color:#666;
-            font-size:13px;
-        }
-        .info p{
-            margin:0 0 10px 0;
-        }
-        form{
-            display:grid;
-            grid-template-columns:1fr 1fr;
-            gap:16px;
-        }
-        .full{
-            grid-column:1 / -1;
-        }
-        label{
-            display:block;
-            font-weight:bold;
-            margin-bottom:6px;
-        }
-        input{
-            width:100%;
-            padding:12px 14px;
-            border:1px solid #d1d5db;
-            border-radius:10px;
-            font-size:14px;
-            background:#fff;
-        }
-        .btn{
-            display:inline-block;
-            padding:12px 16px;
-            border:none;
-            border-radius:10px;
-            text-decoration:none;
-            cursor:pointer;
-            font-weight:bold;
-            text-align:center;
-        }
-        .btn-primary{ background:#0d6efd; color:#fff; }
-        .btn-secondary{ background:#6c757d; color:#fff; }
-        .alert{
-            padding:12px 15px;
-            border-radius:10px;
-            margin-bottom:15px;
-            font-weight:bold;
-        }
-        .alert-danger{
-            background:#fee2e2;
-            color:#991b1b;
-        }
-        .alert-success{
-            background:#dcfce7;
-            color:#166534;
-        }
-        .actions{
-            display:flex;
-            gap:10px;
-            flex-wrap:wrap;
-            margin-top:8px;
-        }
-        @media (max-width: 700px){
-            .carro-box{
-                grid-template-columns:1fr;
-            }
-            form{
-                grid-template-columns:1fr;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<title>Marcar Venda</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body{font-family:Arial;background:#f4f6f9;margin:0;padding:20px}
+.container{max-width:900px;margin:auto}
+.card{background:#fff;padding:20px;border-radius:12px;margin-bottom:15px}
+input{width:100%;padding:10px;margin-top:6px;border:1px solid #ccc;border-radius:8px}
+button{padding:12px;border:0;background:#0d6efd;color:#fff;border-radius:8px;cursor:pointer}
+.alert{padding:10px;border-radius:8px;margin-bottom:10px}
+.error{background:#fee2e2}
+.success{background:#dcfce7}
+</style>
+
 </head>
 <body>
+
 <div class="container">
 
-    <div class="card">
-        <h1 class="title">Marcar Venda</h1>
-        <p class="muted">Registar venda de um carro no sistema da RG Auto</p>
-    </div>
+<h2>Marcar Venda</h2>
 
-    <div class="card">
-        <div class="carro-box">
-            <div>
-                <?php if ($imgSrc !== ''): ?>
-                    <img src="<?= h($imgSrc) ?>" alt="Capa do carro" class="thumb">
-                <?php else: ?>
-                    <div class="noimg">Sem foto</div>
-                <?php endif; ?>
-            </div>
+<?php if ($erro): ?>
+<div class="alert error"><?= h($erro) ?></div>
+<?php endif; ?>
 
-            <div class="info">
-                <p><strong>ID:</strong> <?= (int)$carro['id'] ?></p>
-                <p><strong>Carro:</strong> <?= h($carro['marca']) ?> <?= h($carro['modelo']) ?></p>
-                <p><strong>Ano:</strong> <?= h($carro['ano']) ?></p>
-                <p><strong>Preço atual:</strong> <?= money($carro['preco']) ?></p>
-                <p><strong>Status atual:</strong> <?= h(ucfirst($carro['status'])) ?></p>
-            </div>
-        </div>
-    </div>
+<?php if ($sucesso): ?>
+<div class="alert success"><?= h($sucesso) ?></div>
+<?php endif; ?>
 
-    <div class="card">
-        <?php if ($erro !== ''): ?>
-            <div class="alert alert-danger"><?= h($erro) ?></div>
-        <?php endif; ?>
+<div class="card">
+<p><strong>Carro:</strong> <?= h($carro['marca']) ?> <?= h($carro['modelo']) ?></p>
+<p><strong>Preço base:</strong> <?= money($carro['preco']) ?></p>
+</div>
 
-        <?php if ($sucesso !== ''): ?>
-            <div class="alert alert-success"><?= h($sucesso) ?></div>
-        <?php endif; ?>
+<div class="card">
+<form method="POST">
 
-        <form method="POST">
-            <input type="hidden" name="csrf_token" value="<?= h($_SESSION['csrf_token']) ?>">
+<input type="hidden" name="csrf_token" value="<?= h($_SESSION['csrf_token']) ?>">
 
-            <div>
-                <label for="preco_venda">Preço de venda (MT)</label>
-                <input
-                    type="number"
-                    step="0.01"
-                    name="preco_venda"
-                    id="preco_venda"
-                    value="<?= h($carro['preco_venda'] ?? '') ?>"
-                    required
-                >
-            </div>
+<label>Preço de Venda</label>
+<input type="number" step="0.01" name="preco_venda" required>
 
-            <div>
-                <label for="comissao">Comissão (MT)</label>
-                <input
-                    type="number"
-                    step="0.01"
-                    name="comissao"
-                    id="comissao"
-                    value="<?= h($carro['comissao'] ?? '') ?>"
-                >
-            </div>
+<label>Data da Venda</label>
+<input type="datetime-local" name="data_venda" required>
 
-            <div class="full">
-                <label for="data_venda">Data da venda</label>
-                <input
-                    type="datetime-local"
-                    name="data_venda"
-                    id="data_venda"
-                    value="<?= !empty($carro['data_venda']) ? date('Y-m-d\TH:i', strtotime($carro['data_venda'])) : date('Y-m-d\TH:i') ?>"
-                    required
-                >
-            </div>
+<br><br>
+<button type="submit">Confirmar Venda</button>
 
-            <div class="full actions">
-                <button type="submit" class="btn btn-primary">Confirmar Venda</button>
-                <a href="listar_carros.php" class="btn btn-secondary">Voltar</a>
-            </div>
-        </form>
-    </div>
+</form>
+</div>
 
 </div>
+
 </body>
 </html>

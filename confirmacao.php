@@ -6,7 +6,7 @@ include("conexao.php");
 
 $RG_WA = "258862934721"; // WhatsApp da RG
 
-$id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+$id = intval($_GET['lead_id'] ?? 0);
 
 if ($id <= 0) {
     $erro = "Não foi possível carregar os detalhes (ID inválido).";
@@ -165,10 +165,22 @@ if ($id <= 0) {
 
 <?php if (empty($erro)) { ?>
 <script>
-  // tenta abrir WhatsApp automaticamente (pode ser bloqueado pelo browser)
-  setTimeout(() => {
-    window.open("<?php echo $wa_link; ?>", "_blank");
-  }, 1000);
+  // tentativa automática
+  window.onload = function() {
+    const link = "<?php echo $wa_link; ?>";
+
+    // cria clique "disfarçado" (melhor aceitação)
+    const a = document.createElement("a");
+    a.href = link;
+    a.target = "_blank";
+    a.rel = "noopener";
+
+    document.body.appendChild(a);
+
+    setTimeout(() => {
+      a.click();
+    }, 800);
+  };
 </script>
 <?php } ?>
 

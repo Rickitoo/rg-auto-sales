@@ -26,8 +26,10 @@ if (!isset($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
-$sql = "SELECT * FROM clientes ORDER BY data_registo DESC";
-$resultado = mysqli_query($conexao, $sql);
+$sql = "SELECT * FROM clientes 
+        WHERE status = 'ativo' 
+        ORDER BY data_registo DESC";
+$resultado = mysqli_query($conexao, $sql); 
 
 $sqlV = "SELECT * FROM vendedores ORDER BY data_registo DESC";
 $resultadoV = mysqli_query($conexao, $sqlV);
@@ -37,6 +39,9 @@ if (!$resultado) {
 }
 if (!$resultadoV) {
     die("Erro na consulta vendedores: " . mysqli_error($conexao));
+}
+if ($cliente['status'] == 'inativo') {
+    echo "<span style='color:red;'>Inativo</span>";
 }
 
 $msg = $_GET['msg'] ?? '';
@@ -171,11 +176,13 @@ $msg = $_GET['msg'] ?? '';
         <td class="msg"><?php echo nl2br(htmlspecialchars($linha['mensagem'] ?? '')); ?></td>
         <td><?php echo htmlspecialchars($linha['data_registo']); ?></td>
         <td>
-          <a class="danger"
-             href="delete.php?id=<?php echo (int)$linha['id']; ?>&token=<?php echo $_SESSION['csrf_token']; ?>"
-             onclick="return confirm('Tens certeza que queres apagar este agendamento?');">
-             Apagar
-          </a>
+          <form method="POST" action="delete.php" style="display:inline;">
+            <input type="hidden" name="id" value="<?= $cliente['id'] ?>">
+            <input type="hidden" name="token" value="<?= $_SESSION['csrf_token'] ?>">
+            <button type="submit" onclick="return confirm('Desativar este cliente?')">
+                Desativar
+            </button>
+          </form>
         </td>
       </tr>
     <?php } ?>

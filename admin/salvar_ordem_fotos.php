@@ -1,7 +1,11 @@
 <?php
 // admin/salvar_ordem_fotos.php
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
+require_once(__DIR__ . "/../init.php");
+
+if (!isset($_SESSION['admin'])) {
+    header("Location: /RG_AUTO_SALES/login.php");
+    exit();
+}
 
 include("../auth.php");
 include("../conexao.php");

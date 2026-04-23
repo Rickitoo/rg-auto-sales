@@ -1,17 +1,15 @@
 <?php
-session_start();
+require_once(__DIR__ . "/init.php");
 include("config_admin.php");
 
-$erro = "";
-
-// Gerar CSRF token (sempre antes do form)
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
+$erro = "";
+
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
-    //  VALIDAR CSRF
     if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
         die("Erro de validação CSRF");
     }
@@ -21,13 +19,23 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     if ($user === $ADMIN_USER && password_verify($pass, $ADMIN_HASH)) {
 
-        //  Segurança 
         session_regenerate_id(true);
 
-        $_SESSION['admin_logado'] = true;
+        $_SESSION['admin'] = true;
+        $_SESSION['username'] = $user;
+        $_SESSION['ultimo_acesso'] = time();
+
+        // 🔥 redirect inteligente
+        $redirect = $_SESSION['redirect_after_login'] ?? null;
+        unset($_SESSION['redirect_after_login']);
+
+        if (!empty($redirect)) {
+            header("Location: " . $redirect);
+            exit();
+        }
 
         header("Location: /RG_AUTO_SALES/admin/dashboard.php");
-        exit;
+        exit();
 
     } else {
         $erro = "Credenciais inválidas.";
@@ -65,20 +73,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   </style>
 
 </head>
-
 <body>
 
-  <!-- Search box -->
-  <div class="search-box">
-    <input class="search-txt" type="text" placeholder="Pesquise aqui" aria-label="Pesquisar" />
-    <a class="search-btn" href="#" aria-label="Botão pesquisar">
-      <i class="fas fa-search"></i>
-    </a>
-  </div>
-
 <header class="header header--rg">
-  <div class="header__overlay">
-    <div class="container">
+    <div class="header__overlay">
+      <div class="container">
 
       <!-- NAVBAR -->
       <div class="navbar">
@@ -106,8 +105,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         </button>
       </div>
 
-</head>
-<body>
+</header>
+
+  <!-- Search box -->
+  <div class="search-box">
+    <input class="search-txt" type="text" placeholder="Pesquise aqui" aria-label="Pesquisar" />
+    <a class="search-btn" href="#" aria-label="Botão pesquisar">
+      <i class="fas fa-search"></i>
+    </a>
+  </div>
+
+  
   <div class="wrap">
     <div class="brand">RG <span>Auto Sales</span></div>
     <div class="card">
@@ -117,7 +125,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <div class="err"><?php echo htmlspecialchars($erro); ?></div>
       <?php } ?>
 
-      <form method="POST"<input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+      <form method="POST">
+        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+
         <label>Usuário</label>
         <input type="text" name="user" required placeholder="admin">
 

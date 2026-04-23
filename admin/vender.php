@@ -1,4 +1,10 @@
 <?php
+require_once(__DIR__ . "/../init.php");
+
+if (!isset($_SESSION['admin'])) {
+    header("Location: /RG_AUTO_SALES/login.php");
+    exit();
+}
 include_once("includes/conexao.php");
 include_once("includes/funcoes_vendas.php");
 

@@ -151,7 +151,7 @@
 
 </script>
 <script>
-   function validarLogin(){
+    function validarLogin(){
     let data = new FormData();
     data.append("username", document.getElementById("login_username").value);
     data.append("password", document.getElementById("login_password").value);
@@ -160,10 +160,23 @@
         method: "POST",
         body: data
     })
-    .then(res => res.text())
+    .then(res => res.json())
+    .then(res => {
+        if(res.status === "ok"){
+            window.location.href = "/RG_AUTO_SALES/admin/dashboard.php";
+        } else {
+            alert("Login inválido!");
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Erro no sistema");
+    });
+}
+    
     .then(res => {
         if(res === "ok"){
-            window.location.href = "index.php";
+            window.location.href = "/RG_AUTO_SALES/admin/dashboard.php";
         } else {
             alert("Login inválido!");
         }

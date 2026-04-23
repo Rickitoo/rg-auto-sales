@@ -1,7 +1,11 @@
 <?php
-include_once("includes/conexao.php");
-include_once("includes/funcoes_vendas.php");
+require_once(__DIR__ . "/../init.php");
+require_once(__DIR__ . "/includes/db.php");
 
+if (!isset($_SESSION['admin'])) {
+    header("Location: /RG_AUTO_SALES/login.php");
+    exit();
+}
 // Recebe dados do formulário
 $venda_id    = $_POST['venda_id'];
 $preco_venda = $_POST['preco_venda'];

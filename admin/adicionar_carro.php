@@ -1,14 +1,19 @@
 <?php
-// admin/carro_add.php
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
+require_once(__DIR__ . "/../init.php");
+require_once(__DIR__ . "/includes/db.php");
 
-include("auth_check.php");
-include("admin/includes/db.php");
+if (!isset($_SESSION['admin'])) {
 
-require_once __DIR__ . "/../conexao.php";
+    // 🔥 GARANTIR QUE SESSÃO ESTÁ ATIVA
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
 
-function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
+    $_SESSION['redirect_after_login'] = $_SERVER['REQUEST_URI'];
+
+    header("Location: /RG_AUTO_SALES/login.php");
+    exit();
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt">

@@ -2,6 +2,12 @@
 // admin/nova_venda.php (MODELO NOVO: LUCRO REAL)
 // Desliga modelo antigo: NÃO grava valor_carro nem comissao (7%)
 // A comissão é calculada em includes/financeiro.php via recalcular_venda()
+require_once(__DIR__ . "/../init.php");
+
+if (!isset($_SESSION['admin'])) {
+    header("Location: /RG_AUTO_SALES/login.php");
+    exit();
+}
 
 include("../auth.php");
 include("../conexao.php");

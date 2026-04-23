@@ -1,5 +1,11 @@
 <?php
 // admin/funil.php
+require_once(__DIR__ . "/../init.php");
+
+if (!isset($_SESSION['admin'])) {
+    header("Location: /RG_AUTO_SALES/login.php");
+    exit();
+}
 include("../auth.php");      // se o teu admin usa auth
 include("../conexao.php");   // $conexao
 include("auth_check.php");

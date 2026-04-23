@@ -1,8 +1,11 @@
 <?php
-include("../auth.php");
-include("../conexao.php");
-include("auth_check.php");
-include("admin/includes/db.php");
+require_once(__DIR__ . "/../init.php");
+require_once(__DIR__ . "/includes/db.php");
+
+if (!isset($_SESSION['admin'])) {
+    header("Location: /RG_AUTO_SALES/login.php");
+    exit();
+}
 
 $id = intval($_GET['id'] ?? 0);
 $carro_id = intval($_GET['carro_id'] ?? 0);

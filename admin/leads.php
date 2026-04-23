@@ -1,7 +1,10 @@
 <?php
-include("../conexao.php"); // se teu admin usa auth, depois colocamos
-include("auth_check.php");
-include("admin/includes/db.php");
+require_once(__DIR__ . "/../init.php");
+
+if (!isset($_SESSION['admin'])) {
+    header("Location: /RG_AUTO_SALES/login.php");
+    exit();
+}
 
 function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
 
@@ -23,11 +26,18 @@ if(!$res) die("Erro SQL: " . mysqli_error($conexao));
     <table class="table table-striped table-hover m-0">
       <thead>
         <tr>
-          <th>#</th><th>Data</th><th>Tipo</th><th>Nome</th><th>Telefone</th><th>Carro</th><th>Status</th>
+          <th>#</th>
+          <th>Data</th>
+          <th>Tipo</th>
+          <th>Nome</th>
+          <th>Telefone</th>
+          <th>Carro</th>
+          <th>Status</th>
+          <th>Ações</th>
         </tr>
       </thead>
       <tbody>
-      <?php while($row = mysqli_fetch_assoc($res)): ?>
+        <?php while($row = mysqli_fetch_assoc($res)): ?>
         <tr>
           <td><?=h($row['id'])?></td>
           <td><?=h($row['criado_em'])?></td>
@@ -36,16 +46,35 @@ if(!$res) die("Erro SQL: " . mysqli_error($conexao));
           <td><?=h($row['telefone'])?></td>
           <td><?=h(trim(($row['marca']??'').' '.($row['modelo']??'').' '.($row['ano']??'')))?></td>
           <td><?=h($row['status'])?></td>
+            <?php
+            $status = $row['status'];
+
+            $badge = match($status) {
+              'contactado' => 'success',
+              'qualificado' => 'primary',
+              'agendado' => 'dark',
+              'negociacao' => 'warning',
+              'fechado' => 'secondary',
+              'perdido' => 'danger',
+              default => 'light'
+            };
+            ?>
+            <td>
+              <span class="badge bg-<?=$badge?>">
+                <?=h($status)?>
+              </span>
+            </td>
+          <td class="d-flex gap-1 flex-wrap">
+            <a class="btn btn-sm btn-outline-success" href="leads_status.php?id=<?=h($row['id'])?>&s=contactado">Contactado</a>
+            <a class="btn btn-sm btn-outline-primary" href="leads_status.php?id=<?=h($row['id'])?>&s=qualificado">Qualificado</a>
+            <a class="btn btn-sm btn-outline-dark" href="leads_status.php?id=<?=h($row['id'])?>&s=agendado">Agendado</a>
+            <a class="btn btn-sm btn-outline-warning" href="leads_status.php?id=<?=h($row['id'])?>&s=negociacao">Negociação</a>
+            <a class="btn btn-sm btn-outline-secondary" href="leads_status.php?id=<?=h($row['id'])?>&s=fechado">Fechado</a>
+            <a class="btn btn-sm btn-outline-danger" href="leads_status.php?id=<?=h($row['id'])?>&s=perdido">Perdido</a>
+            <a class="btn btn-sm btn-outline-info" href="ver_lead.php?id=<?=h($row['id'])?>">Ver</a>
+          </td>
         </tr>
-        <td class="d-flex gap-1 flex-wrap">
-            <a class="btn btn-sm btn-outline-success" href="lead_status.php?id=<?=h($row['id'])?>&s=contactado">Contactado</a>
-            <a class="btn btn-sm btn-outline-primary" href="lead_status.php?id=<?=h($row['id'])?>&s=qualificado">Qualificado</a>
-            <a class="btn btn-sm btn-outline-dark" href="lead_status.php?id=<?=h($row['id'])?>&s=agendado">Agendado</a>
-            <a class="btn btn-sm btn-outline-warning" href="lead_status.php?id=<?=h($row['id'])?>&s=negociacao">Negociação</a>
-            <a class="btn btn-sm btn-outline-secondary" href="lead_status.php?id=<?=h($row['id'])?>&s=fechado">Fechado</a>
-            <a class="btn btn-sm btn-outline-danger" href="lead_status.php?id=<?=h($row['id'])?>&s=perdido">Perdido</a>
-        </td>
-      <?php endwhile; ?>
+        <?php endwhile; ?>
       </tbody>
     </table>
   </div>

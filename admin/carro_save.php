@@ -1,10 +1,14 @@
 <?php
 // admin/carro_save.php
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
+require_once(__DIR__ . "/../init.php");
+
+if (!isset($_SESSION['admin'])) {
+    header("Location: /RG_AUTO_SALES/login.php");
+    exit();
+}
 
 include("auth_check.php");
-include("admin/includes/db.php");
+include(__DIR__ . "/includes/db.php");
 
 require_once __DIR__ . "/../conexao.php";
 

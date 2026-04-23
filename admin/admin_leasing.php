@@ -1,11 +1,10 @@
 <?php
-session_start();
-include("auth_check.php"); 
-include("admin/includes/db.php");
+require_once(__DIR__ . "/../init.php");
+require_once(__DIR__ . "/includes/db.php");
 
-if(!isset($_SESSION['user_id'])){
-    header("Location: account.php");
-    exit;
+if (!isset($_SESSION['admin'])) {
+    header("Location: /RG_AUTO_SALES/login.php");
+    exit();
 }
 
 $sql = "SELECT pl.*, c.marca, c.modelo 
