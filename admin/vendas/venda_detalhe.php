@@ -329,27 +329,27 @@ $percParc    = ($hasParceiro && $hasPP) ? (float)($venda["perc_parceiro"] ?? 0) 
   <title>Admin | Detalhe da Venda - RG Auto Sales</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    body { background:#f6f7fb; }
-    .card { border:0; border-radius:16px; }
+    body { background:#eef3f8; }
   </style>
+  <link rel="stylesheet" href="<?= h(asset('css/admin-modern.css')) ?>">
 </head>
 <body>
-<div class="container py-4">
+<div class="container py-4 sales-page">
 
-  <div class="d-flex align-items-center justify-content-between mb-3">
+  <div class="rg-page-hero">
     <div>
-      <h3 class="mb-0">Detalhe da Venda #<?php echo (int)$venda['id']; ?></h3>
-      <small class="text-muted">
+      <h3>Detalhe da Venda #<?php echo (int)$venda['id']; ?></h3>
+      <small>
         <?php echo 'Modelo: lucro real (comissões só quando PAGO).'; ?>
       </small>
     </div>
-    <div class="d-flex gap-2">
-      <a class="btn btn-outline-dark" href="<?= h(url('admin/vendas/vendas.php')) ?>">Voltar</a>
-      <a class="btn btn-outline-dark" href="<?= h(url('admin/vendas/nova_venda.php')) ?>">Nova venda</a>
-      <a class="btn btn-outline-secondary" href="<?= h(url('app/modules/finance/custos.php?venda_id=' . (int)$venda['id'])) ?>">Custos da venda</a>
+    <div class="rg-page-actions">
+      <a class="btn btn-light" href="<?= h(url('admin/vendas/vendas.php')) ?>">Voltar</a>
+      <a class="btn btn-outline-light" href="<?= h(url('admin/vendas/nova_venda.php')) ?>">Nova venda</a>
+      <a class="btn btn-outline-light" href="<?= h(url('app/modules/finance/custos.php?venda_id=' . (int)$venda['id'])) ?>">Custos da venda</a>
 
       <?php if ($venda['status'] === 'PAGO'): ?>
-        <a class="btn btn-outline-dark" href="<?= h(url('app/modules/finance/recibo.php?id=' . (int)$venda['id'])) ?>" target="_blank">Recibo (PDF)</a>
+        <a class="btn btn-outline-light" href="<?= h(url('app/modules/finance/recibo.php?id=' . (int)$venda['id'])) ?>" target="_blank">Recibo (PDF)</a>
       <?php endif; ?>
     </div>
   </div>
@@ -364,8 +364,8 @@ $percParc    = ($hasParceiro && $hasPP) ? (float)($venda["perc_parceiro"] ?? 0) 
   <div class="row g-3">
 
     <div class="col-lg-8">
-      <div class="card shadow-sm">
-        <div class="card-body">
+      <div class="rg-panel">
+        <div class="rg-panel-body">
 
           <div class="d-flex justify-content-between align-items-center mb-3">
             <div class="fw-semibold">Informações da venda</div>
@@ -516,7 +516,7 @@ $percParc    = ($hasParceiro && $hasPP) ? (float)($venda["perc_parceiro"] ?? 0) 
                   <?php echo ($precisaApv === 1) ? 'disabled' : ''; ?>
                   onclick="return confirm('Marcar como PAGA?');"
                   title="<?php echo ($precisaApv === 1) ? ('Bloqueado: '.h($motivoApv ?: 'Precisa aprovação antes de pagar')) : ''; ?>"
-
+                >
                   Marcar Pago
                 </button>
               </form>
@@ -537,8 +537,8 @@ $percParc    = ($hasParceiro && $hasPP) ? (float)($venda["perc_parceiro"] ?? 0) 
     </div>
 
     <div class="col-lg-4">
-      <div class="card shadow-sm">
-        <div class="card-body">
+      <div class="rg-panel">
+        <div class="rg-panel-body">
           <div class="fw-semibold mb-2">Cliente</div>
           <div class="mb-1"><span class="text-muted small">Nome:</span> <span class="fw-semibold"><?php echo h($venda['cliente_nome']); ?></span></div>
           <div class="mb-1"><span class="text-muted small">Telefone:</span> <span class="fw-semibold"><?php echo h($venda['cliente_telefone']); ?></span></div>

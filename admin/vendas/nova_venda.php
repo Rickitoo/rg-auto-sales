@@ -199,23 +199,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <title>Admin | Nova Venda - RG Auto Sales</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    body { background:#f6f7fb; }
-    .card { border:0; border-radius:16px; }
+    body { background:#eef3f8; }
   </style>
+  <link rel="stylesheet" href="<?= h(asset('css/admin-modern.css')) ?>">
 </head>
 <body>
-<div class="container py-4">
+<div class="container py-4 sales-page">
 
-  <div class="d-flex align-items-center justify-content-between mb-3">
+  <div class="rg-page-hero">
     <div>
-      <h3 class="mb-0">Nova Venda</h3>
-      <small class="text-muted">
+      <h3>Nova Venda</h3>
+      <small>
         Modelo novo: lucro real → vendedor (15%) / RG (restante) · lucro mínimo: 30.000 MT
       </small>
     </div>
-    <div class="d-flex gap-2">
-      <a class="btn btn-outline-dark" href="<?= h(url('admin/vendas/vendas.php')) ?>">Vendas</a>
-      <a class="btn btn-outline-dark" href="<?= h(url('admin/dashboard.php')) ?>">Dashboard</a>
+    <div class="rg-page-actions">
+      <a class="btn btn-light" href="<?= h(url('admin/vendas/vendas.php')) ?>">Vendas</a>
+      <a class="btn btn-outline-light" href="<?= h(url('admin/dashboard.php')) ?>">Dashboard</a>
     </div>
   </div>
 
@@ -226,8 +226,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
   <?php endif; ?>
 
-  <div class="card shadow-sm">
-    <div class="card-body">
+  <div class="rg-panel">
+    <div class="rg-panel-body">
 
       <!-- Selecionar cliente (GET) -->
       <form class="row g-2 align-items-end mb-4" method="GET" action="<?= h(url('admin/vendas/nova_venda.php')) ?>">

@@ -253,27 +253,23 @@ function buildQuery(array $extra = []) {
   <title>Admin | Vendas - RG Auto Sales</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    body { background: #f6f7fb; }
-    .card-kpi { border: 0; border-radius: 16px; }
-    .table-wrap { border-radius: 16px; overflow: hidden; }
+    body { background: #eef3f8; }
   </style>
+  <link rel="stylesheet" href="<?= h(asset('css/admin-modern.css')) ?>">
 </head>
 <body>
-<div class="container py-4">
+<div class="container py-4 sales-page">
 
-  <div class="d-flex gap-2 mb-3">
-    <a class="btn btn-success" href="<?= h(url('admin/vendas/nova_venda.php')) ?>">+ Nova venda</a>
-    <a class="btn btn-outline-secondary" href="<?= h(url('app/modules/finance/export_vendas_csv.php')) ?>">Exportar CSV</a>
-  </div>
-
-  <div class="d-flex align-items-center justify-content-between mb-3">
+  <div class="rg-page-hero">
     <div>
-      <h3 class="mb-0">Vendas</h3>
-      <small class="text-muted">
-        <?= $hasLucro ? "Modelo novo: lucro → vendedor/RG (automático)" : "Modelo atual: comissao antiga (ainda sem migração total)" ?>
-      </small>
+      <h3>Vendas</h3>
+      <small>Modelo comercial com lucro real, pagamentos e comissoes.</small>
     </div>
-    <a class="btn btn-outline-dark" href="<?= h(url('admin/dashboard.php')) ?>">Voltar ao Dashboard</a>
+    <div class="rg-page-actions">
+      <a class="btn btn-success" href="<?= h(url('admin/vendas/nova_venda.php')) ?>">+ Nova venda</a>
+      <a class="btn btn-outline-light" href="<?= h(url('app/modules/finance/export_vendas_csv.php')) ?>">Exportar CSV</a>
+      <a class="btn btn-light" href="<?= h(url('admin/dashboard.php')) ?>">Dashboard</a>
+    </div>
   </div>
 
   <?php if ($flash): ?>
@@ -284,29 +280,31 @@ function buildQuery(array $extra = []) {
   <?php endif; ?>
 
   <!-- KPIs -->
-  <div class="row g-3 mb-3">
-    <div class="col-md-3"><div class="card card-kpi shadow-sm"><div class="card-body">
-      <div class="text-muted small">Vendas pagas</div><div class="fs-3 fw-semibold"><?php echo $vendasPagas; ?></div>
-    </div></div></div>
+  <div class="rg-kpi-grid">
+    <div class="rg-kpi-card is-success">
+      <strong><?php echo $vendasPagas; ?></strong>
+      <span>Vendas pagas</span>
+    </div>
 
-    <div class="col-md-3"><div class="card card-kpi shadow-sm"><div class="card-body">
-      <div class="text-muted small">Vendas pendentes</div><div class="fs-3 fw-semibold"><?php echo $vendasPend; ?></div>
-    </div></div></div>
+    <div class="rg-kpi-card is-warning">
+      <strong><?php echo $vendasPend; ?></strong>
+      <span>Vendas pendentes</span>
+    </div>
 
-    <div class="col-md-3"><div class="card card-kpi shadow-sm"><div class="card-body">
-      <div class="text-muted small"><?= $hasCRG ? "Comissão RG paga" : "Comissão paga" ?></div>
-      <div class="fs-5 fw-semibold"><?php echo number_format($comissaoPaga, 2, ',', '.'); ?> MT</div>
-    </div></div></div>
+    <div class="rg-kpi-card is-info">
+      <strong><?php echo number_format($comissaoPaga, 2, ',', '.'); ?> MT</strong>
+      <span><?= $hasCRG ? "Comissão RG paga" : "Comissão paga" ?></span>
+    </div>
 
-    <div class="col-md-3"><div class="card card-kpi shadow-sm"><div class="card-body">
-      <div class="text-muted small"><?= $hasCRG ? "Comissão RG pendente" : "Pendente a receber" ?></div>
-      <div class="fs-5 fw-semibold"><?php echo number_format($comissaoPend, 2, ',', '.'); ?> MT</div>
-    </div></div></div>
+    <div class="rg-kpi-card is-warning">
+      <strong><?php echo number_format($comissaoPend, 2, ',', '.'); ?> MT</strong>
+      <span><?= $hasCRG ? "Comissão RG pendente" : "Pendente a receber" ?></span>
+    </div>
   </div>
 
   <!-- Filtros -->
-  <div class="card shadow-sm border-0 mb-3" style="border-radius: 16px;">
-    <div class="card-body">
+  <div class="rg-panel">
+    <div class="rg-panel-body">
       <form class="row g-2 align-items-end" method="GET" action="">
         <div class="col-md-2">
           <label class="form-label">Status</label>
@@ -341,7 +339,7 @@ function buildQuery(array $extra = []) {
   </div>
 
   <!-- Tabela -->
-  <div class="table-wrap shadow-sm bg-white">
+  <div class="rg-table-wrap">
     <table class="table table-hover mb-0 align-middle">
       <thead class="table-light">
         <tr>

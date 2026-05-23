@@ -1,6 +1,6 @@
 # RG Auto Sales
 
-Checkpoint tecnico em 2026-05-23.
+Checkpoint tecnico em 2026-05-24.
 
 ## Estado atual
 
@@ -16,6 +16,10 @@ Checkpoint tecnico em 2026-05-23.
 - Painel Inteligente reforcado com leads urgentes, leads parados, follow-ups pendentes, vendas pendentes, pagamentos pendentes e proximas acoes.
 - Detalhe de cliente/test-drive criado em `admin/clientes/cliente_detalhe.php`.
 - Rotas e botoes principais entre dashboard admin, dashboard CRM, inbox, financeiro, vendas, clientes, carros e leads foram estabilizados.
+- Modernizacao visual inicial aplicada ao Dashboard CRM, CRM Inbox e Painel Inteligente.
+- Modernizacao visual aplicada aos modulos Financeiro e Vendas usando `public/assets/css/admin-modern.css`.
+- Financeiro e Vendas agora usam componentes visuais reutilizaveis como `rg-page-hero`, `rg-kpi-grid`, `rg-kpi-card`, `rg-panel`, `rg-table-wrap`, badges e botoes padronizados.
+- `admin/vendas/pagar_venda.php` permanece como endpoint de acao/redirect, sem HTML visual para preservar o fluxo.
 - Lint PHP validado com 176 arquivos OK e 0 erros.
 
 ## Correcoes recentes de schema
