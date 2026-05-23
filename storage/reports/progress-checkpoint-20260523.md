@@ -86,6 +86,39 @@ Arquivo: `admin/vendas/vendedores_pedidos.php`
 
 Manter uma unica pasta oficial de trabalho para o projeto ou configurar um symlink entre `C:\xampp\htdocs\RG_AUTO_SALES` e o workspace real. Isso evita que o codigo editado e o codigo executado pelo Apache fiquem divergentes, reduzindo falsos diagnosticos, cache aparente e regressao de rotas.
 
+## Checkpoint CRM Inbox inteligente
+
+### Entregue
+
+- CRM Inbox funcional em `admin/crm/inbox.php`.
+- Timeline/follow-up por lead criada com tabela `lead_followups`.
+- Migration registrada em `storage/database/migrations/20260523_create_lead_followups.sql`.
+- Formulario rapido para registrar notas, status e responsavel pelo acompanhamento.
+- Follow-up inteligente calculado em tempo real na pagina, sem cron/job.
+- Calculo de ultimo follow-up e dias sem contacto.
+- Badges operacionais: `Novo`, `Urgente`, `Sem resposta`, `Parado` e `Em negociacao`.
+- Destaque visual para leads esquecidos:
+  - 3 dias sem follow-up/contacto: atencao.
+  - 7 dias sem follow-up/contacto: urgente.
+- Compatibilidade mantida com a timeline atual e com o fluxo existente de vendas.
+- Nenhuma regra de venda, comissao ou financeiro foi alterada nesta fase.
+
+### Validacao
+
+- Lint PHP validado com `174 arquivos OK` e `0 erros`.
+- Relatorio final de lint: `storage/reports/php-lint-20260523-220816.txt`.
+- Arquivo da inbox espelhado para `C:\xampp\htdocs\RG_AUTO_SALES`, que e a copia atualmente servida pelo Apache/XAMPP.
+
+### Proxima fase recomendada
+
+Preparar automacao de mensagens WhatsApp/follow-up:
+
+1. Definir templates de mensagem por status/prioridade.
+2. Validar regras de envio manual antes de qualquer automacao.
+3. Registrar interacoes enviadas/recebidas na timeline do lead.
+4. Avaliar integracao com webhook/API WhatsApp sem bloquear o fluxo atual.
+5. Somente depois considerar cron/job para lembretes e reativacao automatica.
+
 ## Pendencias antes de remover wrappers
 
 - Executar o checklist manual no navegador.
