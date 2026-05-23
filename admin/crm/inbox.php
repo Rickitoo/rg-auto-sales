@@ -253,20 +253,72 @@ function status_label(array $statuses, ?string $status): string {
     return $statuses[$status ?? ''] ?? ucfirst((string)$status);
 }
 
-function whatsapp_url(array $lead): string {
+function crm_lead_phone(array $lead): string {
     $tel = preg_replace('/\D+/', '', (string)($lead['telefone'] ?? ''));
     if ($tel !== '' && !str_starts_with($tel, '258')) {
         $tel = '258' . ltrim($tel, '0');
     }
 
+    return $tel;
+}
+
+function crm_car_label(array $lead): string {
+    return trim(($lead['marca'] ?? '') . ' ' . ($lead['modelo'] ?? '') . ' ' . ($lead['ano'] ?? ''));
+}
+
+function smart_whatsapp_message(array $lead, ?array $attention = null): array {
     $nome = $lead['nome'] ?? '';
-    $carro = trim(($lead['marca'] ?? '') . ' ' . ($lead['modelo'] ?? ''));
-    $msg = "Ola $nome, aqui e a RG Auto Sales.";
-    if ($carro !== '') {
-        $msg .= " Estou a dar seguimento ao seu interesse em $carro.";
+    $primeiroNome = trim(explode(' ', trim($nome))[0] ?? '');
+    $cliente = $primeiroNome !== '' ? $primeiroNome : 'tudo bem';
+    $carro = crm_car_label($lead);
+    $carroTexto = $carro !== '' ? " sobre o $carro" : '';
+    $status = (string)($lead['status'] ?? '');
+    $badge = $attention['badge']['label'] ?? '';
+
+    if ($status === 'fechado') {
+        return [
+            'tipo' => 'pos-venda',
+            'label' => 'Pos-venda',
+            'texto' => "Ola $cliente, aqui e a RG Auto Sales. Obrigado pela confianca na sua compra$carroTexto. Estou a acompanhar para garantir que ficou tudo bem e ajudar no que precisar.",
+        ];
     }
 
-    return $tel !== '' ? 'https://wa.me/' . $tel . '?text=' . urlencode($msg) : '#';
+    if ($badge === 'Urgente') {
+        return [
+            'tipo' => 'urgente',
+            'label' => 'Urgente',
+            'texto' => "Ola $cliente, aqui e a RG Auto Sales. Estou a tentar fechar o acompanhamento$carroTexto e queria saber se ainda tem interesse. Posso ajudar com detalhes, condicoes ou marcar uma visita hoje?",
+        ];
+    }
+
+    if (in_array($badge, ['Sem resposta', 'Parado'], true)) {
+        return [
+            'tipo' => 'sem-resposta',
+            'label' => 'Sem resposta',
+            'texto' => "Ola $cliente, aqui e a RG Auto Sales. Ficou pendente o nosso contacto$carroTexto. Ainda faz sentido avancarmos? Posso enviar mais informacoes ou sugerir uma alternativa dentro do seu objetivo.",
+        ];
+    }
+
+    if ($status === 'negociacao') {
+        return [
+            'tipo' => 'negociacao',
+            'label' => 'Negociacao',
+            'texto' => "Ola $cliente, aqui e a RG Auto Sales. Sobre a negociacao$carroTexto, posso ajudar a alinhar os proximos passos e confirmar as condicoes para avancarmos?",
+        ];
+    }
+
+    return [
+        'tipo' => 'novo',
+        'label' => 'Novo lead',
+        'texto' => "Ola $cliente, aqui e a RG Auto Sales. Recebemos o seu pedido$carroTexto e quero ajudar. Pode confirmar qual e o melhor horario para falarmos?",
+    ];
+}
+
+function whatsapp_url(array $lead, ?array $attention = null): string {
+    $tel = crm_lead_phone($lead);
+    $message = smart_whatsapp_message($lead, $attention);
+
+    return $tel !== '' ? 'https://wa.me/' . $tel . '?text=' . urlencode($message['texto']) : '#';
 }
 ?>
 <!doctype html>
@@ -323,6 +375,7 @@ function whatsapp_url(array $lead): string {
         .status-form{display:flex;gap:8px;flex-wrap:wrap}.status-form select{border:1px solid #d0d5dd;border-radius:8px;padding:10px;min-width:180px}
         .note-form{display:grid;gap:10px}.note-form textarea{width:100%;min-height:92px;resize:vertical;border:1px solid #d0d5dd;border-radius:8px;padding:12px;font:inherit;line-height:1.45}.note-form-row{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}.note-form select{border:1px solid #d0d5dd;border-radius:8px;padding:10px;min-width:180px;background:#fff}
         .timeline{display:grid;gap:12px}.timeline-item{display:grid;grid-template-columns:38px 1fr;gap:10px;align-items:start}.timeline-dot{width:38px;height:38px;border-radius:50%;background:#01203f;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px}.timeline-card{background:#f8fafc;border:1px solid #e5e7eb;border-radius:8px;padding:12px}.timeline-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}.timeline-user{font-weight:900}.timeline-date{font-size:12px;color:#667085;white-space:nowrap}.timeline-text{white-space:pre-wrap;line-height:1.5;color:#1d2939}.timeline-empty{border:1px dashed #d0d5dd;border-radius:8px;padding:16px;color:#667085;background:#f8fafc}
+        .smart-message{background:#f8fafc;border:1px solid #d0d5dd;border-radius:8px;padding:14px;display:grid;gap:10px}.smart-message-top{display:flex;align-items:center;justify-content:space-between;gap:10px}.smart-message-title{font-weight:900}.smart-message-text{white-space:pre-wrap;line-height:1.5;color:#1d2939}
         .empty{height:100%;display:flex;align-items:center;justify-content:center;color:#667085;text-align:center;padding:30px}
         @media(max-width:900px){.shell{height:auto;min-height:100vh;grid-template-columns:1fr}.sidebar{max-height:46vh}.topbar{height:auto;align-items:flex-start;flex-direction:column;padding:16px}.actions{justify-content:flex-start}.info-grid{grid-template-columns:1fr}}
     </style>
@@ -385,6 +438,8 @@ function whatsapp_url(array $lead): string {
             if (!empty($leadSelecionado['carro_id'])) {
                 $fecharVendaUrl .= '&carro_id=' . (int)$leadSelecionado['carro_id'];
             }
+            $smartMessage = smart_whatsapp_message($leadSelecionado, $leadAttention);
+            $smartWhatsappUrl = whatsapp_url($leadSelecionado, $leadAttention);
             ?>
             <div class="topbar">
                 <div class="title">
@@ -392,7 +447,7 @@ function whatsapp_url(array $lead): string {
                     <p><?= h($leadSelecionado['telefone']) ?><?= $leadSelecionado['email'] ? ' · ' . h($leadSelecionado['email']) : '' ?></p>
                 </div>
                 <div class="actions">
-                    <a class="btn btn-green" href="<?= h(whatsapp_url($leadSelecionado)) ?>" target="_blank" rel="noopener">WhatsApp</a>
+                    <a class="btn btn-green" href="<?= h($smartWhatsappUrl) ?>" target="_blank" rel="noopener">Mensagem Inteligente</a>
                     <a class="btn btn-blue" href="<?= h(url($fecharVendaUrl)) ?>">Fechar venda</a>
                     <a class="btn btn-light" href="<?= h(url('admin/leads/leads.php')) ?>">Lista de leads</a>
                 </div>
@@ -430,6 +485,19 @@ function whatsapp_url(array $lead): string {
                             <button class="btn btn-dark" type="submit">Alterar status</button>
                             <a class="btn btn-light" href="<?= h(url('admin/leads/ver_lead.php?id=' . (int)$leadSelecionado['id'])) ?>">Abrir detalhe classico</a>
                         </form>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-head">Mensagem WhatsApp sugerida</div>
+                    <div class="panel-body">
+                        <div class="smart-message">
+                            <div class="smart-message-top">
+                                <div class="smart-message-title"><?= h($smartMessage['label']) ?></div>
+                                <a class="btn btn-green" href="<?= h($smartWhatsappUrl) ?>" target="_blank" rel="noopener">Abrir WhatsApp</a>
+                            </div>
+                            <div class="smart-message-text"><?= h($smartMessage['texto']) ?></div>
+                        </div>
                     </div>
                 </div>
 

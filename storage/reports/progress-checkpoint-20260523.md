@@ -119,6 +119,39 @@ Preparar automacao de mensagens WhatsApp/follow-up:
 4. Avaliar integracao com webhook/API WhatsApp sem bloquear o fluxo atual.
 5. Somente depois considerar cron/job para lembretes e reativacao automatica.
 
+## Checkpoint automacao WhatsApp no CRM Inbox
+
+### Entregue
+
+- Mensagens WhatsApp inteligentes integradas diretamente em `admin/crm/inbox.php`.
+- Templates automaticos por status/prioridade:
+  - novo lead;
+  - sem resposta/parado;
+  - negociacao;
+  - urgente;
+  - pos-venda.
+- Mensagem dinamica com nome do cliente, carro/modelo/ano e prioridade do lead.
+- Botao principal `Mensagem Inteligente` abrindo `https://wa.me/...` com texto pronto.
+- Painel de previa `Mensagem WhatsApp sugerida` para o comercial revisar antes de abrir o WhatsApp.
+- Compatibilidade mantida com follow-up inteligente, timeline e fluxo atual da inbox.
+- Nenhuma regra de venda, financeiro ou comissao foi alterada.
+
+### Validacao
+
+- Lint PHP validado com `174 arquivos OK` e `0 erros`.
+- Relatorio final de lint: `storage/reports/php-lint-20260523-221645.txt`.
+- Arquivo da inbox espelhado para `C:\xampp\htdocs\RG_AUTO_SALES`, que e a copia atualmente servida pelo Apache/XAMPP.
+
+### Proxima fase recomendada
+
+Melhorar UI da Inbox e criar dashboard CRM:
+
+1. Reorganizar a Inbox para leitura mais rapida em modo comercial.
+2. Criar cards de prioridade: urgente, parado, sem resposta e negociacao.
+3. Criar dashboard CRM com funil, tarefas do dia, taxa de resposta e leads quentes.
+4. Melhorar estados vazios, filtros e atalhos de acao.
+5. Manter a automacao WhatsApp ainda manual ate validar o fluxo com usuarios reais.
+
 ## Pendencias antes de remover wrappers
 
 - Executar o checklist manual no navegador.
