@@ -12,7 +12,7 @@ if (!isset($_SESSION['csrf_token'])) {
   $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
-function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
+if (!function_exists('h')) { function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); } }
 function money($v){ return number_format((float)$v, 2, ',', '.')." MT"; }
 
 function col_exists(mysqli $con, string $table, string $col): bool {
@@ -248,9 +248,9 @@ if ($hasLucro) {
       </small>
     </div>
     <div class="d-flex gap-2">
-      <a class="btn btn-outline-dark" href="venda_detalhe.php?id=<?php echo (int)$v["id"]; ?>">Voltar ao detalhe</a>
-      <a class="btn btn-outline-secondary" href="custos.php?venda_id=<?php echo (int)$v["id"]; ?>">Custos</a>
-      <a class="btn btn-outline-primary" href="editar_venda.php?id=<?php echo (int)$venda['id']; ?>">
+      <a class="btn btn-outline-dark" href="<?= h(url('admin/vendas/venda_detalhe.php?id=' . (int)$v['id'])) ?>">Voltar ao detalhe</a>
+      <a class="btn btn-outline-secondary" href="<?= h(url('app/modules/finance/custos.php?venda_id=' . (int)$v['id'])) ?>">Custos</a>
+      <a class="btn btn-outline-primary" href="<?= h(url('admin/vendas/editar_venda.php?id=' . (int)$venda['id'])) ?>">
         Editar
       </a>
 

@@ -12,7 +12,7 @@ if ($_SESSION['user']['role'] !== 'admin') {
 
 
 function money($v){ return number_format((float)$v, 2, ',', '.') . " MT"; }
-function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
+if (!function_exists('h')) { function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); } }
 
 function col_exists(mysqli $con, string $table, string $col): bool {
   $table = mysqli_real_escape_string($con, $table);
@@ -217,7 +217,7 @@ $vendedorNome = $venda['vendedor_nome'] ?? null;
 
   <div class="actions">
     <button class="btn" onclick="window.print()">Imprimir / Guardar PDF</button>
-    <a class="btn2" href="venda_detalhe.php?id=<?php echo (int)$venda['id']; ?>">Voltar</a>
+    <a class="btn2" href="<?= h(url('admin/vendas/venda_detalhe.php?id=' . (int)$venda['id'])) ?>">Voltar</a>
   </div>
 
 </div>

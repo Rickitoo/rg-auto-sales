@@ -9,7 +9,7 @@ if ($_SESSION['user']['role'] !== 'admin') {
     exit();
 }
 
-function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
+if (!function_exists('h')) { function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); } }
 function money($v){ return number_format((float)$v, 2, ',', '.'); }
 
 // ===============================

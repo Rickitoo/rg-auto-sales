@@ -152,6 +152,34 @@ Melhorar UI da Inbox e criar dashboard CRM:
 4. Melhorar estados vazios, filtros e atalhos de acao.
 5. Manter a automacao WhatsApp ainda manual ate validar o fluxo com usuarios reais.
 
+## Checkpoint pos-estabilizacao final
+
+### Entregue
+
+- Estabilizacao final concluida.
+- Painel Inteligente reforcado com dados reais de `leads` e `vendas`.
+- Dashboard CRM criado em `admin/crm/dashboard.php`.
+- Detalhe de cliente/test-drive criado em `admin/clientes/cliente_detalhe.php`.
+- Links entre dashboard admin, CRM Dashboard, CRM Inbox, financeiro, vendas, clientes, carros e leads corrigidos.
+- Rotas para custos, recibo, CSV, detalhe de venda, follow-up e detalhe de cliente ajustadas para caminhos canonicos.
+- Botoes de leads agora permitem seguir para detalhe, CRM/follow-up, WhatsApp e fechamento de venda.
+- Permissoes basicas validadas nas paginas admin novas/alteradas com `require_admin()`.
+- Relatorio final criado em `storage/reports/final-stabilization-20260523.md`.
+
+### Validacao
+
+- Lint PHP validado com `176 arquivos OK` e `0 erros`.
+- Relatorio final de lint: `storage/reports/php-lint-20260523-233801.txt`.
+- Teste HTTP sem sessao confirmou redirect seguro com `next` para paginas admin novas.
+
+### Proxima fase recomendada
+
+1. Teste real com dados reais no navegador usando sessao admin.
+2. Preparacao de deploy.
+3. Backup do banco antes do uso real.
+4. Definir pasta oficial de execucao ou symlink entre workspace e XAMPP.
+5. Configuracao de producao com HTTPS, credenciais fora do repositorio, logs e politica de erros.
+
 ## Pendencias antes de remover wrappers
 
 - Executar o checklist manual no navegador.

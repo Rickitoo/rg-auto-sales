@@ -19,7 +19,7 @@ if (!isset($_SESSION['csrf_token'])) {
   $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
-function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
+if (!function_exists('h')) { function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); } }
 function money($v){ return number_format((float)$v, 2, ',', '.')." MT"; }
 
 // evita redeclare se financeiro.php também tiver
@@ -346,10 +346,10 @@ $percParc    = ($hasParceiro && $hasPP) ? (float)($venda["perc_parceiro"] ?? 0) 
     <div class="d-flex gap-2">
       <a class="btn btn-outline-dark" href="<?= h(url('admin/vendas/vendas.php')) ?>">Voltar</a>
       <a class="btn btn-outline-dark" href="<?= h(url('admin/vendas/nova_venda.php')) ?>">Nova venda</a>
-      <a class="btn btn-outline-secondary" href="custos.php?venda_id=<?php echo (int)$venda['id']; ?>">Custos da venda</a>
+      <a class="btn btn-outline-secondary" href="<?= h(url('app/modules/finance/custos.php?venda_id=' . (int)$venda['id'])) ?>">Custos da venda</a>
 
       <?php if ($venda['status'] === 'PAGO'): ?>
-        <a class="btn btn-outline-dark" href="recibo.php?id=<?php echo (int)$venda['id']; ?>" target="_blank">Recibo (PDF)</a>
+        <a class="btn btn-outline-dark" href="<?= h(url('app/modules/finance/recibo.php?id=' . (int)$venda['id'])) ?>" target="_blank">Recibo (PDF)</a>
       <?php endif; ?>
     </div>
   </div>

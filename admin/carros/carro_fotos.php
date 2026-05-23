@@ -9,8 +9,10 @@ if ($_SESSION['user']['role'] !== 'admin') {
 
 
 
+if (!function_exists('h')) {
 function h($s){
     return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
+}
 }
 
 $carro_id = (int)($_GET['carro_id'] ?? 0);

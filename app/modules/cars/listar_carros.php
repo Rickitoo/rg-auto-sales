@@ -19,8 +19,10 @@ if (!isset($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
+if (!function_exists('h')) {
 function h($v) {
     return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8');
+}
 }
 
 function money($v) {

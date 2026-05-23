@@ -7,8 +7,10 @@ if ($_SESSION['user']['role'] !== 'admin') {
     exit();
 }
 
+if (!function_exists('h')) {
 function h($v){
     return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8');
+}
 }
 
 $lead_id = (int)($_GET['id'] ?? 0);

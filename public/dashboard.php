@@ -8,7 +8,7 @@ require_login();
 // =========================
 function money($v){ return number_format((float)$v, 2, ',', '.') . " MT"; }
 function n($v){ return (int)($v ?? 0); }
-function h($v){ return htmlspecialchars($v ?? '', ENT_QUOTES, 'UTF-8'); }
+if (!function_exists('h')) { function h($v){ return htmlspecialchars($v ?? '', ENT_QUOTES, 'UTF-8'); } }
 
 // =========================
 // DATAS
@@ -53,14 +53,15 @@ $lucroMes  = (float)($r['lucro'] ?? 0);
 $leadsFollow = [];
 $resFollow = mysqli_query($conexao, "
     SELECT *,
+    proximo_contacto AS proximo_followup,
     CASE
-        WHEN proximo_followup IS NULL THEN 1
-        WHEN proximo_followup <= NOW() THEN 2
+        WHEN proximo_contacto IS NULL THEN 1
+        WHEN proximo_contacto <= NOW() THEN 2
         ELSE 0
     END as prioridade
     FROM leads
     WHERE status NOT IN ('fechado','perdido')
-    ORDER BY prioridade DESC, proximo_followup ASC, id DESC
+    ORDER BY prioridade DESC, proximo_contacto ASC, id DESC
     LIMIT 20
 ");
 
@@ -203,7 +204,7 @@ href="https://wa.me/258<?= $tel ?>?text=<?= $msg ?>">
 <a href="<?= h(url('admin/vendas/pagar_venda.php?id=' . (int)$v['id'])) ?>">Marcar pago</a>
 <?php else: ?>
 <a class="btn btn-sm btn-success"
-href="marcar_pago.php?id=<?=h($v['id'])?>">PAGO</a>
+href="<?= h(url('admin/vendas/venda_detalhe.php?id=' . (int)$v['id'])) ?>">PAGO</a>
 <?php endif; ?>
 </td>
 </tr>

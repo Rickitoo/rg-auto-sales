@@ -9,7 +9,7 @@ if ($_SESSION['user']['role'] !== 'admin') {
     exit();
 }
 
-function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
+if (!function_exists('h')) { function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); } }
 
 $id = (int)($_GET['id'] ?? 0);
 if ($id <= 0) die("ID inválido.");

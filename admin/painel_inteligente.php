@@ -2,172 +2,177 @@
 require_once __DIR__ . '/../app/core/bootstrap.php';
 require_admin();
 
-if ($_SESSION['user']['role'] !== 'admin') {
-    redirect_to('auth/login.php');
-    exit();
+function pi_money($v): string { return number_format((float)$v, 2, ',', '.') . ' MT'; }
+
+function pi_table_exists(mysqli $con, string $table): bool {
+    return function_exists('db_table_exists') ? db_table_exists($con, $table) : false;
 }
 
+function pi_col_exists(mysqli $con, string $table, string $col): bool {
+    $table = mysqli_real_escape_string($con, $table);
+    $col = mysqli_real_escape_string($con, $col);
+    $q = mysqli_query($con, "SHOW COLUMNS FROM `$table` LIKE '$col'");
+    return $q && mysqli_num_rows($q) > 0;
+}
 
+function pi_days_since(?string $date): ?int {
+    if (!$date) return null;
+    $ts = strtotime($date);
+    return $ts ? max(0, (int)floor((time() - $ts) / 86400)) : null;
+}
 
-// ===============================
-// HELPERS
-// ===============================
-function money($v) { return number_format((float)$v, 2, ',', '.') . " MT"; }
-function h($v){ return htmlspecialchars($v ?? '', ENT_QUOTES, 'UTF-8'); }
+function pi_phone(?string $phone): string {
+    $tel = preg_replace('/\D+/', '', (string)$phone);
+    return $tel !== '' && !str_starts_with($tel, '258') ? '258' . ltrim($tel, '0') : $tel;
+}
 
-// ===============================
-// DADOS BASE
-// ===============================
-$hoje = date("Y-m-d");
-$inicioMes = date('Y-m-01');
-$fimMes = date('Y-m-t');
+$hasFollowups = pi_table_exists($conexao, 'lead_followups');
+$hasAtualizadoEm = pi_col_exists($conexao, 'leads', 'atualizado_em');
+$selectUpdated = $hasAtualizadoEm ? 'atualizado_em' : 'criado_em';
+$selectLastFollowup = $hasFollowups
+    ? '(SELECT MAX(lf.criado_em) FROM lead_followups lf WHERE lf.lead_id = leads.id)'
+    : 'NULL';
 
-// ===============================
-// LEADS EM ATRASO (FOLLOW-UP)
-// ===============================
-$agora = date("Y-m-d H:i:s");
-$sqlFollow = "
-    SELECT id, nome, telefone
-    FROM clientes
-    WHERE proximo_followup IS NOT NULL
-    AND proximo_followup <= '$agora'
-";
-$res = mysqli_query($conexao, $sqlFollow);
-$leadsFollow = [];
-if($res) while($r = mysqli_fetch_assoc($res)) $leadsFollow[] = $r;
+$resLeads = mysqli_query($conexao, "
+    SELECT id, nome, telefone, marca, modelo, ano, status, criado_em,
+           $selectUpdated AS ultima_atividade,
+           $selectLastFollowup AS ultimo_followup
+    FROM leads
+    WHERE status NOT IN ('fechado','perdido')
+    ORDER BY id DESC
+    LIMIT 300
+");
 
-// ===============================
-// NEGOCIAÇÕES
-// ===============================
-$sqlNeg = "
-    SELECT id, nome, telefone
-    FROM clientes
-    WHERE estado='negociacao' AND status='ativo'
-";
-$res = mysqli_query($conexao, $sqlNeg);
-$negociacoes = [];
-if($res) while($r = mysqli_fetch_assoc($res)) $negociacoes[] = $r;
+$leadsUrgentes = [];
+$leadsParados = [];
+$followupsPendentes = [];
 
-// ===============================
-// CARROS PARADOS
-// ===============================
-$sqlCarros = "
-    SELECT id, marca, modelo
-    FROM carros
-    WHERE status='disponivel'
-    ORDER BY data_registo ASC
-    LIMIT 5
-";
-$res = mysqli_query($conexao, $sqlCarros);
-$carros = [];
-if($res) while($r = mysqli_fetch_assoc($res)) $carros[] = $r;
+while ($resLeads && $lead = mysqli_fetch_assoc($resLeads)) {
+    $ref = $lead['ultimo_followup'] ?: ($lead['ultima_atividade'] ?? $lead['criado_em']);
+    $dias = pi_days_since($ref);
+    $lead['_dias'] = $dias;
+    $lead['_sem_followup'] = empty($lead['ultimo_followup']);
 
-// ===============================
-// DINHEIRO PENDENTE
-// ===============================
-$stmt = mysqli_prepare($conexao, "
-    SELECT SUM(comissao) as total
+    if ($dias !== null && $dias >= 7) {
+        $leadsUrgentes[] = $lead;
+    } elseif ($dias !== null && $dias >= 3) {
+        $leadsParados[] = $lead;
+    }
+
+    if ($dias !== null && $dias >= 3) {
+        $followupsPendentes[] = $lead;
+    }
+}
+
+$vendasPendentes = [];
+$res = mysqli_query($conexao, "
+    SELECT id, marca, modelo, ano, status, data_venda, valor_venda, lucro
     FROM vendas
     WHERE status='PENDENTE'
-    AND data_venda BETWEEN ? AND ?
+    ORDER BY data_venda ASC, id ASC
+    LIMIT 10
 ");
-mysqli_stmt_bind_param($stmt, "ss", $inicioMes, $fimMes);
-mysqli_stmt_execute($stmt);
-$res = mysqli_stmt_get_result($stmt);
-$pendente = (float)(mysqli_fetch_assoc($res)['total'] ?? 0);
-mysqli_stmt_close($stmt);
+while ($res && $row = mysqli_fetch_assoc($res)) {
+    $vendasPendentes[] = $row;
+}
 
-// ===============================
-// MISSÕES
-// ===============================
+$pagamentosPendentes = [];
+$res = mysqli_query($conexao, "
+    SELECT id, marca, modelo, ano, status, data_venda, valor_venda, lucro
+    FROM vendas
+    WHERE status='PENDENTE'
+    ORDER BY data_venda ASC, id ASC
+    LIMIT 10
+");
+while ($res && $row = mysqli_fetch_assoc($res)) {
+    $pagamentosPendentes[] = $row;
+}
+
 $missoes = [];
-
-if(count($leadsFollow) > 0){
-    $missoes[] = [
-        'tipo' => 'lead',
-        'texto' => "Contactar " . count($leadsFollow) . " leads em atraso"
-    ];
-}
-
-if(count($negociacoes) > 0){
-    $missoes[] = [
-        'tipo' => 'negociacao',
-        'texto' => "Fechar pelo menos 1 negociação hoje"
-    ];
-}
-
-if(count($carros) > 0){
-    $missoes[] = [
-        'tipo' => 'carro',
-        'texto' => "Promover " . count($carros) . " carros parados"
-    ];
-}
-
-if($pendente > 0){
-    $missoes[] = [
-        'tipo' => 'financeiro',
-        'texto' => "Cobrar clientes (" . money($pendente) . ")"
-    ];
-}
-
-// ===============================
-// PRIORIDADE
-// ===============================
-$prioridade = [
-    'financeiro' => 1,
-    'lead' => 2,
-    'negociacao' => 3,
-    'carro' => 4
-];
-
-usort($missoes, function($a,$b) use ($prioridade){
-    return $prioridade[$a['tipo']] - $prioridade[$b['tipo']];
-});
+if ($pagamentosPendentes) $missoes[] = ['tipo' => 'financeiro', 'texto' => 'Regularizar ' . count($pagamentosPendentes) . ' pagamento(s) pendente(s).', 'url' => url('admin/vendas/vendas.php')];
+if ($leadsUrgentes) $missoes[] = ['tipo' => 'urgente', 'texto' => 'Contactar ' . count($leadsUrgentes) . ' lead(s) urgente(s) hoje.', 'url' => url('admin/crm/inbox.php')];
+if ($leadsParados) $missoes[] = ['tipo' => 'parado', 'texto' => 'Reativar ' . count($leadsParados) . ' lead(s) parado(s).', 'url' => url('admin/crm/inbox.php')];
+if ($vendasPendentes) $missoes[] = ['tipo' => 'venda', 'texto' => 'Acompanhar ' . count($vendasPendentes) . ' venda(s) pendente(s).', 'url' => url('admin/vendas/vendas.php')];
 
 require_once __DIR__ . '/../includes/layout_top.php';
 ?>
 
-<h2>🧠 Painel Inteligente</h2>
+<div class="page-card">
+    <h2>Painel Inteligente</h2>
+    <p style="color:#667085;margin-top:4px">Proximas acoes comerciais, financeiras e de follow-up.</p>
+</div>
 
-<?php if(empty($missoes)): ?>
-    <div style="background:#d4edda;padding:15px;border-radius:10px;">
-        ✅ Tudo em dia! Continua assim.
-    </div>
-<?php endif; ?>
+<div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:18px">
+    <div class="card"><strong><?= h(count($leadsUrgentes)) ?></strong><br><span>Leads urgentes</span></div>
+    <div class="card"><strong><?= h(count($leadsParados)) ?></strong><br><span>Leads parados</span></div>
+    <div class="card"><strong><?= h(count($followupsPendentes)) ?></strong><br><span>Follow-ups pendentes</span></div>
+    <div class="card"><strong><?= h(count($vendasPendentes)) ?></strong><br><span>Vendas pendentes</span></div>
+    <div class="card"><strong><?= h(count($pagamentosPendentes)) ?></strong><br><span>Pagamentos pendentes</span></div>
+</div>
 
-<?php foreach($missoes as $m): ?>
-    <div style="background:#111;color:#fff;padding:15px;margin-bottom:10px;border-radius:10px;">
-        <?= h($m['texto']) ?>
-    </div>
-<?php endforeach; ?>
-
-<hr>
-
-<h3>⚡ Ações rápidas</h3>
-
-<!-- LEADS -->
-<?php foreach($leadsFollow as $l): ?>
-    <?php $tel = preg_replace('/[^0-9]/','',$l['telefone']); ?>
-    <div>
-        <?= h($l['nome']) ?>
-        <a target="_blank"
-           href="https://wa.me/258<?= $tel ?>?text=<?= urlencode("Olá {$l['nome']}, estou a dar seguimento ao seu pedido.") ?>">
-           🚀 Contactar
+<div class="page-card">
+    <h3>Sugestoes de proxima acao</h3>
+    <?php if (!$missoes): ?>
+        <p style="background:#dcfce7;color:#166534;padding:12px;border-radius:8px">Tudo em dia. Monitorar novos leads e manter follow-up ativo.</p>
+    <?php endif; ?>
+    <?php foreach ($missoes as $missao): ?>
+        <a href="<?= h($missao['url']) ?>" style="display:block;background:#111827;color:#fff;padding:14px;border-radius:8px;margin-top:8px;font-weight:800">
+            <?= h($missao['texto']) ?>
         </a>
-    </div>
-<?php endforeach; ?>
+    <?php endforeach; ?>
+</div>
 
-<br> 
-
-<!-- NEGOCIAÇÕES -->
-<?php foreach($negociacoes as $l): ?>
-    <?php $tel = preg_replace('/[^0-9]/','',$l['telefone']); ?>
-    <div>
-        <?= h($l['nome']) ?>
-        <a target="_blank" href="https://wa.me/258<?= $tel ?>">
-            💰 Fechar
-        </a>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+    <div class="page-card">
+        <h3>Leads urgentes</h3>
+        <?php foreach (array_slice($leadsUrgentes, 0, 8) as $lead): ?>
+            <?php $tel = pi_phone($lead['telefone']); $carro = trim(($lead['marca'] ?? '') . ' ' . ($lead['modelo'] ?? '') . ' ' . ($lead['ano'] ?? '')); ?>
+            <div style="border-bottom:1px solid #e5e7eb;padding:10px 0">
+                <strong><?= h($lead['nome']) ?></strong>
+                <div style="color:#667085"><?= h($carro ?: 'Sem carro') ?> | <?= h($lead['_dias']) ?> dia(s) sem contacto</div>
+                <a href="<?= h(url('admin/crm/inbox.php?id=' . (int)$lead['id'])) ?>">Abrir CRM</a>
+                <?php if ($tel): ?> | <a target="_blank" rel="noopener" href="https://wa.me/<?= h($tel) ?>?text=<?= h(rawurlencode('Ola ' . $lead['nome'] . ', aqui e a RG Auto Sales. Quero dar seguimento ao seu interesse.')) ?>">WhatsApp</a><?php endif; ?>
+                | <a href="<?= h(url('admin/vendas/marcar_venda.php?lead_id=' . (int)$lead['id'])) ?>">Fechar venda</a>
+            </div>
+        <?php endforeach; ?>
+        <?php if (!$leadsUrgentes): ?><p>Sem leads urgentes.</p><?php endif; ?>
     </div>
-<?php endforeach; ?>
+
+    <div class="page-card">
+        <h3>Leads parados / follow-ups pendentes</h3>
+        <?php foreach (array_slice($followupsPendentes, 0, 8) as $lead): ?>
+            <div style="border-bottom:1px solid #e5e7eb;padding:10px 0">
+                <strong><?= h($lead['nome']) ?></strong>
+                <div style="color:#667085"><?= h($lead['_sem_followup'] ? 'Sem resposta' : 'Parado') ?> | <?= h($lead['_dias']) ?> dia(s)</div>
+                <a href="<?= h(url('admin/crm/inbox.php?id=' . (int)$lead['id'])) ?>">Adicionar follow-up</a>
+            </div>
+        <?php endforeach; ?>
+        <?php if (!$followupsPendentes): ?><p>Sem follow-ups pendentes.</p><?php endif; ?>
+    </div>
+</div>
+
+<div class="page-card">
+    <h3>Vendas e pagamentos pendentes</h3>
+    <?php if (!$vendasPendentes): ?>
+        <p>Sem vendas pendentes.</p>
+    <?php else: ?>
+        <table>
+            <tr><th>Venda</th><th>Data</th><th>Valor</th><th>Lucro</th><th>Acao</th></tr>
+            <?php foreach ($vendasPendentes as $venda): ?>
+                <tr>
+                    <td><?= h(trim($venda['marca'] . ' ' . $venda['modelo'] . ' ' . $venda['ano'])) ?></td>
+                    <td><?= h($venda['data_venda']) ?></td>
+                    <td><?= h(pi_money($venda['valor_venda'])) ?></td>
+                    <td><?= h(pi_money($venda['lucro'])) ?></td>
+                    <td>
+                        <a href="<?= h(url('admin/vendas/venda_detalhe.php?id=' . (int)$venda['id'])) ?>">Ver</a>
+                        |
+                        <a href="<?= h(url('admin/vendas/pagar_venda.php?id=' . (int)$venda['id'])) ?>">Pagar</a>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        </table>
+    <?php endif; ?>
+</div>
 
 <?php require_once __DIR__ . '/../includes/layout_bottom.php'; ?>

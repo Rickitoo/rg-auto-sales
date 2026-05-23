@@ -9,8 +9,10 @@ if ($_SESSION['user']['role'] !== 'admin') {
 
 
 
+if (!function_exists('h')) {
 function h($s){
     return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
+}
 }
 
 $sql = "SELECT * FROM clientes ORDER BY data_registo DESC, id DESC";
@@ -80,7 +82,7 @@ if (!$res) {
                                     <a href="https://wa.me/<?= h($telefoneLimpo) ?>?text=<?= $msg ?>" target="_blank" class="btn btn-success btn-sm">
                                         WhatsApp
                                     </a>
-                                    <a href="cliente_detalhe.php?id=<?= h($row['id']) ?>" class="btn btn-primary btn-sm">
+                                    <a href="<?= h(url('admin/clientes/cliente_detalhe.php?id=' . (int)$row['id'])) ?>" class="btn btn-primary btn-sm">
                                         Ver
                                     </a>
                                 </td>

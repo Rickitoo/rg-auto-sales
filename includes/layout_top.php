@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../app/core/bootstrap.php';
 
 $paginaAtual = basename($_SERVER['PHP_SELF'] ?? '');
+$caminhoAtual = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
 $user = current_user();
 
 function menuAtivo($arquivo) {
@@ -9,7 +10,18 @@ function menuAtivo($arquivo) {
     return $paginaAtual === $arquivo ? 'active' : '';
 }
 
+function menuAtivoPath($path) {
+    global $caminhoAtual;
+    return str_ends_with($caminhoAtual, '/' . ltrim($path, '/')) ? 'active' : '';
+}
+
 function tituloPagina($pagina) {
+    global $caminhoAtual;
+
+    if (str_ends_with($caminhoAtual, '/admin/crm/dashboard.php')) {
+        return 'CRM Dashboard';
+    }
+
     $titulos = [
         'dashboard.php' => 'Dashboard',
         'listar_carros.php' => 'Carros',
@@ -21,6 +33,8 @@ function tituloPagina($pagina) {
         'clientes.php' => 'Clientes',
         'leads.php' => 'Leads',
         'funil.php' => 'CRM',
+        'inbox.php' => 'CRM Inbox',
+        'painel_inteligente.php' => 'Painel Inteligente',
         'custos.php' => 'Custos',
         'config.php' => 'Configuracoes',
         'vendedores_pedidos.php' => 'Pedidos de Vendedores',
@@ -92,12 +106,13 @@ $tituloAtual = tituloPagina($paginaAtual);
 
         <div class="menu-title">Principal</div>
         <nav class="nav">
-            <a href="<?= h(url('admin/dashboard.php')) ?>" class="<?= menuAtivo('dashboard.php') ?>">Dashboard</a>
+            <a href="<?= h(url('admin/dashboard.php')) ?>" class="<?= menuAtivoPath('admin/dashboard.php') ?>">Dashboard</a>
             <a href="<?= h(url('admin/carros/listar_carros.php')) ?>" class="<?= menuAtivo('listar_carros.php') ?>">Carros</a>
             <a href="<?= h(url('admin/vendas/vendas.php')) ?>" class="<?= menuAtivo('vendas.php') ?>">Vendas</a>
             <a href="<?= h(url('admin/clientes/clientes.php')) ?>" class="<?= menuAtivo('clientes.php') ?>">Clientes</a>
             <a href="<?= h(url('admin/leads/leads.php')) ?>" class="<?= menuAtivo('leads.php') ?>">Leads</a>
-            <a href="<?= h(url('admin/funil.php')) ?>" class="<?= menuAtivo('funil.php') ?>">CRM</a>
+            <a href="<?= h(url('admin/crm/dashboard.php')) ?>" class="<?= menuAtivoPath('admin/crm/dashboard.php') ?>">CRM Dashboard</a>
+            <a href="<?= h(url('admin/crm/inbox.php')) ?>" class="<?= menuAtivoPath('admin/crm/inbox.php') ?>">CRM Inbox</a>
             <a href="<?= h(url('admin/financeiro/dashboard_financeiro.php')) ?>" class="<?= menuAtivo('dashboard_financeiro.php') ?>">Financeiro</a>
         </nav>
 
@@ -105,6 +120,7 @@ $tituloAtual = tituloPagina($paginaAtual);
         <nav class="nav">
             <a href="<?= h(url('admin/carros/adicionar_carro.php')) ?>" class="<?= menuAtivo('adicionar_carro.php') ?>">Adicionar Carro</a>
             <a href="<?= h(url('admin/vendas/nova_venda.php')) ?>" class="<?= menuAtivo('nova_venda.php') ?>">Nova Venda</a>
+            <a href="<?= h(url('admin/painel_inteligente.php')) ?>" class="<?= menuAtivo('painel_inteligente.php') ?>">Painel Inteligente</a>
             <a href="<?= h(url('admin/vendas/vendedores_pedidos.php')) ?>" class="<?= menuAtivo('vendedores_pedidos.php') ?>">Pedidos de Vendedores</a>
             <a href="<?= h(url('admin/config.php')) ?>" class="<?= menuAtivo('config.php') ?>">Configuracoes</a>
             <a href="<?= h(url('admin/relatorio_vendedores.php')) ?>" class="<?= menuAtivo('relatorio_vendedores.php') ?>">Relatorios</a>

@@ -16,7 +16,7 @@ if (!isset($_SESSION['csrf_token'])) {
 // Helpers
 function money($v) { return number_format((float)$v, 2, ',', '.') . " MT"; }
 function n($v) { return (int)($v ?? 0); }
-function h($v){ return htmlspecialchars($v ?? '', ENT_QUOTES, 'UTF-8'); }
+if (!function_exists('h')) { function h($v){ return htmlspecialchars($v ?? '', ENT_QUOTES, 'UTF-8'); } }
 
 function scoreLead($lead){
     $score = 0;

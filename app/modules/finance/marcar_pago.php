@@ -6,7 +6,7 @@ if ($_SESSION['user']['role'] !== 'admin') {
     die("Acesso negado");
 }
 
-function h($s){ return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
+if (!function_exists('h')) { function h($s){ return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); } }
 
 $id = intval($_GET['id'] ?? $_POST['id'] ?? 0);
 if ($id <= 0) die("ID inválido");

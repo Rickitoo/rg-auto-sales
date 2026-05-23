@@ -14,7 +14,7 @@ error_reporting(E_ALL);
 
 
 
-function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
+if (!function_exists('h')) { function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); } }
 function money($v){ return number_format((float)$v, 2, ',', '.') . " MT"; }
 
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;

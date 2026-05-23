@@ -7,8 +7,10 @@ if ($_SESSION['user']['role'] !== 'admin') {
     exit();
 }
 
+if (!function_exists('h')) {
 function h($v){
     return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8');
+}
 }
 
 $lead_id = (int)($_GET['id'] ?? 0);
@@ -389,10 +391,10 @@ textarea{
             </a>
 
             <a
-                href="editar_lead.php?id=<?= $lead_id ?>"
+                href="<?= h(url('admin/crm/inbox.php?id=' . (int)$lead_id)) ?>"
                 class="btn btn-orange"
             >
-                ✏️ Editar Lead
+                ✏️ CRM / Follow-up
             </a>
 
         </div>
@@ -483,4 +485,5 @@ window.onload = () => {
 
 </body>
 </html>
+
 

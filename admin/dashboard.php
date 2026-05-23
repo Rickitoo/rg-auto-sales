@@ -202,7 +202,7 @@ href="https://wa.me/<?= h(str_starts_with($tel, '258') ? $tel : '258' . ltrim($t
 <a href="<?= h(url('admin/vendas/pagar_venda.php?id=' . (int)$v['id'])) ?>">Marcar pago</a>
 <?php else: ?>
 <a class="btn btn-sm btn-success"
-href="marcar_pago.php?id=<?=h($v['id'])?>">PAGO</a>
+href="<?= h(url('admin/vendas/venda_detalhe.php?id=' . (int)$v['id'])) ?>">PAGO</a>
 <?php endif; ?>
 </td>
 </tr>

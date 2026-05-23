@@ -11,7 +11,12 @@ Checkpoint tecnico em 2026-05-23.
 - Rotas canonicas definidas para dashboard, carros, leads, vendas, financeiro, clientes, test-drive, autenticacao e paginas publicas.
 - Duplicatas claras convertidas em redirects controlados.
 - Checklist de teste manual criado em `storage/reports/manual-test-checklist-20260523.md`.
-- Lint PHP validado com 173 arquivos OK e 0 erros.
+- CRM Inbox criado com timeline, follow-up por lead, prioridade automatica e mensagens WhatsApp inteligentes.
+- Dashboard CRM criado em `admin/crm/dashboard.php`.
+- Painel Inteligente reforcado com leads urgentes, leads parados, follow-ups pendentes, vendas pendentes, pagamentos pendentes e proximas acoes.
+- Detalhe de cliente/test-drive criado em `admin/clientes/cliente_detalhe.php`.
+- Rotas e botoes principais entre dashboard admin, dashboard CRM, inbox, financeiro, vendas, clientes, carros e leads foram estabilizados.
+- Lint PHP validado com 176 arquivos OK e 0 erros.
 
 ## Correcoes recentes de schema
 
@@ -21,12 +26,16 @@ Checkpoint tecnico em 2026-05-23.
 
 ## Proxima fase
 
-Testar manualmente o fluxo completo:
+Testar com dados reais e preparar deploy:
 
 1. Lead/test-drive publico.
 2. Lead no CRM/admin.
-3. Conversao para venda.
-4. Confirmacao/fechamento da venda.
-5. Reflexo no financeiro, lucro e comissoes.
+3. Follow-up, WhatsApp e timeline.
+4. Conversao para venda.
+5. Confirmacao/fechamento da venda.
+6. Pagamento, financeiro, lucro e comissoes.
+7. Backup do banco antes de uso real.
+8. Padronizar pasta oficial ou symlink para evitar divergencia entre workspace e XAMPP.
+9. Configurar producao com HTTPS, credenciais fora do repositorio, logs e politica de erros.
 
 Depois dos testes, remover wrappers antigos somente quando nao houver `NOT FOUND`, erro de schema, POST quebrado ou asset 404.

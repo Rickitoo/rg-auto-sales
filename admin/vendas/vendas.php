@@ -19,7 +19,7 @@ if (!isset($_SESSION['csrf_token'])) {
 
 $flash = null;
 
-function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
+if (!function_exists('h')) { function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); } }
 function money($v){ return number_format((float)$v, 2, ',', '.')." MT"; }
 function col_exists(mysqli $con, string $table, string $col): bool {
     $table = mysqli_real_escape_string($con, $table);
@@ -263,7 +263,7 @@ function buildQuery(array $extra = []) {
 
   <div class="d-flex gap-2 mb-3">
     <a class="btn btn-success" href="<?= h(url('admin/vendas/nova_venda.php')) ?>">+ Nova venda</a>
-    <a class="btn btn-outline-secondary" href="export_vendas_csv.php">Exportar CSV</a>
+    <a class="btn btn-outline-secondary" href="<?= h(url('app/modules/finance/export_vendas_csv.php')) ?>">Exportar CSV</a>
   </div>
 
   <div class="d-flex align-items-center justify-content-between mb-3">
@@ -398,10 +398,10 @@ function buildQuery(array $extra = []) {
             </td>
 
             <td class="text-end">
-              <a class="btn btn-sm btn-outline-primary" href="venda_detalhe.php?id=<?php echo (int)$v['id']; ?>">Ver</a>
+              <a class="btn btn-sm btn-outline-primary" href="<?= h(url('admin/vendas/venda_detalhe.php?id=' . (int)$v['id'])) ?>">Ver</a>
 
               <!-- ✅ Custos por venda -->
-              <a class="btn btn-sm btn-outline-secondary" href="custos.php?venda_id=<?php echo (int)$v['id']; ?>">Custos</a>
+              <a class="btn btn-sm btn-outline-secondary" href="<?= h(url('app/modules/finance/custos.php?venda_id=' . (int)$v['id'])) ?>">Custos</a>
 
               <!-- ✅ Recalcular (opcional) -->
               <?php if (function_exists("recalcular_venda") && $st !== 'CANCELADO'): ?>

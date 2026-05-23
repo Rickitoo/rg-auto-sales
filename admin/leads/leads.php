@@ -7,8 +7,10 @@ if ($_SESSION['user']['role'] !== 'admin') {
     exit();
 }
 
+if (!function_exists('h')) {
 function h($v){
     return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8');
+}
 }
 
 function gerarMensagem($lead) {
@@ -25,6 +27,17 @@ function gerarMensagem($lead) {
             return "Posso ajudar em algo?";
     }
 }
+
+function lead_col_exists(mysqli $con, string $col): bool {
+    $col = mysqli_real_escape_string($con, $col);
+    $q = mysqli_query($con, "SHOW COLUMNS FROM leads LIKE '$col'");
+    return $q && mysqli_num_rows($q) > 0;
+}
+
+$hasProximoFollowup = lead_col_exists($conexao, 'proximo_followup');
+$hasProximoContacto = lead_col_exists($conexao, 'proximo_contacto');
+$followupExpr = $hasProximoFollowup ? 'proximo_followup' : ($hasProximoContacto ? 'proximo_contacto' : 'NULL');
+$followupField = $hasProximoFollowup ? 'proximo_followup' : ($hasProximoContacto ? 'proximo_contacto' : null);
 
 // filtros
 $filtro = $_GET['status'] ?? '';
@@ -55,7 +68,7 @@ SELECT *,
     END
     +
     CASE 
-        WHEN proximo_followup <= NOW() THEN 50
+        WHEN $followupExpr <= NOW() THEN 50
         ELSE 0
     END
     +
@@ -87,9 +100,9 @@ $follow = mysqli_query($conexao, "
     SELECT COUNT(*) as total
     FROM leads
     WHERE status NOT IN ('fechado','perdido')
-    AND (proximo_followup IS NULL OR proximo_followup <= NOW())
+    AND ($followupExpr IS NULL OR $followupExpr <= NOW())
 ");
-$followCount = mysqli_fetch_assoc($follow)['total'];
+$followCount = $follow ? mysqli_fetch_assoc($follow)['total'] : 0;
 ?>
 
 <!doctype html>
@@ -182,16 +195,16 @@ href="https://wa.me/<?= $tel ?>?text=<?= $msg ?>">💬</a>
 href="<?= h(url('admin/vendas/marcar_venda.php?lead_id=' . (int)$row['id'] . '&carro_id=' . (int)$row['carro_id'])) ?>">💰</a>
 
 <a class="btn btn-sm btn-info"
-href="ver_lead.php?id=<?=h($row['id'])?>">👁</a>
+href="<?= h(url('admin/leads/ver_lead.php?id=' . (int)$row['id'])) ?>">Ver</a>
 
 <a class="btn btn-sm btn-warning"
-href="follow_up.php?id=<?=h($row['id'])?>">⏰</a>
+href="<?= h(url('admin/crm/inbox.php?id=' . (int)$row['id'])) ?>">CRM</a>
 
 </td>
 
 <td>
-<?= $row['proximo_followup'] 
-    ? date('d/m H:i', strtotime($row['proximo_followup'])) 
+<?= $followupField && !empty($row[$followupField]) 
+    ? date('d/m H:i', strtotime($row[$followupField])) 
     : '-' ?>
 </td>
 
@@ -205,3 +218,5 @@ href="follow_up.php?id=<?=h($row['id'])?>">⏰</a>
 </div>
 </body>
 </html>
+
+

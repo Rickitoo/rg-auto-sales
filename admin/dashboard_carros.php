@@ -12,7 +12,7 @@ if ($_SESSION['user']['role'] !== 'admin') {
 // HELPERS
 // ===============================
 function money($v) { return number_format((float)$v, 2, ',', '.') . " MT"; }
-function h($v){ return htmlspecialchars($v ?? '', ENT_QUOTES, 'UTF-8'); }
+if (!function_exists('h')) { function h($v){ return htmlspecialchars($v ?? '', ENT_QUOTES, 'UTF-8'); } }
 
 // ===============================
 // KPIs CARROS
