@@ -56,6 +56,36 @@ Arquivo: `admin/vendas/vendedores_pedidos.php`
 - Confirmado que a coluna de data em `vendedores` e `data_registo`.
 - Corrigido `v.criado_em` para `v.data_registo`.
 
+## Checkpoint pos-correcao do CRM Inbox
+
+### Diagnostico
+
+- O redirecionamento indevido do CRM Inbox nao estava no HTML/layout da pagina.
+- O teste com `die('CHEGOU NA INBOX')` indicou que a requisicao HTTP nao estava executando o arquivo editado no workspace.
+- A causa real foi divergencia entre pastas: o navegador/XAMPP estava servindo `C:\xampp\htdocs\RG_AUTO_SALES`, enquanto o workspace ativo estava em `C:\Users\rickg\OneDrive\Ambiente de Trabalho\RG_AUTO_SALES`.
+- A copia servida pelo Apache ainda tinha `require_login()` antigo e login sempre redirecionando para dashboard.
+
+### Correcoes aplicadas
+
+- `.htaccess` atualizado para deixar arquivos e pastas fisicos passarem direto antes das rotas amigaveis.
+- Rota `/crm` e `/admin/crm` apontando para `admin/crm/inbox.php`.
+- `require_login()` passou a preservar a rota pedida com `next`.
+- `auth/login.php` mantem o `next` no formulario e, se o usuario ja estiver autenticado, redireciona para a rota solicitada quando segura.
+- `auth/processa_login.php` devolve o destino original no JSON de login quando o `next` e valido.
+- Arquivos minimos corrigidos foram espelhados para `C:\xampp\htdocs\RG_AUTO_SALES`, que e a copia atualmente servida pelo Apache.
+
+### Validacao
+
+- Acesso sem sessao a `/RG_AUTO_SALES/admin/crm/inbox.php` redireciona para `auth/login.php?next=%2FRG_AUTO_SALES%2Fadmin%2Fcrm%2Finbox.php`.
+- Acesso sem sessao a `/RG_AUTO_SALES/crm` redireciona para `auth/login.php?next=%2FRG_AUTO_SALES%2Fcrm`.
+- Depois do login, o fluxo preserva a rota pedida em vez de cair sempre no dashboard.
+- Lint PHP validado com `174 arquivos OK` e `0 erros`.
+- Relatorio final de lint: `storage/reports/php-lint-20260523-214547.txt`.
+
+### Recomendacao operacional
+
+Manter uma unica pasta oficial de trabalho para o projeto ou configurar um symlink entre `C:\xampp\htdocs\RG_AUTO_SALES` e o workspace real. Isso evita que o codigo editado e o codigo executado pelo Apache fiquem divergentes, reduzindo falsos diagnosticos, cache aparente e regressao de rotas.
+
 ## Pendencias antes de remover wrappers
 
 - Executar o checklist manual no navegador.

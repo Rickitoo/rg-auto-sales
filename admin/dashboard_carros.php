@@ -111,7 +111,7 @@ require_once __DIR__ . '/../includes/layout_top.php';
                 <strong><?= h($c['marca'].' '.$c['modelo']) ?></strong>
                 (<?= money($c['preco']) ?>)
 
-                <a href="editar_carro.php?id=<?= $c['id'] ?>">
+                <a href="<?= h(url('admin/carros/editar_carro.php?id=' . (int)$c['id'])) ?>">
                     ✏️ Editar
                 </a>
             </div>

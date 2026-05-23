@@ -30,7 +30,7 @@ if(!$row) die("Lead não encontrado.");
 <div class="container py-4">
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h3 class="m-0">Lead #<?=h($row['id'])?></h3>
-    <a class="btn btn-outline-dark" href="funil.php">Voltar</a>
+    <a class="btn btn-outline-dark" href="<?= h(url('admin/funil.php')) ?>">Voltar</a>
   </div>
 
   <div class="bg-white rounded shadow-sm p-3">

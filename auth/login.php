@@ -1,7 +1,15 @@
 <?php
 require_once __DIR__ . '/../app/core/bootstrap.php';
 
+$next = $_GET['next'] ?? '';
+$safeNext = is_string($next) && str_starts_with($next, app_base_url() . '/') ? $next : '';
+
 if (is_logged_in()) {
+    if ($safeNext !== '') {
+        header('Location: ' . $safeNext);
+        exit;
+    }
+
     redirect_to(is_admin() ? 'admin/dashboard.php' : 'public/dashboard.php');
 }
 ?>
@@ -36,6 +44,8 @@ if (is_logged_in()) {
         <p>Acesso ao painel RG Auto Sales</p>
 
         <form id="loginForm" method="post">
+            <input type="hidden" name="next" value="<?= h($safeNext) ?>">
+
             <label for="username">Email ou utilizador</label>
             <input id="username" name="username" autocomplete="username" required>
 

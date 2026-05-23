@@ -273,7 +273,7 @@ function buildQuery(array $extra = []) {
         <?= $hasLucro ? "Modelo novo: lucro → vendedor/RG (automático)" : "Modelo atual: comissao antiga (ainda sem migração total)" ?>
       </small>
     </div>
-    <a class="btn btn-outline-dark" href="dashboard.php">Voltar ao Dashboard</a>
+    <a class="btn btn-outline-dark" href="<?= h(url('admin/dashboard.php')) ?>">Voltar ao Dashboard</a>
   </div>
 
   <?php if ($flash): ?>

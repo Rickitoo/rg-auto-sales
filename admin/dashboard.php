@@ -199,7 +199,7 @@ href="https://wa.me/<?= h(str_starts_with($tel, '258') ? $tel : '258' . ltrim($t
 <td><?= money($v['comissao_rg']) ?></td>
 <td>
 <?php if($v['status']=='PENDENTE'): ?>
-<a href="pagar_venda.php?id=<?= $v['id'] ?>">Marcar pago</a>
+<a href="<?= h(url('admin/vendas/pagar_venda.php?id=' . (int)$v['id'])) ?>">Marcar pago</a>
 <?php else: ?>
 <a class="btn btn-sm btn-success"
 href="marcar_pago.php?id=<?=h($v['id'])?>">PAGO</a>

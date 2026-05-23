@@ -32,7 +32,7 @@ if (!$res) {
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0">Clientes / Test Drives</h2>
-        <a href="dashboard.php" class="btn btn-dark">Voltar ao Dashboard</a>
+        <a href="<?= h(url('admin/dashboard.php')) ?>" class="btn btn-dark">Voltar ao Dashboard</a>
     </div>
 
     <div class="card shadow-sm">

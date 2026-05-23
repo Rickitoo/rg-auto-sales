@@ -325,7 +325,7 @@ require_once __DIR__ . '/../../../includes/layout_top.php';
                                 <a href="gerir_fotos.php?id=<?= $idCarro ?>" class="btn-dark">Fotos</a>
 
                                 <?php if ($carro['status'] !== 'vendido'): ?>
-                                    <a href="marcar_venda.php?id=<?= $idCarro ?>" class="btn-success">Marcar Venda</a>
+                                    <a href="<?= h(url('admin/vendas/marcar_venda.php?id=' . $idCarro)) ?>" class="btn-success">Marcar Venda</a>
                                 <?php endif; ?>
 
                                 <a href="apagar_carro.php?id=<?= $idCarro ?>&csrf_token=<?= h($_SESSION['csrf_token']) ?>"

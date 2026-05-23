@@ -9,6 +9,13 @@ if ($_SESSION['user']['role'] !== 'admin') {
 
 $id = (int)($_GET['id'] ?? 0);
 
+function venda_col_exists(mysqli $con, string $table, string $col): bool {
+    $table = mysqli_real_escape_string($con, $table);
+    $col = mysqli_real_escape_string($con, $col);
+    $q = mysqli_query($con, "SHOW COLUMNS FROM `$table` LIKE '$col'");
+    return $q && mysqli_num_rows($q) > 0;
+}
+
 if ($id <= 0) {
     die("ID inválido.");
 }
@@ -43,15 +50,46 @@ if ($venda['status'] === 'PAGO') {
 $user = current_user();
 $admin = $user['nome'] ?? 'admin';
 
-$stmt = mysqli_prepare($conexao, "
-    UPDATE vendas 
-    SET status = 'PAGO',
-        data_pagamento = NOW(),
-        pago_por = ?
-    WHERE id = ?
-");
+if (function_exists('recalcular_venda')) {
+    $calc = recalcular_venda($conexao, $id);
+    if (!$calc['ok']) {
+        die("Erro ao recalcular venda: " . h($calc['erro'] ?? 'erro desconhecido'));
+    }
+}
 
-mysqli_stmt_bind_param($stmt, "si", $admin, $id);
+$sets = ["status = 'PAGO'"];
+$types = "";
+$params = [];
+
+if (venda_col_exists($conexao, 'vendas', 'data_pagamento')) {
+    $sets[] = "data_pagamento = NOW()";
+}
+
+if (venda_col_exists($conexao, 'vendas', 'pago_por')) {
+    $sets[] = "pago_por = ?";
+    $types .= "s";
+    $params[] = $admin;
+}
+
+if (venda_col_exists($conexao, 'vendas', 'pago')) {
+    $sets[] = "pago = 1";
+}
+
+if (venda_col_exists($conexao, 'vendas', 'status_pagamento')) {
+    $sets[] = "status_pagamento = 'PAGO'";
+}
+
+$sql = "
+    UPDATE vendas
+    SET " . implode(", ", $sets) . "
+    WHERE id = ?
+";
+
+$types .= "i";
+$params[] = $id;
+
+$stmt = mysqli_prepare($conexao, $sql);
+mysqli_stmt_bind_param($stmt, $types, ...$params);
 
 if (mysqli_stmt_execute($stmt)) {
     mysqli_stmt_close($stmt);

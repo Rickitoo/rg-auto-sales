@@ -215,7 +215,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
     <div class="d-flex gap-2">
       <a class="btn btn-outline-dark" href="<?= h(url('admin/vendas/vendas.php')) ?>">Vendas</a>
-      <a class="btn btn-outline-dark" href="dashboard.php">Dashboard</a>
+      <a class="btn btn-outline-dark" href="<?= h(url('admin/dashboard.php')) ?>">Dashboard</a>
     </div>
   </div>
 

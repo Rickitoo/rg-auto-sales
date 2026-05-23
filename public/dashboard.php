@@ -168,7 +168,7 @@ href="https://wa.me/258<?= $tel ?>?text=<?= $msg ?>">
 💬 WhatsApp
 </a>
 
-<a href="ver_lead.php?id=<?= $l['id'] ?>">
+<a href="<?= h(url('admin/leads/ver_lead.php?id=' . (int)$l['id'])) ?>">
 👁 Ver
 </a>
 </div>
@@ -200,7 +200,7 @@ href="https://wa.me/258<?= $tel ?>?text=<?= $msg ?>">
 <td><?= money($v['comissao_rg']) ?></td>
 <td>
 <?php if($v['status']=='PENDENTE'): ?>
-<a href="pagar_venda.php?id=<?= $v['id'] ?>">Marcar pago</a>
+<a href="<?= h(url('admin/vendas/pagar_venda.php?id=' . (int)$v['id'])) ?>">Marcar pago</a>
 <?php else: ?>
 <a class="btn btn-sm btn-success"
 href="marcar_pago.php?id=<?=h($v['id'])?>">PAGO</a>

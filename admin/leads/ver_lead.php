@@ -382,7 +382,7 @@ textarea{
             </a>
 
             <a
-                href="marcar_venda.php?lead_id=<?= $lead_id ?>"
+                href="<?= h(url('admin/vendas/marcar_venda.php?lead_id=' . (int)$lead_id)) ?>"
                 class="btn btn-blue"
             >
                 💰 Fechar Venda

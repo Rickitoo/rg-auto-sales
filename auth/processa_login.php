@@ -11,6 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $login = trim($_POST['username'] ?? $_POST['email'] ?? '');
 $password = $_POST['password'] ?? '';
+$next = $_POST['next'] ?? '';
 
 if ($login === '' || $password === '') {
     http_response_code(422);
@@ -28,7 +29,9 @@ if (!$user || (int)$user['ativo'] !== 1 || !password_verify($password, $user['pa
 
 login_user($user);
 
+$safeNext = is_string($next) && str_starts_with($next, app_base_url() . '/') ? $next : '';
+
 echo json_encode([
     'status' => 'ok',
-    'redirect' => is_admin() ? url('admin/dashboard.php') : url('public/dashboard.php'),
+    'redirect' => $safeNext !== '' ? $safeNext : (is_admin() ? url('admin/dashboard.php') : url('public/dashboard.php')),
 ]);

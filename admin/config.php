@@ -48,7 +48,7 @@ $cfg = $res ? (mysqli_fetch_assoc($res) ?: []) : [];
     <div><h3 class="mb-0">Configurações</h3><small class="text-muted">Comissão e divisão interna</small></div>
     <div class="d-flex gap-2">
       <a class="btn btn-outline-dark" href="<?= h(url('admin/dashboard.php')) ?>">Dashboard</a>
-      <a class="btn btn-outline-dark" href="vendas.php">Vendas</a>
+      <a class="btn btn-outline-dark" href="<?= h(url('admin/vendas/vendas.php')) ?>">Vendas</a>
     </div>
   </div>
 

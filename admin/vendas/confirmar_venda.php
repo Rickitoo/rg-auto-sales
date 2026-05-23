@@ -167,7 +167,7 @@ if (!$lead) die("Lead não encontrado.");
 <div class="container py-4">
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h3 class="m-0">Confirmar Venda (Lead #<?=h($lead['id'])?>)</h3>
-    <a class="btn btn-outline-dark" href="funil.php">Voltar</a>
+    <a class="btn btn-outline-dark" href="<?= h(url('admin/funil.php')) ?>">Voltar</a>
   </div>
 
   <div class="bg-white rounded shadow-sm p-3 mb-3">
@@ -205,7 +205,7 @@ if (!$lead) die("Lead não encontrado.");
 
     <div class="d-flex gap-2 mt-3">
       <button class="btn btn-success">Criar Venda</button>
-      <a class="btn btn-outline-secondary" href="funil.php">Cancelar</a>
+      <a class="btn btn-outline-secondary" href="<?= h(url('admin/funil.php')) ?>">Cancelar</a>
     </div>
   </form>
 </div>

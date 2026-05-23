@@ -77,7 +77,14 @@ if (!function_exists('require_login')) {
         auth_sync_legacy_session();
 
         if (!is_logged_in()) {
-            redirect_to('auth/login.php');
+            $next = $_SERVER['REQUEST_URI'] ?? '';
+            $loginPath = 'auth/login.php';
+
+            if ($next !== '') {
+                $loginPath .= '?next=' . urlencode($next);
+            }
+
+            redirect_to($loginPath);
         }
 
         if (isset($_SESSION['ultimo_acesso']) && time() - (int)$_SESSION['ultimo_acesso'] > 1800) {

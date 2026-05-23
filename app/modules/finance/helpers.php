@@ -10,11 +10,17 @@ if (!function_exists('r2')) {
 if (!function_exists('recalcular_venda')) {
     function recalcular_venda(mysqli $con, int $venda_id): array
     {
+        $columnExists = static function (string $table, string $col) use ($con): bool {
+            $table = mysqli_real_escape_string($con, $table);
+            $col = mysqli_real_escape_string($con, $col);
+            $q = mysqli_query($con, "SHOW COLUMNS FROM `$table` LIKE '$col'");
+            return $q && mysqli_num_rows($q) > 0;
+        };
+
         $sql = "SELECT 
                 id, status,
                 valor_venda, valor_proprietario,
-                lucro_minimo,
-                vendedor_id, captador_id
+                lucro_minimo
             FROM vendas
             WHERE id=? LIMIT 1";
 
@@ -37,9 +43,6 @@ if (!function_exists('recalcular_venda')) {
             return ["ok"=>false, "erro"=>"Valor de venda invÃ¡lido"];
         }
 
-        $temVendedor = !empty($v['vendedor_id']);
-        $temParceiro = !empty($v['captador_id']);
-
         $q = mysqli_prepare($con, "
         SELECT COALESCE(SUM(valor),0) AS total 
         FROM custos 
@@ -55,8 +58,8 @@ if (!function_exists('recalcular_venda')) {
         $lucro = $valor_venda - $valor_prop - $total_custos;
         $precisa_aprovacao = ($lucro <= 0 || $lucro < $lucro_min) ? 1 : 0;
 
-        $perc_parceiro = $temParceiro ? 10.0 : 0.0;
-        $perc_vendedor = $temVendedor ? 15.0 : 0.0;
+        $perc_parceiro = 10.0;
+        $perc_vendedor = 15.0;
 
         if (($perc_parceiro + $perc_vendedor) > 100) {
             return ["ok"=>false, "erro"=>"Percentagens invÃ¡lidas"];
@@ -64,7 +67,7 @@ if (!function_exists('recalcular_venda')) {
 
         $perc_rg = 100.0 - ($perc_parceiro + $perc_vendedor);
 
-        $base = ($lucro > 0 && $precisa_aprovacao === 0) ? $lucro : 0;
+        $base = $lucro > 0 ? $lucro : 0;
 
         $com_parceiro = $base * ($perc_parceiro / 100);
         $com_vendedor = $base * ($perc_vendedor / 100);
@@ -77,40 +80,59 @@ if (!function_exists('recalcular_venda')) {
         $com_vendedor = r2($com_vendedor);
         $com_rg       = r2($com_rg);
 
+        $hasPodePagar = $columnExists('vendas', 'pode_pagar');
+
         $sql = "
-        UPDATE vendas SET
-            total_custos=?,
-            lucro=?,
-            perc_parceiro=?,
-            perc_vendedor=?,
-            perc_rg=?,
-            comissao_parceiro=?,
-            comissao_vendedor=?,
-            comissao_rg=?,
-            precisa_aprovacao=?,
-            pode_pagar=?,
-            atualizado_em=NOW()
-        WHERE id=?
-        LIMIT 1
-    ";
+            UPDATE vendas SET
+                total_custos=?,
+                lucro=?,
+                perc_parceiro=?,
+                perc_vendedor=?,
+                perc_rg=?,
+                comissao_parceiro=?,
+                comissao_vendedor=?,
+                comissao_rg=?,
+                precisa_aprovacao=?
+                " . ($hasPodePagar ? ", pode_pagar=?" : "") . ",
+                atualizado_em=NOW()
+            WHERE id=?
+            LIMIT 1
+        ";
 
         $st = mysqli_prepare($con, $sql);
 
-        mysqli_stmt_bind_param(
-            $st,
-            "ddddddddiii",
-            $total_custos,
-            $lucro,
-            $perc_parceiro,
-            $perc_vendedor,
-            $perc_rg,
-            $com_parceiro,
-            $com_vendedor,
-            $com_rg,
-            $precisa_aprovacao,
-            $pode_pagar,
-            $venda_id
-        );
+        if ($hasPodePagar) {
+            mysqli_stmt_bind_param(
+                $st,
+                "ddddddddiii",
+                $total_custos,
+                $lucro,
+                $perc_parceiro,
+                $perc_vendedor,
+                $perc_rg,
+                $com_parceiro,
+                $com_vendedor,
+                $com_rg,
+                $precisa_aprovacao,
+                $pode_pagar,
+                $venda_id
+            );
+        } else {
+            mysqli_stmt_bind_param(
+                $st,
+                "ddddddddii",
+                $total_custos,
+                $lucro,
+                $perc_parceiro,
+                $perc_vendedor,
+                $perc_rg,
+                $com_parceiro,
+                $com_vendedor,
+                $com_rg,
+                $precisa_aprovacao,
+                $venda_id
+            );
+        }
 
         if (!mysqli_stmt_execute($st)) {
             $err = mysqli_error($con);

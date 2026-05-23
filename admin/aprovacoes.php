@@ -33,9 +33,9 @@ $result = mysqli_query($conexao, "
     <td><?= htmlspecialchars($v['marca']." ".$v['modelo']) ?></td>
     <td><?= number_format($v['lucro'],2,',','.') ?> MT</td>
     <td>
-        <a href="aprovar_venda.php?id=<?= $v['id'] ?>">Aprovar</a>
+        <a href="<?= h(url('admin/vendas/aprovar_venda.php?id=' . (int)$v['id'])) ?>">Aprovar</a>
         |
-        <a href="rejeitar_venda.php?id=<?= $v['id'] ?>">Rejeitar</a>
+        <a href="<?= h(url('admin/vendas/rejeitar_venda.php?id=' . (int)$v['id'])) ?>">Rejeitar</a>
     </td>
 </tr>
 <?php endwhile; ?>

@@ -21,7 +21,14 @@ function is_admin(): bool
 function require_login(): void
 {
     if (!is_logged_in()) {
-        redirect_to('auth/login.php');
+        $next = $_SERVER['REQUEST_URI'] ?? '';
+        $loginPath = 'auth/login.php';
+
+        if ($next !== '') {
+            $loginPath .= '?next=' . urlencode($next);
+        }
+
+        redirect_to($loginPath);
     }
 }
 

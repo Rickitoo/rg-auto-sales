@@ -179,7 +179,7 @@ $msg = urlencode(gerarMensagem($row));
 href="https://wa.me/<?= $tel ?>?text=<?= $msg ?>">💬</a>
 
 <a class="btn btn-sm btn-primary"
-href="marcar_venda.php?lead_id=<?=h($row['id'])?>&carro_id=<?=h($row['carro_id'])?>">💰</a>
+href="<?= h(url('admin/vendas/marcar_venda.php?lead_id=' . (int)$row['id'] . '&carro_id=' . (int)$row['carro_id'])) ?>">💰</a>
 
 <a class="btn btn-sm btn-info"
 href="ver_lead.php?id=<?=h($row['id'])?>">👁</a>

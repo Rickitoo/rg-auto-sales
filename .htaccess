@@ -2,6 +2,10 @@ Options -Indexes
 RewriteEngine On
 RewriteBase /RG_AUTO_SALES/
 
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
 RewriteRule ^$ public/index.php [L]
 RewriteRule ^inicio/?$ public/index.php [L]
 RewriteRule ^carros/?$ public/products.php [L]
@@ -12,7 +16,9 @@ RewriteRule ^test-drive/?$ public/test_drive.php [L]
 RewriteRule ^leasing/?$ public/leasing.php [L]
 RewriteRule ^login/?$ public/account.php [L]
 RewriteRule ^dashboard/?$ admin/dashboard.php [L]
-RewriteRule ^crm/?$ admin/funil.php [L]
+RewriteRule ^crm/?$ admin/crm/inbox.php [L]
+RewriteRule ^crm/inbox/?$ admin/crm/inbox.php [L]
+RewriteRule ^admin/crm/?$ admin/crm/inbox.php [L]
 RewriteRule ^admin/carros/?$ admin/carros/listar_carros.php [L]
 RewriteRule ^admin/vendas/?$ admin/vendas/vendas.php [L]
 RewriteRule ^admin/leads/?$ admin/leads/leads.php [L]

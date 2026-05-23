@@ -335,7 +335,7 @@ $carro = trim(
             <!-- VENDA -->
             <a 
                 class="btn btn-venda"
-                href="marcar_venda.php?id=<?= (int)$lead['id'] ?>"
+                href="<?= h(url('admin/vendas/marcar_venda.php?id=' . (int)$lead['id'])) ?>"
             >
                 Vender
             </a>

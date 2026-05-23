@@ -545,7 +545,7 @@ $percParc    = ($hasParceiro && $hasPP) ? (float)($venda["perc_parceiro"] ?? 0) 
           <div class="mb-1"><span class="text-muted small">Email:</span> <span class="fw-semibold"><?php echo h($venda['cliente_email']); ?></span></div>
 
           <div class="mt-3">
-            <a class="btn btn-outline-primary w-100" href="dashboard.php">Voltar ao Dashboard</a>
+            <a class="btn btn-outline-primary w-100" href="<?= h(url('admin/dashboard.php')) ?>">Voltar ao Dashboard</a>
           </div>
         </div>
       </div>

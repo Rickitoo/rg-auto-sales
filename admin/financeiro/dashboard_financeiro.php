@@ -13,6 +13,12 @@ if ($_SESSION['user']['role'] !== 'admin') {
 // ===============================
 function money($v) { return number_format((float)$v, 2, ',', '.') . " MT"; }
 function n($v) { return (int)($v ?? 0); }
+function finance_col_exists(mysqli $con, string $table, string $col): bool {
+    $table = mysqli_real_escape_string($con, $table);
+    $col = mysqli_real_escape_string($con, $col);
+    $q = mysqli_query($con, "SHOW COLUMNS FROM `$table` LIKE '$col'");
+    return $q && mysqli_num_rows($q) > 0;
+}
 
 // ===============================
 // DATAS
@@ -23,11 +29,16 @@ $fimMes    = date('Y-m-t');
 // ===============================
 // RECEITA (COMISSÕES)
 // ===============================
+$campoReceita = finance_col_exists($conexao, 'vendas', 'comissao_rg') ? 'comissao_rg' : 'comissao';
+$campoLucro = finance_col_exists($conexao, 'vendas', 'lucro') ? 'lucro' : $campoReceita;
+
 $stmt = mysqli_prepare($conexao, "
     SELECT 
-        SUM(CASE WHEN status='PAGO' THEN comissao ELSE 0 END) AS pago,
-        SUM(CASE WHEN status='PENDENTE' THEN comissao ELSE 0 END) AS pendente,
-        SUM(comissao) AS total
+        COALESCE(SUM(CASE WHEN status='PAGO' THEN $campoReceita ELSE 0 END), 0) AS pago,
+        COALESCE(SUM(CASE WHEN status='PENDENTE' THEN $campoReceita ELSE 0 END), 0) AS pendente,
+        COALESCE(SUM($campoReceita), 0) AS total,
+        COALESCE(SUM(CASE WHEN status='PAGO' THEN $campoLucro ELSE 0 END), 0) AS lucro_pago,
+        COALESCE(SUM($campoLucro), 0) AS lucro_total
     FROM vendas
     WHERE data_venda BETWEEN ? AND ?
 ");
@@ -41,6 +52,8 @@ mysqli_stmt_close($stmt);
 $recebido = (float)($dados['pago'] ?? 0);
 $pendente = (float)($dados['pendente'] ?? 0);
 $total    = (float)($dados['total'] ?? 0);
+$lucroPago = (float)($dados['lucro_pago'] ?? 0);
+$lucroTotal = (float)($dados['lucro_total'] ?? 0);
 
 // ===============================
 // CUSTOS
@@ -65,12 +78,12 @@ if ($chk && mysqli_num_rows($chk) > 0) {
 // ===============================
 // LUCRO
 // ===============================
-$lucro = $recebido - $custosMes;
+$lucro = $lucroPago - $custosMes;
 
 // ===============================
 // PREVISÃO
 // ===============================
-$lucroPrevisto = $total - $custosMes;
+$lucroPrevisto = $lucroTotal - $custosMes;
 
 require_once __DIR__ . '/../../includes/layout_top.php';
 ?>
