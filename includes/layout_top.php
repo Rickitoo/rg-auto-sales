@@ -94,6 +94,7 @@ $tituloAtual = tituloPagina($paginaAtual);
             .content{padding:16px}
         }
     </style>
+    <link rel="stylesheet" href="<?= h(asset('css/admin-modern.css')) ?>">
 </head>
 <body>
 <div class="admin-layout">

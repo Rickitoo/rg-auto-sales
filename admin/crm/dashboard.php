@@ -212,6 +212,7 @@ if ($hasVendas) {
         @media(max-width:1180px){.kpis{grid-template-columns:repeat(3,1fr)}.grid,.activity{grid-template-columns:1fr}}
         @media(max-width:720px){.top{align-items:flex-start;flex-direction:column}.quick{justify-content:flex-start}.wrap{padding:14px}.kpis{grid-template-columns:1fr 1fr}.item{grid-template-columns:1fr}}
     </style>
+    <link rel="stylesheet" href="<?= h(asset('css/admin-modern.css')) ?>">
 </head>
 <body>
 <div class="page">

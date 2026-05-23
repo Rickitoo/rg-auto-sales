@@ -379,6 +379,7 @@ function whatsapp_url(array $lead, ?array $attention = null): string {
         .empty{height:100%;display:flex;align-items:center;justify-content:center;color:#667085;text-align:center;padding:30px}
         @media(max-width:900px){.shell{height:auto;min-height:100vh;grid-template-columns:1fr}.sidebar{max-height:46vh}.topbar{height:auto;align-items:flex-start;flex-direction:column;padding:16px}.actions{justify-content:flex-start}.info-grid{grid-template-columns:1fr}}
     </style>
+    <link rel="stylesheet" href="<?= h(asset('css/admin-modern.css')) ?>">
 </head>
 <body>
 <div class="shell">

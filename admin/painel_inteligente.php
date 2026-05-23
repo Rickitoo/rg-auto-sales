@@ -102,12 +102,12 @@ require_once __DIR__ . '/../includes/layout_top.php';
     <p style="color:#667085;margin-top:4px">Proximas acoes comerciais, financeiras e de follow-up.</p>
 </div>
 
-<div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:18px">
-    <div class="card"><strong><?= h(count($leadsUrgentes)) ?></strong><br><span>Leads urgentes</span></div>
-    <div class="card"><strong><?= h(count($leadsParados)) ?></strong><br><span>Leads parados</span></div>
-    <div class="card"><strong><?= h(count($followupsPendentes)) ?></strong><br><span>Follow-ups pendentes</span></div>
-    <div class="card"><strong><?= h(count($vendasPendentes)) ?></strong><br><span>Vendas pendentes</span></div>
-    <div class="card"><strong><?= h(count($pagamentosPendentes)) ?></strong><br><span>Pagamentos pendentes</span></div>
+<div class="rg-kpi-grid">
+    <div class="rg-kpi-card"><strong><?= h(count($leadsUrgentes)) ?></strong><span>Leads urgentes</span></div>
+    <div class="rg-kpi-card"><strong><?= h(count($leadsParados)) ?></strong><span>Leads parados</span></div>
+    <div class="rg-kpi-card"><strong><?= h(count($followupsPendentes)) ?></strong><span>Follow-ups pendentes</span></div>
+    <div class="rg-kpi-card"><strong><?= h(count($vendasPendentes)) ?></strong><span>Vendas pendentes</span></div>
+    <div class="rg-kpi-card"><strong><?= h(count($pagamentosPendentes)) ?></strong><span>Pagamentos pendentes</span></div>
 </div>
 
 <div class="page-card">
@@ -116,7 +116,7 @@ require_once __DIR__ . '/../includes/layout_top.php';
         <p style="background:#dcfce7;color:#166534;padding:12px;border-radius:8px">Tudo em dia. Monitorar novos leads e manter follow-up ativo.</p>
     <?php endif; ?>
     <?php foreach ($missoes as $missao): ?>
-        <a href="<?= h($missao['url']) ?>" style="display:block;background:#111827;color:#fff;padding:14px;border-radius:8px;margin-top:8px;font-weight:800">
+        <a href="<?= h($missao['url']) ?>" class="rg-action-card">
             <?= h($missao['texto']) ?>
         </a>
     <?php endforeach; ?>
