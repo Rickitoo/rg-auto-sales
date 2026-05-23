@@ -1,20 +1,17 @@
 <?php
-require_once(__DIR__ . "/../init.php");
+require_once __DIR__ . '/../app/core/bootstrap.php';
+require_admin();
 
-if (!isset($_SESSION['admin'])) {
-    header("Location: /RG_AUTO_SALES/login.php");
+if ($_SESSION['user']['role'] !== 'admin') {
+    redirect_to('auth/login.php');
     exit();
 }
+
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-include("../auth.php");
-include("../conexao.php");
-include("auth_check.php");
-include("admin/includes/db.php");
 
 if (session_status() === PHP_SESSION_NONE) {
-    session_start();
 }
 
 if (!isset($_SESSION['csrf_token'])) {
@@ -26,12 +23,11 @@ function h($v) {
 }
 
 function redirectSelf($id, $msg = '', $tipo = 'ok') {
-    $url = "gerir_fotos.php?id=" . (int)$id;
+    $url = "admin/gerir_fotos.php?id=" . (int)$id;
     if ($msg !== '') {
         $url .= "&msg=" . urlencode($msg) . "&tipo=" . urlencode($tipo);
     }
-    header("Location: $url");
-    exit;
+    redirect_to($url);
 }
 
 function atualizarImagemPrincipal($conexao, $carroId) {

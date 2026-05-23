@@ -1,8 +1,9 @@
 <?php
-require_once(__DIR__ . "/../init.php");
+require_once __DIR__ . '/../app/core/bootstrap.php';
+require_admin();
 
-if (!isset($_SESSION['admin'])) {
-    header("Location: /RG_AUTO_SALES/login.php");
+if ($_SESSION['user']['role'] !== 'admin') {
+    redirect_to('auth/login.php');
     exit();
 }
 
@@ -57,5 +58,4 @@ if ($resVizinha && mysqli_num_rows($resVizinha) > 0) {
     mysqli_query($conexao, "UPDATE carros_fotos SET ordem = $ordemAtual WHERE id = $idVizinha");
 }
 
-header("Location: editar_carro.php?id=" . $carro_id);
-exit;
+redirect_to('admin/editar_carro.php?id=' . $carro_id);

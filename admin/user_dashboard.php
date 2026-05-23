@@ -1,16 +1,9 @@
 <?php
-require_once(__DIR__ . "/../init.php");
+require_once __DIR__ . '/../app/core/bootstrap.php';
+require_admin();
 
-if (!isset($_SESSION['admin'])) {
-    header("Location: /RG_AUTO_SALES/login.php");
-    exit();
-}
-include("../auth.php");
-include("../conexao.php");
-include("../auth_check.php");
-include("admin/includes/auth_user.php");
-
-$user_id = $_SESSION['user_id'] ?? 0;
+$user = current_user();
+$user_id = (int)($user['id'] ?? 0);
 
 // =======================
 // FUNÇÕES

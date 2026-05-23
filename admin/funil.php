@@ -1,226 +1,155 @@
 <?php
-// admin/funil.php
-require_once(__DIR__ . "/../init.php");
+require_once __DIR__ . '/../app/core/bootstrap.php';
+require_admin();
 
-if (!isset($_SESSION['admin'])) {
-    header("Location: /RG_AUTO_SALES/login.php");
-    exit();
-}
-include("../auth.php");      // se o teu admin usa auth
-include("../conexao.php");   // $conexao
-include("auth_check.php");
-include("admin/includes/db.php");
-
-function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
-
-// Status do funil (ajusta se o teu ENUM for diferente)
 $stages = [
-  'novo' => ['label' => 'NOVO', 'badge' => 'bg-danger'],
-  'contactado' => ['label' => 'CONTACTADO', 'badge' => 'bg-primary'],
-  'negociacao' => ['label' => 'NEGOCIAÇÃO', 'badge' => 'bg-warning text-dark'],
-  'fechado' => ['label' => 'FECHADO', 'badge' => 'bg-success'],
-  'perdido' => ['label' => 'PERDIDO', 'badge' => 'bg-secondary'],
+    'novo' => 'Novo',
+    'contactado' => 'Contactado',
+    'qualificado' => 'Qualificado',
+    'agendado' => 'Agendado',
+    'negociacao' => 'Negociacao',
+    'fechado' => 'Fechado',
+    'perdido' => 'Perdido',
 ];
 
-// Puxa leads (últimos 400, ajusta se quiser)
+$byStage = array_fill_keys(array_keys($stages), []);
 $res = mysqli_query($conexao, "
-  SELECT id, tipo, nome, telefone, email, mensagem, marca, modelo, ano, origem, status, criado_em
-  FROM leads
-  ORDER BY id DESC
-  LIMIT 400
+    SELECT id, tipo, nome, telefone, email, mensagem, marca, modelo, ano, origem, status, criado_em, notas, proximo_contacto
+    FROM leads
+    ORDER BY atualizado_em DESC, id DESC
+    LIMIT 500
 ");
-if(!$res) die("Erro SQL: " . mysqli_error($conexao));
 
-// Agrupa por status
-$byStage = [];
-foreach ($stages as $k => $_) $byStage[$k] = [];
-
-while($row = mysqli_fetch_assoc($res)){
-  $s = $row['status'] ?? 'novo';
-  if (!isset($byStage[$s])) $s = 'novo'; // fallback
-  $byStage[$s][] = $row;
+while ($res && ($row = mysqli_fetch_assoc($res))) {
+    $status = $row['status'] ?? 'novo';
+    if (!isset($byStage[$status])) {
+        $status = 'novo';
+    }
+    $byStage[$status][] = $row;
 }
 
-// helper: próxima fase / fase anterior (para botões)
-$keys = array_keys($stages);
-function prev_stage($keys, $current){
-  $i = array_search($current, $keys, true);
-  return ($i !== false && $i > 0) ? $keys[$i-1] : null;
-}
-function next_stage($keys, $current){
-  $i = array_search($current, $keys, true);
-  return ($i !== false && $i < count($keys)-1) ? $keys[$i+1] : null;
+$stageKeys = array_keys($stages);
+
+function crm_next_stage(array $keys, string $current): ?string {
+    $i = array_search($current, $keys, true);
+    return $i !== false && $i < count($keys) - 2 ? $keys[$i + 1] : null;
 }
 
+require_once __DIR__ . '/../includes/layout_top.php';
 ?>
-<!doctype html>
-<html lang="pt">
-<head>
-  <meta charset="utf-8">
-  <title>Funil - RG</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    .kanban-wrap { overflow-x: auto; padding-bottom: 12px; }
-    .kanban { display: flex; gap: 14px; min-width: 1100px; }
-    .kcol { width: 320px; flex: 0 0 320px; }
-    .kcol .head { position: sticky; top: 0; z-index: 2; background: #f8f9fa; padding: 10px 10px 6px; border-radius: 10px; }
-    .klist { max-height: calc(100vh - 190px); overflow-y: auto; padding-right: 6px; }
-    .kcard { border: 1px solid rgba(0,0,0,.08); border-radius: 12px; }
-    .smallmuted { font-size: 12px; color: #6c757d; }
-    .btn-xs { padding: 2px 8px; font-size: 12px; }
-  </style>
-</head>
-<body class="bg-light">
-<div class="container-fluid py-3">
 
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-      <h3 class="mb-0">Funil de Vendas</h3>
-      <div class="smallmuted">Arrasta mentalmente o fluxo: NOVO → CONTACTADO → NEGOCIAÇÃO → FECHADO (ou PERDIDO)</div>
-    </div>
-    <div class="d-flex gap-2">
-      <a class="btn btn-outline-dark" href="leads.php">Lista</a>
-      <a class="btn btn-outline-dark" href="dashboard.php">Dashboard</a>
-    </div>
-  </div>
+<style>
+    .crm-board{display:grid;grid-template-columns:320px 1fr;gap:18px;min-height:calc(100vh - 210px)}
+    .crm-inbox{background:#fff;border-radius:12px;box-shadow:0 4px 18px rgba(16,24,40,.08);overflow:hidden}
+    .crm-inbox-head{padding:16px;border-bottom:1px solid #e5e7eb}
+    .crm-search{width:100%;border:1px solid #d0d5dd;border-radius:9px;padding:10px 12px;margin-top:10px}
+    .crm-columns{display:flex;gap:14px;overflow-x:auto;padding-bottom:8px}
+    .crm-col{min-width:290px;max-width:290px;background:#eef2f7;border-radius:12px;padding:10px}
+    .crm-col h3{font-size:15px;margin:4px 4px 10px;display:flex;justify-content:space-between;color:#344054}
+    .lead-card{background:#fff;border-radius:10px;padding:12px;margin-bottom:10px;box-shadow:0 1px 4px rgba(16,24,40,.08)}
+    .lead-card strong{display:block;color:#111827;margin-bottom:4px}
+    .lead-meta{color:#667085;font-size:12px;line-height:1.5}
+    .lead-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+    .lead-actions a,.lead-actions button{border:0;border-radius:8px;padding:7px 9px;font-weight:800;font-size:12px;cursor:pointer}
+    .wa{background:#12b76a;color:#fff}
+    .detail{background:#e5e7eb;color:#111827}
+    .advance{background:#00aeef;color:#fff}
+    .crm-tip{background:#ecfdf3;border:1px solid #abefc6;color:#027a48;border-radius:10px;padding:12px;margin-bottom:14px}
+    @media(max-width:980px){.crm-board{grid-template-columns:1fr}.crm-columns{display:grid;grid-template-columns:1fr}}
+</style>
 
-  <div class="kanban-wrap">
-    <div class="kanban">
-
-      <?php foreach($stages as $stageKey => $meta): 
-        $count = count($byStage[$stageKey] ?? []);
-      ?>
-        <div class="kcol dropzone" data-status="<?=h($stageKey)?>">
-          <div class="head shadow-sm">
-            <div class="d-flex justify-content-between align-items-center">
-              <span class="badge <?=h($meta['badge'])?>"><?=h($meta['label'])?></span>
-              <span class="smallmuted"><?=h($count)?> lead(s)</span>
-            </div>
-          </div>
-
-          <div class="klist mt-2">
-            <?php if($count === 0): ?>
-              <div class="text-center smallmuted py-3">Sem leads aqui.</div>
-            <?php endif; ?>
-
-            <?php foreach(($byStage[$stageKey] ?? []) as $row): 
-              $prev = prev_stage($keys, $stageKey);
-              $next = next_stage($keys, $stageKey);
-
-              $carro = trim(($row['marca'] ?? '').' '.($row['modelo'] ?? '').' '.(($row['ano'] ?? '') ? '('.$row['ano'].')' : ''));
-              $tipo = $row['tipo'] ?? '';
-            ?>
-              <div class="kcard bg-white p-3 mb-2 shadow-sm" draggable="true" data-lead-id="<?=h($row['id'])?>">
-                <div class="d-flex justify-content-between align-items-start gap-2">
-                  <div>
-                    <div class="fw-semibold"><?=h($row['nome'] ?? '')?></div>
-                    <div class="smallmuted">#<?=h($row['id'])?> • <?=h($tipo)?> • <?=h($row['origem'] ?? '')?></div>
-                  </div>
-                  <span class="badge <?=h($meta['badge'])?>"><?=h($meta['label'])?></span>
-                </div>
-
-                <div class="mt-2">
-                  <div><span class="smallmuted">Tel:</span> <span class="fw-semibold"><?=h($row['telefone'] ?? '')?></span></div>
-                  <?php if($carro !== ''): ?>
-                    <div class="mt-1"><span class="smallmuted">Carro:</span> <?=h($carro)?></div>
-                  <?php endif; ?>
-                  <div class="mt-1 smallmuted">Criado: <?=h($row['criado_em'] ?? '')?></div>
-                </div>
-
-                <div class="d-flex gap-2 flex-wrap mt-3">
-                  <?php if($prev): ?>
-                    <a class="btn btn-outline-secondary btn-xs"
-                       href="lead_status.php?id=<?=h($row['id'])?>&s=<?=h($prev)?>">
-                       ◀ Voltar
-                    </a>
-                  <?php endif; ?>
-
-                  <?php if($next): ?>
-                    <a class="btn btn-outline-primary btn-xs"
-                       href="lead_status.php?id=<?=h($row['id'])?>&s=<?=h($next)?>">
-                       Avançar ▶
-                    </a>
-                  <?php endif; ?>
-
-                  <a class="btn btn-outline-success btn-xs"
-                     href="https://wa.me/<?=h(preg_replace('/\D+/', '', $row['telefone'] ?? ''))?>"
-                     target="_blank" rel="noopener">
-                     WhatsApp
-                  </a>
-
-                  <a class="btn btn-outline-dark btn-xs"
-                     href="lead_detalhe.php?id=<?=h($row['id'])?>">
-                     Detalhe
-                  </a>
-                </div>
-
-              </div>
-            <?php endforeach; ?>
-          </div>
-        </div>
-      <?php endforeach; ?>
-
-    </div>
-  </div>
-
+<div class="crm-tip">
+    CRM estilo WhatsApp: priorize responder, mover o lead de etapa e fechar a venda. Quando marcar como fechado, o sistema abre o fluxo de nova venda.
 </div>
+
+<div class="crm-board">
+    <aside class="crm-inbox">
+        <div class="crm-inbox-head">
+            <strong>Caixa comercial</strong>
+            <input class="crm-search" id="leadSearch" placeholder="Pesquisar nome, telefone ou carro">
+        </div>
+        <div style="padding:12px">
+            <?php foreach ($stages as $key => $label): ?>
+                <div style="display:flex;justify-content:space-between;padding:9px 4px;border-bottom:1px solid #eef2f7">
+                    <span><?= h($label) ?></span>
+                    <strong><?= count($byStage[$key]) ?></strong>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </aside>
+
+    <section class="crm-columns">
+        <?php foreach ($stages as $stage => $label): ?>
+            <div class="crm-col" data-stage="<?= h($stage) ?>">
+                <h3><span><?= h($label) ?></span><span><?= count($byStage[$stage]) ?></span></h3>
+
+                <?php if (count($byStage[$stage]) === 0): ?>
+                    <div class="lead-meta" style="padding:14px 6px">Sem leads nesta etapa.</div>
+                <?php endif; ?>
+
+                <?php foreach ($byStage[$stage] as $lead): ?>
+                    <?php
+                    $telefone = preg_replace('/\D+/', '', $lead['telefone'] ?? '');
+                    if ($telefone !== '' && !str_starts_with($telefone, '258')) {
+                        $telefone = '258' . ltrim($telefone, '0');
+                    }
+                    $carro = trim(($lead['marca'] ?? '') . ' ' . ($lead['modelo'] ?? '') . ' ' . ($lead['ano'] ?? ''));
+                    $waText = urlencode('Ola ' . ($lead['nome'] ?? '') . ', fala a RG Auto Sales. Estou a dar seguimento ao seu interesse em ' . ($carro ?: 'uma viatura') . '.');
+                    $next = crm_next_stage($stageKeys, $stage);
+                    ?>
+                    <article class="lead-card" data-search="<?= h(strtolower(($lead['nome'] ?? '') . ' ' . ($lead['telefone'] ?? '') . ' ' . $carro)) ?>">
+                        <strong><?= h($lead['nome']) ?></strong>
+                        <div class="lead-meta">
+                            <?= h($telefone ?: $lead['telefone']) ?><br>
+                            <?= h($carro ?: ucfirst($lead['tipo'] ?? 'lead')) ?><br>
+                            Origem: <?= h($lead['origem'] ?? 'site') ?> | #<?= (int)$lead['id'] ?>
+                        </div>
+                        <div class="lead-actions">
+                            <?php if ($telefone): ?>
+                                <a class="wa" target="_blank" rel="noopener" href="https://wa.me/<?= h($telefone) ?>?text=<?= h($waText) ?>">WhatsApp</a>
+                            <?php endif; ?>
+                            <a class="detail" href="<?= h(url('admin/leads/ver_lead.php?id=' . (int)$lead['id'])) ?>">Detalhe</a>
+                            <?php if ($next): ?>
+                                <button class="advance" type="button" data-id="<?= (int)$lead['id'] ?>" data-status="<?= h($next) ?>">Avancar</button>
+                            <?php endif; ?>
+                        </div>
+                    </article>
+                <?php endforeach; ?>
+            </div>
+        <?php endforeach; ?>
+    </section>
+</div>
+
 <script>
-  document.querySelectorAll('.kcard[draggable="true"]').forEach(card => {
-    card.addEventListener('dragstart', (e) => {
-      e.dataTransfer.setData('text/plain', card.dataset.leadId);
-      e.dataTransfer.effectAllowed = 'move';
-      card.classList.add('opacity-50');
-    });
-    card.addEventListener('dragend', () => card.classList.remove('opacity-50'));
-  });
+document.querySelectorAll('.advance').forEach((button) => {
+    button.addEventListener('click', async () => {
+        const form = new FormData();
+        form.append('id', button.dataset.id);
+        form.append('status', button.dataset.status);
 
-  document.querySelectorAll('.dropzone').forEach(zone => {
-    zone.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      zone.classList.add('border', 'border-2', 'border-primary', 'rounded');
-    });
-
-    zone.addEventListener('dragleave', () => {
-      zone.classList.remove('border', 'border-2', 'border-primary', 'rounded');
-    });
-
-    zone.addEventListener('drop', async (e) => {
-      e.preventDefault();
-      zone.classList.remove('border', 'border-2', 'border-primary', 'rounded');
-
-      const leadId = e.dataTransfer.getData('text/plain');
-      const newStatus = zone.dataset.status;
-      if (!leadId || !newStatus) return;
-
-      // manda o card para o topo da lista da coluna
-      const card = document.querySelector(`.kcard[data-lead-id="${leadId}"]`);
-      const list = zone.querySelector('.klist');
-      if (card && list) list.prepend(card);
-
-      try {
-        const fd = new FormData();
-        fd.append('id', leadId);
-        fd.append('status', newStatus);
-
-        const res = await fetch('lead_move.php', { method: 'POST', body: fd });
-        const data = await res.json();
+        const res = await fetch('<?= h(url('admin/leads/lead_move.php')) ?>', {method: 'POST', body: form});
+        const data = await res.json().catch(() => ({ok:false, error:'Resposta invalida'}));
 
         if (data.redirect) {
-          window.location.href = data.redirect;
-          return;
+            window.location.href = data.redirect;
+            return;
         }
 
-        if (!data.ok) {
-          alert('Erro ao mover: ' + (data.error || 'desconhecido'));
-          location.reload();
+        if (data.ok) {
+            window.location.reload();
+            return;
         }
-      } catch (err) {
-        alert('Falha ao atualizar no servidor.');
-        location.reload();
-      }
+
+        alert(data.error || 'Nao foi possivel mover o lead.');
     });
-  });
+});
+
+document.getElementById('leadSearch').addEventListener('input', (event) => {
+    const q = event.target.value.trim().toLowerCase();
+    document.querySelectorAll('.lead-card').forEach((card) => {
+        card.style.display = !q || card.dataset.search.includes(q) ? '' : 'none';
+    });
+});
 </script>
-</body>
-</html>
+
+<?php require_once __DIR__ . '/../includes/layout_bottom.php'; ?>

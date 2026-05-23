@@ -1,20 +1,18 @@
 <?php
-// admin/status.php
-require_once(__DIR__ . "/../init.php");
+require_once __DIR__ . '/../app/core/bootstrap.php';
+require_admin();
 
-if (!isset($_SESSION['admin'])) {
-    header("Location: /RG_AUTO_SALES/login.php");
+// admin/status.php
+
+
+if ($_SESSION['user']['role'] !== 'admin') {
+    redirect_to('auth/login.php');
     exit();
 }
-include("../auth.php");
-include("../conexao.php");
-include("auth_check.php");
-include("admin/includes/db.php");
 
-if (session_status() === PHP_SESSION_NONE) session_start();
 
 function back($msg){
-  header("Location: dashboard.php?msg=" . urlencode($msg));
+  redirect_to('admin/dashboard.php?msg=' . urlencode($msg));
   exit;
 }
 

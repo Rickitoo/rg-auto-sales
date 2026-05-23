@@ -1,18 +1,17 @@
 <?php
-// admin/salvar_ordem_fotos.php
-require_once(__DIR__ . "/../init.php");
+require_once __DIR__ . '/../app/core/bootstrap.php';
+require_admin();
 
-if (!isset($_SESSION['admin'])) {
-    header("Location: /RG_AUTO_SALES/login.php");
+// admin/salvar_ordem_fotos.php
+
+
+if ($_SESSION['user']['role'] !== 'admin') {
+    redirect_to('auth/login.php');
     exit();
 }
 
-include("../auth.php");
-include("../conexao.php");
-include("auth_check.php");
 
 if (session_status() === PHP_SESSION_NONE) {
-    session_start();
 }
 
 header('Content-Type: application/json');

@@ -1,15 +1,12 @@
 <?php
-require_once(__DIR__ . "/../init.php");
+require_once __DIR__ . '/../app/core/bootstrap.php';
+require_admin();
 
-if (!isset($_SESSION['admin'])) {
-    header("Location: /RG_AUTO_SALES/login.php");
+if ($_SESSION['user']['role'] !== 'admin') {
+    redirect_to('auth/login.php');
     exit();
 }
 
-require_once __DIR__ . "/../conexao.php";
-require_once __DIR__ . "/includes/config.php";
-require_once __DIR__ . "/includes/db.php";
-require_once __DIR__ . "/includes/auth_admin.php";
 
 // CSRF
 if (!isset($_SESSION['csrf_token'])) {
@@ -86,7 +83,7 @@ $resNovos = mysqli_query($conexao, $sqlNovos);
 $leadsNovos = [];
 if ($resNovos) while ($r = mysqli_fetch_assoc($resNovos)) $leadsNovos[] = $r;
 
-include("includes/layout_top.php");
+require_once __DIR__ . '/../includes/layout_top.php';
 ?>
 
 <div class="dash-card" style="background:#111;color:#fff;">
@@ -169,4 +166,4 @@ include("includes/layout_top.php");
 
 </div>
 
-<?php include("includes/layout_bottom.php"); ?>
+<?php require_once __DIR__ . '/../includes/layout_bottom.php'; ?>

@@ -1,15 +1,12 @@
 <?php
-require_once(__DIR__ . "/../init.php");
+require_once __DIR__ . '/../app/core/bootstrap.php';
+require_admin();
 
-if (!isset($_SESSION['admin'])) {
-    header("Location: /RG_AUTO_SALES/login.php");
+if ($_SESSION['user']['role'] !== 'admin') {
+    redirect_to('auth/login.php');
     exit();
 }
-include("../auth.php");
-include("../conexao.php");
-include("auth_check.php");
-include("admin/includes/db.php");
-if (session_status() === PHP_SESSION_NONE) session_start();
+
 
 $flash = null;
 
@@ -50,7 +47,7 @@ $cfg = $res ? (mysqli_fetch_assoc($res) ?: []) : [];
   <div class="d-flex justify-content-between align-items-center mb-3">
     <div><h3 class="mb-0">Configurações</h3><small class="text-muted">Comissão e divisão interna</small></div>
     <div class="d-flex gap-2">
-      <a class="btn btn-outline-dark" href="dashboard.php">Dashboard</a>
+      <a class="btn btn-outline-dark" href="<?= h(url('admin/dashboard.php')) ?>">Dashboard</a>
       <a class="btn btn-outline-dark" href="vendas.php">Vendas</a>
     </div>
   </div>

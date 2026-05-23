@@ -1,15 +1,12 @@
 <?php
-require_once(__DIR__ . "/../init.php");
+require_once __DIR__ . '/../app/core/bootstrap.php';
+require_admin();
 
-if (!isset($_SESSION['admin'])) {
-    header("Location: /RG_AUTO_SALES/login.php");
+if ($_SESSION['user']['role'] !== 'admin') {
+    redirect_to('auth/login.php');
     exit();
 }
 
-require_once __DIR__ . "/../conexao.php";
-require_once __DIR__ . "/includes/config.php";
-require_once __DIR__ . "/includes/db.php";
-require_once __DIR__ . "/includes/auth_admin.php";
 
 // ===============================
 // HELPERS
@@ -66,7 +63,7 @@ $resU = mysqli_query($conexao, $sqlUltimos);
 $ultimos = [];
 if ($resU) while ($r = mysqli_fetch_assoc($resU)) $ultimos[] = $r;
 
-include("includes/layout_top.php");
+require_once __DIR__ . '/../includes/layout_top.php';
 ?>
 
 <h2>🚗 Dashboard de Carros</h2>
@@ -148,4 +145,4 @@ include("includes/layout_top.php");
     </div>
 <?php endif; ?>
 
-<?php include("includes/layout_bottom.php"); ?>
+<?php require_once __DIR__ . '/../includes/layout_bottom.php'; ?>

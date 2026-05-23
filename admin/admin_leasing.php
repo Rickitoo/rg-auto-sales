@@ -1,9 +1,9 @@
 <?php
-require_once(__DIR__ . "/../init.php");
-require_once(__DIR__ . "/includes/db.php");
+require_once __DIR__ . '/../app/core/bootstrap.php';
+require_admin();
 
-if (!isset($_SESSION['admin'])) {
-    header("Location: /RG_AUTO_SALES/login.php");
+if ($_SESSION['user']['role'] !== 'admin') {
+    redirect_to('auth/login.php');
     exit();
 }
 

@@ -1,15 +1,12 @@
 <?php
-require_once(__DIR__ . "/../init.php");
+require_once __DIR__ . '/../app/core/bootstrap.php';
+require_admin();
 
-if (!isset($_SESSION['admin'])) {
-    header("Location: /RG_AUTO_SALES/login.php");
+if ($_SESSION['user']['role'] !== 'admin') {
+    redirect_to('auth/login.php');
     exit();
 }
-include("../auth.php");
-include("../conexao.php");
-include("auth_check.php");
 
-if (session_status() === PHP_SESSION_NONE) session_start();
 
 function money($v){ return number_format((float)$v, 2, ',', '.') . " MT"; }
 
@@ -67,7 +64,7 @@ mysqli_stmt_close($stmt);
       <small class="text-muted">Período: <?php echo htmlspecialchars($inicioMes); ?> a <?php echo htmlspecialchars($fimMes); ?></small>
     </div>
     <div class="d-flex gap-2">
-      <a class="btn btn-outline-dark" href="dashboard.php">Dashboard</a>
+      <a class="btn btn-outline-dark" href="<?= h(url('admin/dashboard.php')) ?>">Dashboard</a>
       <a class="btn btn-outline-dark" href="vendas.php">Vendas</a>
     </div>
   </div>

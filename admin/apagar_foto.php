@@ -1,9 +1,9 @@
 <?php
-require_once(__DIR__ . "/../init.php");
-require_once(__DIR__ . "/includes/db.php");
+require_once __DIR__ . '/../app/core/bootstrap.php';
+require_admin();
 
-if (!isset($_SESSION['admin'])) {
-    header("Location: /RG_AUTO_SALES/login.php");
+if ($_SESSION['user']['role'] !== 'admin') {
+    redirect_to('auth/login.php');
     exit();
 }
 
@@ -28,5 +28,4 @@ if ($res && mysqli_num_rows($res) > 0) {
     mysqli_query($conexao, "DELETE FROM carros_fotos WHERE id = $id");
 }
 
-header("Location: editar_carro.php?id=" . $carro_id);
-exit;
+redirect_to('admin/editar_carro.php?id=' . $carro_id);
