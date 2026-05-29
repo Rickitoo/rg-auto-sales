@@ -91,6 +91,9 @@ while($r = mysqli_fetch_assoc($chartRes)){
 }
 ?>
 <?php if ($v['status'] === 'PENDENTE' && (int)$v['precisa_aprovacao'] === 0): ?>
-<a class="btn btn-sm btn-success"
-href="marcar_pago.php?id=<?=h($v['id'])?>">PAGO</a>
+<form method="POST" action="marcar_pago.php" style="display:inline;">
+    <?= csrf_input() ?>
+    <input type="hidden" name="id" value="<?= h($v['id']) ?>">
+    <button type="submit" class="btn btn-sm btn-success">PAGO</button>
+</form>
 <?php endif; ?>

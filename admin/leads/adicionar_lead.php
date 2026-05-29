@@ -10,6 +10,15 @@ if ($_SESSION['user']['role'] !== 'admin') {
 $erro = "";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $csrfToken = $_POST['csrf_token'] ?? '';
+    if (
+        !is_string($csrfToken) ||
+        empty($_SESSION['csrf_token']) ||
+        !hash_equals($_SESSION['csrf_token'], $csrfToken)
+    ) {
+        http_response_code(403);
+        exit('CSRF invalido.');
+    }
 
     $nome = trim($_POST['nome'] ?? '');
     $telefone = trim($_POST['telefone'] ?? '');
@@ -35,34 +44,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // carros para seleção
 $carros = mysqli_query($conexao, "SELECT id, marca, modelo FROM carros");
-?>
 
-<h2>Adicionar Lead</h2>
+$pageTitle = 'Adicionar Lead';
+$pageSubtitle = 'Cadastro de nova oportunidade comercial';
+$contentFile = BASE_PATH . '/app/views/admin/leads/adicionar_lead_content.php';
 
-<?php if ($erro): ?>
-<p style="color:red"><?= $erro ?></p>
-<?php endif; ?>
-
-<form method="POST">
-
-<label>Nome</label><br>
-<input type="text" name="nome" required><br><br>
-
-<label>Telefone</label><br>
-<input type="text" name="telefone" required><br><br>
-
-<label>Carro (opcional)</label><br>
-<select name="carro_id">
-    <option value="0">-- Nenhum --</option>
-    <?php while($c = mysqli_fetch_assoc($carros)): ?>
-        <option value="<?= $c['id'] ?>">
-            <?= $c['marca'] ?> <?= $c['modelo'] ?>
-        </option>
-    <?php endwhile; ?>
-</select>
-
-<br><br>
-
-<button type="submit">Criar Lead</button>
-
-</form>
+require BASE_PATH . '/app/views/layouts/admin_layout.php';

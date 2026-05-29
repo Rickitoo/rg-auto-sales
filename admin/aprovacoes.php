@@ -33,9 +33,17 @@ $result = mysqli_query($conexao, "
     <td><?= htmlspecialchars($v['marca']." ".$v['modelo']) ?></td>
     <td><?= number_format($v['lucro'],2,',','.') ?> MT</td>
     <td>
-        <a href="<?= h(url('admin/vendas/aprovar_venda.php?id=' . (int)$v['id'])) ?>">Aprovar</a>
+        <form class="d-inline" method="POST" action="<?= h(url('admin/vendas/aprovar_venda.php')) ?>">
+            <?= csrf_input() ?>
+            <input type="hidden" name="id" value="<?= (int)$v['id'] ?>">
+            <button type="submit" onclick="return confirm('Aprovar esta venda?');">Aprovar</button>
+        </form>
         |
-        <a href="<?= h(url('admin/vendas/rejeitar_venda.php?id=' . (int)$v['id'])) ?>">Rejeitar</a>
+        <form class="d-inline" method="POST" action="<?= h(url('admin/vendas/rejeitar_venda.php')) ?>">
+            <?= csrf_input() ?>
+            <input type="hidden" name="id" value="<?= (int)$v['id'] ?>">
+            <button type="submit" onclick="return confirm('Rejeitar esta venda?');">Rejeitar</button>
+        </form>
     </td>
 </tr>
 <?php endwhile; ?>

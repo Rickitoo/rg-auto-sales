@@ -4,9 +4,22 @@ require_admin();
 
 // admin/carro_save.php
 
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    redirect_to('admin/carros/adicionar_carro.php?msg=metodo_invalido');
+}
+
 if ($_SESSION['user']['role'] !== 'admin') {
     redirect_to('auth/login.php');
     exit();
+}
+
+$csrfToken = $_POST['csrf_token'] ?? '';
+if (
+    empty($_SESSION['csrf_token']) ||
+    !hash_equals($_SESSION['csrf_token'], $csrfToken)
+) {
+    http_response_code(403);
+    exit('CSRF invalido.');
 }
 
 
@@ -25,42 +38,12 @@ if ($marca === '' || $modelo === '' || $ano <= 0 || $preco <= 0) {
 }
 
 // ===== Config upload =====
-$allowed = [
-  'image/jpeg' => 'jpg',
-  'image/png'  => 'png',
-  'image/webp' => 'webp',
-];
 $maxSize = 3 * 1024 * 1024; // 3MB por foto
 
 $uploadDirAbs = __DIR__ . "/../uploads/carros/";
-if (!is_dir($uploadDirAbs)) {
-  if (!mkdir($uploadDirAbs, 0755, true)) die("Não foi possível criar uploads/carros.");
-}
 
-function saveImageFile(array $file, array $allowed, int $maxSize, string $uploadDirAbs, string $baseName): array {
-  if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
-    return [false, null, "Falha no upload."];
-  }
-
-  $tmp = $file['tmp_name'] ?? '';
-  $size = (int)($file['size'] ?? 0);
-  if ($size <= 0 || $size > $maxSize) return [false, null, "Imagem inválida ou muito grande (máx 3MB)."];
-
-  $finfo = new finfo(FILEINFO_MIME_TYPE);
-  $mime = $finfo->file($tmp);
-  if (!isset($allowed[$mime])) return [false, null, "Formato não permitido. Usa JPG/PNG/WEBP."];
-
-  $ext = $allowed[$mime];
-  $safeBase = preg_replace('~[^a-z0-9]+~i', '-', strtolower($baseName));
-  $safeBase = trim($safeBase, '-');
-
-  $filename = $safeBase . '-' . date('Ymd-His') . '-' . bin2hex(random_bytes(3)) . '.' . $ext;
-  $destAbs = $uploadDirAbs . $filename;
-  $destRel = "uploads/carros/" . $filename;
-
-  if (!move_uploaded_file($tmp, $destAbs)) return [false, null, "Não foi possível salvar a imagem."];
-
-  return [true, ['abs'=>$destAbs, 'rel'=>$destRel], null];
+function saveImageFile(array $file, int $maxSize, string $uploadDirAbs, string $baseName): array {
+  return secure_uploaded_image($file, $uploadDirAbs, 'uploads/carros', $maxSize, $baseName);
 }
 
 $baseName = "{$marca}-{$modelo}-{$ano}";
@@ -70,7 +53,7 @@ $capaRel = null;
 $uploadedAbsToCleanup = [];
 
 if (isset($_FILES['imagem_capa']) && ($_FILES['imagem_capa']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
-  [$ok, $info, $err] = saveImageFile($_FILES['imagem_capa'], $allowed, $maxSize, $uploadDirAbs, $baseName . "-capa");
+  [$ok, $info, $err] = saveImageFile($_FILES['imagem_capa'], $maxSize, $uploadDirAbs, $baseName . "-capa");
   if (!$ok) die("Capa: " . $err);
   $capaRel = $info['rel'];
   $uploadedAbsToCleanup[] = $info['abs'];
@@ -118,7 +101,7 @@ try {
       'size' => $gal['size'][$i] ?? 0,
     ];
 
-    [$ok, $info, $err] = saveImageFile($file, $allowed, $maxSize, $uploadDirAbs, $baseName . "-g" . ($i+1));
+    [$ok, $info, $err] = saveImageFile($file, $maxSize, $uploadDirAbs, $baseName . "-g" . ($i+1));
     if (!$ok) throw new Exception("Galeria: " . $err);
 
     $uploadedAbsToCleanup[] = $info['abs'];

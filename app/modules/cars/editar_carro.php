@@ -151,7 +151,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['acao'] ?? '') === 'upload_
         if ($pastaUploads === false) {
             $erro = "A pasta uploads não foi encontrada.";
         } else {
-            $permitidas = ['jpg', 'jpeg', 'png', 'webp'];
             $totalEnviadas = 0;
             $falhas = [];
 
@@ -178,30 +177,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['acao'] ?? '') === 'upload_
                 $nomeOriginal = $nomes[$i];
                 $tmp = $tmpNames[$i];
                 $tamanho = (int)($sizes[$i] ?? 0);
-                $ext = strtolower(pathinfo($nomeOriginal, PATHINFO_EXTENSION));
 
-                if (!in_array($ext, $permitidas, true)) {
-                    $falhas[] = "Formato não permitido: " . h($nomeOriginal);
+                $file = [
+                    'name' => $nomeOriginal,
+                    'tmp_name' => $tmp,
+                    'error' => $errors[$i] ?? UPLOAD_ERR_NO_FILE,
+                    'size' => $tamanho,
+                ];
+                [$okUpload, $infoUpload, $erroUpload] = secure_uploaded_image($file, $pastaUploads, '', 8 * 1024 * 1024, 'carro-' . $id);
+                if (!$okUpload) {
+                    $falhas[] = h($nomeOriginal) . ": " . h($erroUpload);
                     continue;
                 }
 
-                if ($tamanho <= 0) {
-                    $falhas[] = "Ficheiro inválido: " . h($nomeOriginal);
-                    continue;
-                }
-
-                if ($tamanho > 8 * 1024 * 1024) {
-                    $falhas[] = "Ficheiro muito grande (máx. 8MB): " . h($nomeOriginal);
-                    continue;
-                }
-
-                $novoNome = normalizarNomeFicheiro($nomeOriginal);
-                $destinoAbsoluto = $pastaUploads . DIRECTORY_SEPARATOR . $novoNome;
-
-                if (!move_uploaded_file($tmp, $destinoAbsoluto)) {
-                    $falhas[] = "Não foi possível guardar: " . h($nomeOriginal);
-                    continue;
-                }
+                $novoNome = $infoUpload['name'];
+                $destinoAbsoluto = $infoUpload['abs'];
 
                 $ordemAtual++;
 

@@ -201,7 +201,11 @@ href="https://wa.me/258<?= $tel ?>?text=<?= $msg ?>">
 <td><?= money($v['comissao_rg']) ?></td>
 <td>
 <?php if($v['status']=='PENDENTE'): ?>
-<a href="<?= h(url('admin/vendas/pagar_venda.php?id=' . (int)$v['id'])) ?>">Marcar pago</a>
+<form class="d-inline" method="POST" action="<?= h(url('admin/vendas/pagar_venda.php')) ?>">
+<?= csrf_input() ?>
+<input type="hidden" name="id" value="<?= (int)$v['id'] ?>">
+<button type="submit" onclick="return confirm('Marcar esta venda como paga?');">Marcar pago</button>
+</form>
 <?php else: ?>
 <a class="btn btn-sm btn-success"
 href="<?= h(url('admin/vendas/venda_detalhe.php?id=' . (int)$v['id'])) ?>">PAGO</a>

@@ -7,10 +7,20 @@ if ($_SESSION['user']['role'] !== 'admin') {
     exit();
 }
 
-$id = (int)($_GET['id'] ?? 0);
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    redirect_to('admin/leads/leads.php?msg=metodo_invalido');
+}
+
+$csrfToken = $_POST['csrf_token'] ?? '';
+if (!isset($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $csrfToken)) {
+    http_response_code(403);
+    exit("CSRF invalido.");
+}
+
+$id = (int)($_POST['id'] ?? 0);
 
 if ($id <= 0) {
-    exit("ID inválido");
+    exit("ID invalido");
 }
 
 // buscar lead
@@ -18,13 +28,13 @@ $res = mysqli_query($conexao, "SELECT tentativas_followup FROM leads WHERE id=$i
 $lead = mysqli_fetch_assoc($res);
 
 if (!$lead) {
-    exit("Lead não encontrado");
+    exit("Lead nao encontrado");
 }
 
 $tentativas = (int)$lead['tentativas_followup'];
 
 // ==========================
-// LÓGICA INTELIGENTE
+// LOGICA INTELIGENTE
 // ==========================
 if ($tentativas == 0) {
     $next = date('Y-m-d H:i:s', strtotime('+1 day'));
@@ -34,19 +44,19 @@ if ($tentativas == 0) {
     $next = date('Y-m-d H:i:s', strtotime('+7 days'));
 }
 if ($tentativas == 0) {
-    $msg = "Olá {$nome}, só a confirmar se ainda tens interesse no carro.";
+    $msg = "Ola {$nome}, so a confirmar se ainda tens interesse no carro.";
 } elseif ($tentativas == 1) {
-    $msg = "Ainda tenho o carro disponível. Queres que te envie mais detalhes?";
+    $msg = "Ainda tenho o carro disponivel. Queres que te envie mais detalhes?";
 } else {
-    $msg = "Última oportunidade antes de fechar com outro cliente.";
+    $msg = "Ultima oportunidade antes de fechar com outro cliente.";
 }
 
 // ==========================
 // UPDATE
 // ==========================
 $stmt = mysqli_prepare($conexao, "
-    UPDATE leads 
-    SET 
+    UPDATE leads
+    SET
         tentativas_followup = tentativas_followup + 1,
         proximo_followup = ?,
         status = 'contactado'

@@ -2,12 +2,25 @@
 require_once __DIR__ . '/../../app/core/bootstrap.php';
 require_admin();
 
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    redirect_to('admin/vendas/vendas.php?msg=metodo_invalido');
+}
+
 if ($_SESSION['user']['role'] !== 'admin') {
     redirect_to('auth/login.php');
     exit();
 }
 
 // Recebe os dados do formulário
+$csrfToken = $_POST['csrf_token'] ?? '';
+if (
+    empty($_SESSION['csrf_token']) ||
+    !hash_equals($_SESSION['csrf_token'], $csrfToken)
+) {
+    http_response_code(403);
+    exit('CSRF invalido.');
+}
+
 $preco_venda = $_POST['preco_venda'];
 $preco_custo = $_POST['preco_custo'];
 $status      = $_POST['status'];      // "CONCLUIDO", "CANCELADO", etc.

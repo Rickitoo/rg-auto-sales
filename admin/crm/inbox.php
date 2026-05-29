@@ -44,6 +44,15 @@ crm_ensure_followups_table($conexao);
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['acao'] ?? '') === 'status') {
     $leadId = (int)($_POST['lead_id'] ?? 0);
     $novoStatus = $_POST['status'] ?? '';
+    $csrfToken = $_POST['csrf_token'] ?? '';
+
+    if (
+        empty($_SESSION['csrf_token']) ||
+        !hash_equals($_SESSION['csrf_token'], $csrfToken)
+    ) {
+        http_response_code(403);
+        exit('CSRF inválido.');
+    }
 
     if ($leadId > 0 && isset($statuses[$novoStatus])) {
         $stmt = mysqli_prepare($conexao, "UPDATE leads SET status=? WHERE id=? LIMIT 1");
@@ -59,6 +68,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['acao'] ?? '') === 'followu
     $leadId = (int)($_POST['lead_id'] ?? 0);
     $mensagem = trim((string)($_POST['mensagem'] ?? ''));
     $statusNota = $_POST['status'] ?? '';
+    $csrfToken = $_POST['csrf_token'] ?? '';
+
+    if (
+        empty($_SESSION['csrf_token']) ||
+        !hash_equals($_SESSION['csrf_token'], $csrfToken)
+    ) {
+        http_response_code(403);
+        exit('CSRF invalido.');
+    }
+
     $user = current_user() ?? [];
     $adminId = isset($user['id']) ? (int)$user['id'] : null;
     $adminNome = $user['nome'] ?? $user['email'] ?? 'Admin';
@@ -320,265 +339,9 @@ function whatsapp_url(array $lead, ?array $attention = null): string {
 
     return $tel !== '' ? 'https://wa.me/' . $tel . '?text=' . urlencode($message['texto']) : '#';
 }
-?>
-<!doctype html>
-<html lang="pt">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>CRM Inbox | RG Auto Sales</title>
-    <link rel="icon" type="image/png" href="<?= h(asset('ImagensRG/logo.png')) ?>">
-    <style>
-        *{box-sizing:border-box}
-        body{margin:0;font-family:Arial,sans-serif;background:#eef2f6;color:#101828}
-        a{text-decoration:none;color:inherit}
-        .shell{height:100vh;display:grid;grid-template-columns:360px 1fr}
-        .sidebar{background:#fff;border-right:1px solid #d9e0e8;display:flex;flex-direction:column;min-width:0}
-        .side-head{padding:18px;border-bottom:1px solid #e5e7eb}
-        .brand{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
-        .brand h1{font-size:20px;margin:0}
-        .brand a{font-size:13px;font-weight:800;color:#0067b1}
-        .filters{display:grid;grid-template-columns:1fr 130px;gap:8px}
-        .filters input,.filters select{width:100%;border:1px solid #d0d5dd;border-radius:8px;padding:10px;background:#fff}
-        .filters button{grid-column:1/-1;border:0;border-radius:8px;padding:10px;background:#01203f;color:#fff;font-weight:800;cursor:pointer}
-        .lead-list{overflow:auto;min-height:0}
-        .lead-item{display:grid;grid-template-columns:42px 1fr;gap:10px;padding:13px 16px;border-bottom:1px solid #eef2f6;position:relative}
-        .lead-item:hover,.lead-item.active{background:#eaf6fb}
-        .lead-item.attention{background:#fffaf0;border-left:4px solid #f79009}
-        .lead-item.urgent{background:#fff1f0;border-left:4px solid #d92d20}
-        .lead-item.active.attention{background:#fff6e5}.lead-item.active.urgent{background:#fee4e2}
-        .avatar{width:42px;height:42px;border-radius:50%;background:#00aeef;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900}
-        .lead-main{min-width:0}
-        .lead-row{display:flex;justify-content:space-between;gap:8px;align-items:center}
-        .lead-name{font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-        .lead-time{font-size:11px;color:#667085;white-space:nowrap}
-        .lead-meta{font-size:13px;color:#667085;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-        .badge{display:inline-flex;align-items:center;border-radius:999px;padding:4px 8px;font-size:11px;font-weight:900;text-transform:uppercase}
-        .s-novo{background:#e0f2fe;color:#075985}.s-contactado{background:#e0e7ff;color:#3730a3}.s-qualificado{background:#ecfdf3;color:#027a48}.s-agendado{background:#fef3c7;color:#92400e}.s-negociacao{background:#ffedd5;color:#9a3412}.s-fechado{background:#dcfce7;color:#166534}.s-perdido{background:#fee2e2;color:#991b1b}
-        .smart{display:inline-flex;align-items:center;border-radius:999px;padding:4px 8px;font-size:11px;font-weight:900;text-transform:uppercase}
-        .smart-novo{background:#e0f2fe;color:#075985}.smart-urgente{background:#fee2e2;color:#991b1b}.smart-sem-resposta{background:#fef3c7;color:#92400e}.smart-parado{background:#ffedd5;color:#9a3412}.smart-negociacao{background:#ede9fe;color:#5b21b6}.smart-normal{background:#f2f4f7;color:#344054}
-        .lead-signals{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}.days{font-size:11px;color:#667085;margin-top:5px}
-        .detail{display:flex;flex-direction:column;min-width:0}
-        .topbar{height:72px;background:#fff;border-bottom:1px solid #d9e0e8;display:flex;align-items:center;justify-content:space-between;padding:0 22px;gap:16px}
-        .title h2{margin:0;font-size:21px}.title p{margin:4px 0 0;color:#667085;font-size:13px}
-        .actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
-        .btn{border:0;border-radius:8px;padding:10px 12px;font-weight:900;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
-        .btn-green{background:#12b76a;color:#fff}.btn-blue{background:#00aeef;color:#fff}.btn-dark{background:#01203f;color:#fff}.btn-light{background:#fff;border:1px solid #d0d5dd;color:#344054}
-        .content{padding:22px;overflow:auto}
-        .panel{background:#fff;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:16px}
-        .panel-head{padding:15px 16px;border-bottom:1px solid #eef2f6;font-weight:900}
-        .panel-body{padding:16px}
-        .info-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-        .info{background:#f8fafc;border:1px solid #eef2f6;border-radius:8px;padding:12px}
-        .info span{display:block;color:#667085;font-size:12px;margin-bottom:5px}.info strong{display:block;font-size:14px;word-break:break-word}
-        .message{background:#dcf8c6;border-radius:8px;padding:14px;line-height:1.5;white-space:pre-wrap}
-        .status-form{display:flex;gap:8px;flex-wrap:wrap}.status-form select{border:1px solid #d0d5dd;border-radius:8px;padding:10px;min-width:180px}
-        .note-form{display:grid;gap:10px}.note-form textarea{width:100%;min-height:92px;resize:vertical;border:1px solid #d0d5dd;border-radius:8px;padding:12px;font:inherit;line-height:1.45}.note-form-row{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}.note-form select{border:1px solid #d0d5dd;border-radius:8px;padding:10px;min-width:180px;background:#fff}
-        .timeline{display:grid;gap:12px}.timeline-item{display:grid;grid-template-columns:38px 1fr;gap:10px;align-items:start}.timeline-dot{width:38px;height:38px;border-radius:50%;background:#01203f;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px}.timeline-card{background:#f8fafc;border:1px solid #e5e7eb;border-radius:8px;padding:12px}.timeline-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}.timeline-user{font-weight:900}.timeline-date{font-size:12px;color:#667085;white-space:nowrap}.timeline-text{white-space:pre-wrap;line-height:1.5;color:#1d2939}.timeline-empty{border:1px dashed #d0d5dd;border-radius:8px;padding:16px;color:#667085;background:#f8fafc}
-        .smart-message{background:#f8fafc;border:1px solid #d0d5dd;border-radius:8px;padding:14px;display:grid;gap:10px}.smart-message-top{display:flex;align-items:center;justify-content:space-between;gap:10px}.smart-message-title{font-weight:900}.smart-message-text{white-space:pre-wrap;line-height:1.5;color:#1d2939}
-        .empty{height:100%;display:flex;align-items:center;justify-content:center;color:#667085;text-align:center;padding:30px}
-        @media(max-width:900px){.shell{height:auto;min-height:100vh;grid-template-columns:1fr}.sidebar{max-height:46vh}.topbar{height:auto;align-items:flex-start;flex-direction:column;padding:16px}.actions{justify-content:flex-start}.info-grid{grid-template-columns:1fr}}
-    </style>
-    <link rel="stylesheet" href="<?= h(asset('css/admin-modern.css')) ?>">
-</head>
-<body>
-<div class="shell">
-    <aside class="sidebar">
-        <div class="side-head">
-            <div class="brand">
-                <h1>CRM Inbox</h1>
-                <a href="<?= h(url('admin/dashboard.php')) ?>">Dashboard</a>
-            </div>
-            <form class="filters" method="GET" action="<?= h(url('admin/crm/inbox.php')) ?>">
-                <input type="text" name="q" value="<?= h($busca) ?>" placeholder="Pesquisar lead">
-                <select name="status">
-                    <option value="">Todos</option>
-                    <?php foreach ($statuses as $key => $label): ?>
-                        <option value="<?= h($key) ?>" <?= $statusFiltro === $key ? 'selected' : '' ?>><?= h($label) ?></option>
-                    <?php endforeach; ?>
-                </select>
-                <button type="submit">Filtrar</button>
-            </form>
-        </div>
 
-        <div class="lead-list">
-            <?php foreach ($leads as $lead): ?>
-                <?php
-                $active = (int)$lead['id'] === $leadSelecionadoId;
-                $attention = $lead['_crm_attention'];
-                $attentionClass = $attention['urgente'] ? 'urgent' : ($attention['esquecido'] ? 'attention' : '');
-                $carro = trim(($lead['marca'] ?? '') . ' ' . ($lead['modelo'] ?? '') . ' ' . ($lead['ano'] ?? ''));
-                $iniciais = mb_strtoupper(mb_substr((string)$lead['nome'], 0, 1));
-                ?>
-                <a class="lead-item <?= $active ? 'active' : '' ?> <?= h($attentionClass) ?>" href="<?= h(url('admin/crm/inbox.php?id=' . (int)$lead['id'] . ($busca !== '' ? '&q=' . urlencode($busca) : '') . ($statusFiltro !== '' ? '&status=' . urlencode($statusFiltro) : ''))) ?>">
-                    <div class="avatar"><?= h($iniciais ?: 'L') ?></div>
-                    <div class="lead-main">
-                        <div class="lead-row">
-                            <div class="lead-name"><?= h($lead['nome']) ?></div>
-                            <div class="lead-time"><?= h(date('d/m', strtotime($lead['ultima_atividade'] ?? $lead['criado_em']))) ?></div>
-                        </div>
-                        <div class="lead-meta"><?= h($lead['telefone']) ?><?= $carro !== '' ? ' · ' . h($carro) : '' ?></div>
-                        <div class="lead-signals">
-                            <span class="badge s-<?= h($lead['status']) ?>"><?= h(status_label($statuses, $lead['status'])) ?></span>
-                            <span class="smart <?= h($attention['badge']['class']) ?>"><?= h($attention['badge']['label']) ?></span>
-                        </div>
-                        <div class="days">
-                            <?= $attention['dias_sem_contacto'] !== null ? h($attention['dias_sem_contacto'] . ' dia(s) sem contacto') : 'Sem historico' ?>
-                        </div>
-                    </div>
-                </a>
-            <?php endforeach; ?>
-        </div>
-    </aside>
+$pageTitle = 'CRM Inbox';
+$pageSubtitle = 'Leads, follow-ups e mensagens comerciais';
+$contentFile = BASE_PATH . '/app/views/admin/crm/inbox_content.php';
 
-    <main class="detail">
-        <?php if ($leadSelecionado): ?>
-            <?php
-            $carroSelecionado = trim(($leadSelecionado['marca'] ?? '') . ' ' . ($leadSelecionado['modelo'] ?? '') . ' ' . ($leadSelecionado['ano'] ?? ''));
-            $fecharVendaUrl = 'admin/vendas/marcar_venda.php?lead_id=' . (int)$leadSelecionado['id'];
-            if (!empty($leadSelecionado['carro_id'])) {
-                $fecharVendaUrl .= '&carro_id=' . (int)$leadSelecionado['carro_id'];
-            }
-            $smartMessage = smart_whatsapp_message($leadSelecionado, $leadAttention);
-            $smartWhatsappUrl = whatsapp_url($leadSelecionado, $leadAttention);
-            ?>
-            <div class="topbar">
-                <div class="title">
-                    <h2><?= h($leadSelecionado['nome']) ?></h2>
-                    <p><?= h($leadSelecionado['telefone']) ?><?= $leadSelecionado['email'] ? ' · ' . h($leadSelecionado['email']) : '' ?></p>
-                </div>
-                <div class="actions">
-                    <a class="btn btn-green" href="<?= h($smartWhatsappUrl) ?>" target="_blank" rel="noopener">Mensagem Inteligente</a>
-                    <a class="btn btn-blue" href="<?= h(url($fecharVendaUrl)) ?>">Fechar venda</a>
-                    <a class="btn btn-light" href="<?= h(url('admin/leads/leads.php')) ?>">Lista de leads</a>
-                </div>
-            </div>
-
-            <div class="content">
-                <div class="panel">
-                    <div class="panel-head">Resumo do lead</div>
-                    <div class="panel-body">
-                        <div class="info-grid">
-                            <div class="info"><span>Status</span><strong><span class="badge s-<?= h($leadSelecionado['status']) ?>"><?= h(status_label($statuses, $leadSelecionado['status'])) ?></span></strong></div>
-                            <div class="info"><span>Origem</span><strong><?= h($leadSelecionado['origem'] ?? '-') ?></strong></div>
-                            <div class="info"><span>Tipo</span><strong><?= h($leadSelecionado['tipo'] ?? '-') ?></strong></div>
-                            <div class="info"><span>Carro</span><strong><?= h($carroSelecionado !== '' ? $carroSelecionado : '-') ?></strong></div>
-                            <div class="info"><span>Criado em</span><strong><?= h(date('d/m/Y H:i', strtotime($leadSelecionado['criado_em']))) ?></strong></div>
-                            <div class="info"><span>Proximo contacto</span><strong><?= h(!empty($leadSelecionado['proximo_evento']) ? date('d/m/Y H:i', strtotime($leadSelecionado['proximo_evento'])) : '-') ?></strong></div>
-                            <div class="info"><span>Ultimo follow-up</span><strong><?= h(!empty($leadSelecionado['ultimo_followup']) ? date('d/m/Y H:i', strtotime($leadSelecionado['ultimo_followup'])) : 'Sem follow-up') ?></strong></div>
-                            <div class="info"><span>Dias sem contacto</span><strong><?= h($leadAttention && $leadAttention['dias_sem_contacto'] !== null ? $leadAttention['dias_sem_contacto'] . ' dia(s)' : '-') ?></strong></div>
-                            <div class="info"><span>Prioridade CRM</span><strong><?php if ($leadAttention): ?><span class="smart <?= h($leadAttention['badge']['class']) ?>"><?= h($leadAttention['badge']['label']) ?></span><?php else: ?>-<?php endif; ?></strong></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="panel">
-                    <div class="panel-head">Acoes rapidas</div>
-                    <div class="panel-body">
-                        <form class="status-form" method="POST" action="<?= h(url('admin/crm/inbox.php')) ?>">
-                            <input type="hidden" name="acao" value="status">
-                            <input type="hidden" name="lead_id" value="<?= (int)$leadSelecionado['id'] ?>">
-                            <select name="status">
-                                <?php foreach ($statuses as $key => $label): ?>
-                                    <option value="<?= h($key) ?>" <?= $leadSelecionado['status'] === $key ? 'selected' : '' ?>><?= h($label) ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                            <button class="btn btn-dark" type="submit">Alterar status</button>
-                            <a class="btn btn-light" href="<?= h(url('admin/leads/ver_lead.php?id=' . (int)$leadSelecionado['id'])) ?>">Abrir detalhe classico</a>
-                        </form>
-                    </div>
-                </div>
-
-                <div class="panel">
-                    <div class="panel-head">Mensagem WhatsApp sugerida</div>
-                    <div class="panel-body">
-                        <div class="smart-message">
-                            <div class="smart-message-top">
-                                <div class="smart-message-title"><?= h($smartMessage['label']) ?></div>
-                                <a class="btn btn-green" href="<?= h($smartWhatsappUrl) ?>" target="_blank" rel="noopener">Abrir WhatsApp</a>
-                            </div>
-                            <div class="smart-message-text"><?= h($smartMessage['texto']) ?></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="panel">
-                    <div class="panel-head">Mensagem inicial</div>
-                    <div class="panel-body">
-                        <div class="message"><?= h($leadSelecionado['mensagem'] ?: 'Sem mensagem registada.') ?></div>
-                    </div>
-                </div>
-
-                <div class="panel">
-                    <div class="panel-head">Adicionar follow-up</div>
-                    <div class="panel-body">
-                        <form class="note-form" method="POST" action="<?= h(url('admin/crm/inbox.php')) ?>">
-                            <input type="hidden" name="acao" value="followup">
-                            <input type="hidden" name="lead_id" value="<?= (int)$leadSelecionado['id'] ?>">
-                            <textarea name="mensagem" placeholder="Registar nota, chamada, resposta do cliente ou proximo passo..." required></textarea>
-                            <div class="note-form-row">
-                                <select name="status">
-                                    <option value="">Status desta nota</option>
-                                    <?php foreach ($statuses as $key => $label): ?>
-                                        <option value="<?= h($key) ?>" <?= $leadSelecionado['status'] === $key ? 'selected' : '' ?>><?= h($label) ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                                <button class="btn btn-dark" type="submit">Guardar nota</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
-                <div class="panel">
-                    <div class="panel-head">Historico de acompanhamento</div>
-                    <div class="panel-body">
-                        <?php if ($followups): ?>
-                            <div class="timeline">
-                                <?php foreach ($followups as $item): ?>
-                                    <?php
-                                    $autor = $item['admin_nome'] ?: 'Admin';
-                                    $inicial = mb_strtoupper(mb_substr((string)$autor, 0, 1));
-                                    ?>
-                                    <div class="timeline-item">
-                                        <div class="timeline-dot"><?= h($inicial ?: 'A') ?></div>
-                                        <div class="timeline-card">
-                                            <div class="timeline-top">
-                                                <div>
-                                                    <div class="timeline-user"><?= h($autor) ?></div>
-                                                    <?php if (!empty($item['status'])): ?>
-                                                        <span class="badge s-<?= h($item['status']) ?>"><?= h(status_label($statuses, $item['status'])) ?></span>
-                                                    <?php endif; ?>
-                                                </div>
-                                                <div class="timeline-date"><?= h(date('d/m/Y H:i', strtotime($item['criado_em']))) ?></div>
-                                            </div>
-                                            <div class="timeline-text"><?= h($item['mensagem']) ?></div>
-                                        </div>
-                                    </div>
-                                <?php endforeach; ?>
-                            </div>
-                        <?php else: ?>
-                            <div class="timeline-empty">Ainda nao ha follow-ups registados para este lead.</div>
-                        <?php endif; ?>
-                    </div>
-                </div>
-
-                <div class="panel">
-                    <div class="panel-head">Notas internas</div>
-                    <div class="panel-body">
-                        <div class="message" style="background:#f8fafc"><?= h($leadSelecionado['notas'] ?: 'Sem notas internas.') ?></div>
-                    </div>
-                </div>
-            </div>
-        <?php else: ?>
-            <div class="empty">
-                <div>
-                    <h2>Nenhum lead encontrado</h2>
-                    <p>Quando existirem leads, eles aparecem nesta caixa de entrada.</p>
-                    <a class="btn btn-dark" href="<?= h(url('admin/leads/leads.php')) ?>">Voltar para leads</a>
-                </div>
-            </div>
-        <?php endif; ?>
-    </main>
-</div>
-</body>
-</html>
+require BASE_PATH . '/app/views/layouts/admin_layout.php';

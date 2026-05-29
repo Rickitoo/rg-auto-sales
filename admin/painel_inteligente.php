@@ -132,7 +132,11 @@ require_once __DIR__ . '/../includes/layout_top.php';
                 <div style="color:#667085"><?= h($carro ?: 'Sem carro') ?> | <?= h($lead['_dias']) ?> dia(s) sem contacto</div>
                 <a href="<?= h(url('admin/crm/inbox.php?id=' . (int)$lead['id'])) ?>">Abrir CRM</a>
                 <?php if ($tel): ?> | <a target="_blank" rel="noopener" href="https://wa.me/<?= h($tel) ?>?text=<?= h(rawurlencode('Ola ' . $lead['nome'] . ', aqui e a RG Auto Sales. Quero dar seguimento ao seu interesse.')) ?>">WhatsApp</a><?php endif; ?>
-                | <a href="<?= h(url('admin/vendas/marcar_venda.php?lead_id=' . (int)$lead['id'])) ?>">Fechar venda</a>
+                | <form class="d-inline" method="POST" action="<?= h(url('admin/vendas/marcar_venda.php')) ?>">
+                    <?= csrf_input() ?>
+                    <input type="hidden" name="lead_id" value="<?= (int)$lead['id'] ?>">
+                    <button type="submit">Fechar venda</button>
+                </form>
             </div>
         <?php endforeach; ?>
         <?php if (!$leadsUrgentes): ?><p>Sem leads urgentes.</p><?php endif; ?>
@@ -167,7 +171,11 @@ require_once __DIR__ . '/../includes/layout_top.php';
                     <td>
                         <a href="<?= h(url('admin/vendas/venda_detalhe.php?id=' . (int)$venda['id'])) ?>">Ver</a>
                         |
-                        <a href="<?= h(url('admin/vendas/pagar_venda.php?id=' . (int)$venda['id'])) ?>">Pagar</a>
+                        <form class="d-inline" method="POST" action="<?= h(url('admin/vendas/pagar_venda.php')) ?>">
+                            <?= csrf_input() ?>
+                            <input type="hidden" name="id" value="<?= (int)$venda['id'] ?>">
+                            <button type="submit" onclick="return confirm('Marcar esta venda como paga?');">Pagar</button>
+                        </form>
                     </td>
                 </tr>
             <?php endforeach; ?>

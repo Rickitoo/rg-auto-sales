@@ -301,46 +301,43 @@ $carro = trim(
             >
                 WhatsApp
             </a>
-
             <!-- CONTACTADO -->
-            <a 
-                class="btn btn-status"
-                href="leads_status.php?id=<?= (int)$lead['id'] ?>&s=contactado"
-            >
-                Contactado
-            </a>
-
+            <form method="POST" action="leads_status.php" style="display:inline;">
+                <?= csrf_input() ?>
+                <input type="hidden" name="lead_id" value="<?= (int)$lead['id'] ?>">
+                <input type="hidden" name="status" value="contactado">
+                <button type="submit" class="btn btn-status">Contactado</button>
+            </form>
             <!-- NEGOCIAÇÃO -->
-            <a 
-                class="btn btn-status"
-                href="leads_status.php?id=<?= (int)$lead['id'] ?>&s=negociacao"
-            >
-                Negociação
-            </a>
-
+            <form method="POST" action="leads_status.php" style="display:inline;">
+                <?= csrf_input() ?>
+                <input type="hidden" name="lead_id" value="<?= (int)$lead['id'] ?>">
+                <input type="hidden" name="status" value="negociacao">
+                <button type="submit" class="btn btn-status">Negocia��o</button>
+            </form>
             <!-- FECHADO -->
-            <a 
-                class="btn btn-status"
-                href="leads_status.php?id=<?= (int)$lead['id'] ?>&s=fechado"
-            >
-                Fechado
-            </a>
-
+            <form method="POST" action="leads_status.php" style="display:inline;">
+                <?= csrf_input() ?>
+                <input type="hidden" name="lead_id" value="<?= (int)$lead['id'] ?>">
+                <input type="hidden" name="status" value="fechado">
+                <button type="submit" class="btn btn-status">Fechado</button>
+            </form>
             <!-- PERDIDO -->
-            <a 
-                class="btn btn-status"
-                href="leads_status.php?id=<?= (int)$lead['id'] ?>&s=perdido"
-            >
-                Perdido
-            </a>
+            <form method="POST" action="leads_status.php" style="display:inline;">
+                <?= csrf_input() ?>
+                <input type="hidden" name="lead_id" value="<?= (int)$lead['id'] ?>">
+                <input type="hidden" name="status" value="perdido">
+                <button type="submit" class="btn btn-status">Perdido</button>
+            </form>
 
             <!-- VENDA -->
-            <a 
-                class="btn btn-venda"
-                href="<?= h(url('admin/vendas/marcar_venda.php?id=' . (int)$lead['id'])) ?>"
-            >
+            <form method="POST" action="<?= h(url('admin/vendas/marcar_venda.php')) ?>" style="display:inline;">
+                <?= csrf_input() ?>
+                <input type="hidden" name="id" value="<?= (int)$lead['id'] ?>">
+            <button type="submit" class="btn btn-venda">
                 Vender
-            </a>
+            </button>
+            </form>
 
         </div>
 

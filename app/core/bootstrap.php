@@ -5,6 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 require_once __DIR__ . '/helpers.php';
+require_once __DIR__ . '/helpers/upload_security.php';
 require_once __DIR__ . '/database.php';
 require_once __DIR__ . '/auth.php';
 

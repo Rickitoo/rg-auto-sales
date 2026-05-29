@@ -227,17 +227,19 @@ $msg = $_GET['msg'] ?? '';
         <td><?php echo htmlspecialchars($v['data_registo']); ?></td>
 
         <td>
-          <a class="btn btn-outline"
-             href="update_status.php?id=<?php echo (int)$v['id']; ?>&status=aprovado&token=<?php echo $_SESSION['csrf_token']; ?>"
-             onclick="return confirm('Aprovar este pedido?');">
-             Aprovar
-          </a>
+          <form method="POST" action="<?= h(url('app/modules/leads/actions/update_status.php')) ?>" style="display:inline;" onsubmit="return confirm('Aprovar este pedido?');">
+             <?= csrf_input() ?>
+             <input type="hidden" name="id" value="<?php echo (int)$v['id']; ?>">
+             <input type="hidden" name="status" value="aprovado">
+             <button class="btn btn-outline" type="submit">Aprovar</button>
+          </form>
 
-          <a class="danger"
-             href="update_status.php?id=<?php echo (int)$v['id']; ?>&status=rejeitado&token=<?php echo $_SESSION['csrf_token']; ?>"
-             onclick="return confirm('Rejeitar este pedido?');">
-             Rejeitar
-          </a>
+          <form method="POST" action="<?= h(url('app/modules/leads/actions/update_status.php')) ?>" style="display:inline;" onsubmit="return confirm('Rejeitar este pedido?');">
+             <?= csrf_input() ?>
+             <input type="hidden" name="id" value="<?php echo (int)$v['id']; ?>">
+             <input type="hidden" name="status" value="rejeitado">
+             <button class="danger" type="submit">Rejeitar</button>
+          </form>
         </td>
       </tr>
     <?php } ?>

@@ -22,6 +22,7 @@ $user = current_user();
                         <li><a href="<?= h(public_url('contacto.php')) ?>">Contacto</a></li>
                         <li><a href="<?= h(public_url('test_drive.php')) ?>">Test Drive</a></li>
                         <li><a href="<?= h(public_url('leasing.php')) ?>">Leasing</a></li>
+                        <li><a href="<?= h(public_url('importar_carro.php')) ?>">Importar</a></li>
                         <?php if ($user): ?>
                             <li><a href="<?= h(is_admin() ? url('admin/dashboard.php') : public_url('dashboard.php')) ?>"><?= h($user['nome']) ?></a></li>
                             <li><a href="<?= h(url('auth/logout.php')) ?>">Sair</a></li>

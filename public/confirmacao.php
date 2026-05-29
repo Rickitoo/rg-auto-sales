@@ -1,9 +1,6 @@
 <?php
 require_once __DIR__ . '/../app/core/bootstrap.php';
 
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-
 
 $RG_WA = "258862934721"; // WhatsApp da RG
 

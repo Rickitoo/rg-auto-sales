@@ -7,7 +7,20 @@ if ($_SESSION['user']['role'] !== 'admin') {
     exit();
 }
 
-$id = (int)($_GET['id'] ?? 0);
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    redirect_to('admin/dashboard.php?msg=metodo_invalido');
+}
+
+$csrfToken = $_POST['csrf_token'] ?? '';
+if (
+    !is_string($csrfToken) ||
+    empty($_SESSION['csrf_token']) ||
+    !hash_equals($_SESSION['csrf_token'], $csrfToken)
+) {
+    redirect_to('admin/dashboard.php?msg=csrf_invalido');
+}
+
+$id = (int)($_POST['id'] ?? 0);
 
 function venda_col_exists(mysqli $con, string $table, string $col): bool {
     $table = mysqli_real_escape_string($con, $table);

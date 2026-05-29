@@ -2,49 +2,43 @@
 require_once __DIR__ . '/../../app/core/bootstrap.php';
 require_admin();
 
-if ($_SESSION['user']['role'] !== 'admin') {
-    redirect_to('auth/login.php');
-    exit();
-}
-
-if (!function_exists('h')) {
-function h($s){
-    return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
-}
-}
-
-$msg = "";
+$msg = '';
+$formData = [
+    'marca' => '',
+    'modelo' => '',
+    'ano' => '',
+    'preco' => '',
+    'descricao' => '',
+];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $csrf = $_POST['csrf_token'] ?? '';
 
-    // =========================
-    // INPUT
-    // =========================
-    $marca     = trim($_POST['marca'] ?? '');
-    $modelo    = trim($_POST['modelo'] ?? '');
-    $ano       = intval($_POST['ano'] ?? 0);
-    $preco     = floatval($_POST['preco'] ?? 0);
-    $descricao = trim($_POST['descricao'] ?? '');
+    $formData = [
+        'marca' => trim($_POST['marca'] ?? ''),
+        'modelo' => trim($_POST['modelo'] ?? ''),
+        'ano' => trim($_POST['ano'] ?? ''),
+        'preco' => trim($_POST['preco'] ?? ''),
+        'descricao' => trim($_POST['descricao'] ?? ''),
+    ];
 
-    // =========================
-    // VALIDAÇÃO
-    // =========================
-    if (!$marca || !$modelo) {
-        $msg = "Marca e modelo são obrigatórios";
-    }
-    elseif ($ano < 1900 || $ano > date('Y') + 1) {
-        $msg = "Ano inválido";
-    }
-    elseif ($preco <= 0) {
-        $msg = "Preço inválido";
-    }
-    else {
+    $marca = $formData['marca'];
+    $modelo = $formData['modelo'];
+    $ano = (int)$formData['ano'];
+    $preco = (float)$formData['preco'];
+    $descricao = $formData['descricao'];
 
-        // =========================
-        // INSERT
-        // =========================
+    if (!csrf_verify($csrf)) {
+        $msg = 'CSRF invalido. Atualize a pagina e tente novamente.';
+    } elseif ($marca === '' || $modelo === '') {
+        $msg = 'Marca e modelo sao obrigatorios';
+    } elseif ($ano < 1900 || $ano > date('Y') + 1) {
+        $msg = 'Ano invalido';
+    } elseif ($preco <= 0) {
+        $msg = 'Preco invalido';
+    } else {
         $stmt = mysqli_prepare($conexao, "
-            INSERT INTO carros 
+            INSERT INTO carros
             (marca, modelo, ano, preco, descricao, status, criado_em)
             VALUES (?, ?, ?, ?, ?, 'disponivel', NOW())
         ");
@@ -60,130 +54,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         );
 
         if (mysqli_stmt_execute($stmt)) {
-            $msg = "Carro adicionado com sucesso ✔";
+            $msg = 'Carro adicionado com sucesso';
+            $formData = [
+                'marca' => '',
+                'modelo' => '',
+                'ano' => '',
+                'preco' => '',
+                'descricao' => '',
+            ];
         } else {
-            $msg = "Erro ao adicionar carro: " . mysqli_error($conexao);
+            $msg = 'Erro ao adicionar carro: ' . mysqli_error($conexao);
         }
 
         mysqli_stmt_close($stmt);
     }
 }
-?>
-<!DOCTYPE html>
-<html lang="pt">
-<head>
-<meta charset="UTF-8">
-<title>Adicionar Carro - RG Auto Sales</title>
 
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        background: #0f172a;
-        color: #fff;
-        margin: 0;
-    }
+$pageTitle = 'Adicionar Carro';
+$pageSubtitle = 'Cadastro de nova viatura no estoque';
+$contentFile = BASE_PATH . '/app/views/admin/carros/adicionar_carro_content.php';
 
-    .container {
-        max-width: 500px;
-        margin: 50px auto;
-        background: #1e293b;
-        padding: 30px;
-        border-radius: 12px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-    }
-
-    h2 {
-        margin-bottom: 20px;
-        text-align: center;
-    }
-
-    label {
-        display: block;
-        margin-bottom: 5px;
-        font-size: 14px;
-    }
-
-    input, textarea {
-        width: 100%;
-        padding: 10px;
-        margin-bottom: 15px;
-        border: none;
-        border-radius: 8px;
-        background: #334155;
-        color: #fff;
-    }
-
-    input:focus, textarea:focus {
-        outline: 2px solid #3b82f6;
-    }
-
-    button {
-        width: 100%;
-        padding: 12px;
-        background: #3b82f6;
-        border: none;
-        border-radius: 8px;
-        color: white;
-        font-weight: bold;
-        cursor: pointer;
-        transition: 0.3s;
-    }
-
-    button:hover {
-        background: #2563eb;
-    }
-
-    .msg {
-        padding: 10px;
-        margin-bottom: 15px;
-        border-radius: 8px;
-        text-align: center;
-    }
-
-    .success {
-        background: #16a34a;
-    }
-
-    .error {
-        background: #dc2626;
-    }
-</style>
-
-</head>
-    <body>
-
-    <div class="container">
-
-        <h2>🚗 Adicionar Carro</h2>
-
-        <?php if($msg): ?>
-        <div class="msg <?= strpos($msg, 'sucesso') !== false ? 'success' : 'error' ?>">
-            <?= h($msg) ?>
-        </div>
-        <?php endif; ?>
-
-        <form method="POST">
-
-            <label>Marca</label>
-            <input type="text" name="marca" placeholder="Ex: Toyota" required>
-
-            <label>Modelo</label>
-            <input type="text" name="modelo" placeholder="Ex: Hilux" required>
-
-            <label>Ano</label>
-            <input type="number" name="ano" placeholder="Ex: 2020" required>
-
-            <label>Preço (MT)</label>
-            <input type="number" step="0.01" name="preco" placeholder="Ex: 850000" required>
-
-            <label>Descrição</label>
-            <textarea name="descricao" placeholder="Detalhes do carro..."></textarea>
-
-            <button type="submit">Guardar Carro</button>
-
-        </form>
-
-    </div>
-
-</body>
-</html>
+require BASE_PATH . '/app/views/layouts/admin_layout.php';

@@ -7,6 +7,20 @@ if ($_SESSION['user']['role'] !== 'admin') {
     exit();
 }
 
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    redirect_to('admin/vendas/vendas.php?msg=metodo_invalido');
+}
+
+$csrfToken = $_POST['csrf_token'] ?? '';
+if (
+    !is_string($csrfToken) ||
+    empty($_SESSION['csrf_token']) ||
+    !hash_equals($_SESSION['csrf_token'], $csrfToken)
+) {
+    http_response_code(403);
+    die("Ação bloqueada (token inválido).");
+}
+
 // =========================
 // VALIDAR INPUT
 // =========================

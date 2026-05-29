@@ -9,7 +9,21 @@ if ($_SESSION['user']['role'] !== 'admin') {
 
 if (!function_exists('h')) { function h($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); } }
 
-$lead_id = (int)($_GET['id'] ?? $_GET['lead_id'] ?? 0);
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    redirect_to('admin/leads/leads.php?msg=metodo_invalido');
+}
+
+$csrfToken = $_POST['csrf_token'] ?? '';
+if (
+    !is_string($csrfToken) ||
+    empty($_SESSION['csrf_token']) ||
+    !hash_equals($_SESSION['csrf_token'], $csrfToken)
+) {
+    http_response_code(403);
+    die("Ação bloqueada (token inválido).");
+}
+
+$lead_id = (int)($_POST['id'] ?? $_POST['lead_id'] ?? 0);
 
 if ($lead_id <= 0) {
     die("ID inválido.");
@@ -65,7 +79,7 @@ if ($carro['carro_status'] === 'vendido') {
 
 $erro = "";
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if (isset($_POST['preco_venda'], $_POST['data_venda'])) {
 
     $preco_venda = (float)($_POST['preco_venda'] ?? 0);
     $data_venda  = $_POST['data_venda'] ?? '';
@@ -208,6 +222,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <p><strong>Carro:</strong> <?= h($carro['marca']) ?> <?= h($carro['modelo']) ?></p>
 
 <form method="POST">
+<?= csrf_input() ?>
+<input type="hidden" name="lead_id" value="<?= (int)$lead_id ?>">
 
 <label>Preço de Venda</label>
 <input type="number" step="0.01" name="preco_venda" value="<?= h($carro['preco']) ?>" required>

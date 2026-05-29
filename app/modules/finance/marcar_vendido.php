@@ -7,7 +7,17 @@ if ($_SESSION['user']['role'] !== 'admin') {
     exit();
 }
 
-$id = (int)($_GET['id'] ?? 0);
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    redirect_to('app/modules/cars/listar_carros.php?msg=metodo_invalido');
+}
+
+$csrfToken = $_POST['csrf_token'] ?? '';
+if (!isset($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $csrfToken)) {
+    http_response_code(403);
+    exit("CSRF invalido.");
+}
+
+$id = (int)($_POST['id'] ?? 0);
 
 if ($id <= 0) {
     die("ID inválido.");

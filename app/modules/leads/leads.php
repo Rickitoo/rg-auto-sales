@@ -182,14 +182,21 @@ $msg = urlencode(gerarMensagem($row));
 <a class="btn btn-sm btn-success" target="_blank"
 href="https://wa.me/<?= $tel ?>?text=<?= $msg ?>">💬</a>
 
-<a class="btn btn-sm btn-primary"
-href="<?= h(url('admin/vendas/marcar_venda.php?lead_id=' . (int)$row['id'] . '&carro_id=' . (int)$row['carro_id'])) ?>">💰</a>
+<form method="POST" action="<?= h(url('admin/vendas/marcar_venda.php')) ?>" style="display:inline;">
+<?= csrf_input() ?>
+<input type="hidden" name="lead_id" value="<?= (int)$row['id'] ?>">
+<input type="hidden" name="carro_id" value="<?= (int)$row['carro_id'] ?>">
+<button class="btn btn-sm btn-primary" type="submit">Venda</button>
+</form>
 
 <a class="btn btn-sm btn-info"
 href="ver_lead.php?id=<?=h($row['id'])?>">👁</a>
 
-<a class="btn btn-sm btn-warning"
-href="follow_up.php?id=<?=h($row['id'])?>">⏰</a>
+<form method="POST" action="<?= h(url('admin/services/follow_up.php')) ?>" style="display:inline;">
+<?= csrf_input() ?>
+<input type="hidden" name="id" value="<?= (int)$row['id'] ?>">
+<button class="btn btn-sm btn-warning" type="submit">Follow-up</button>
+</form>
 
 </td>
 

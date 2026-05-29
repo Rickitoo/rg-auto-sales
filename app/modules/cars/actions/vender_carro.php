@@ -15,7 +15,6 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
 // =====================
 $MAX_FILES = 8;                  // máximo de fotos
 $MAX_SIZE  = 3 * 1024 * 1024;    // 3MB por foto
-$ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp'];
 
 $UPLOAD_DIR = __DIR__ . "/uploads/vendas/";
 $UPLOAD_URL = "uploads/vendas/"; // caminho relativo gravado no BD
@@ -95,7 +94,6 @@ $salvas = 0;
 $salvasPaths = []; // para limpar se der ruim
 $falhas = [];
 
-$finfo = finfo_open(FILEINFO_MIME_TYPE);
 
 foreach ($validIndexes as $i) {
 
@@ -108,30 +106,21 @@ foreach ($validIndexes as $i) {
         continue;
     }
 
-    if ($size > $MAX_SIZE) {
-        $falhas[] = "Foto " . ($i+1) . ": maior que 3MB.";
+    $name = $fotos['name'][$i] ?? '';
+    $file = [
+        'name' => $name,
+        'tmp_name' => $tmp,
+        'error' => $err,
+        'size' => $size,
+    ];
+    [$okUpload, $infoUpload, $erroUpload] = secure_uploaded_image($file, $UPLOAD_DIR, trim($UPLOAD_URL, '/'), $MAX_SIZE, 'venda-' . $vendedor_id);
+    if (!$okUpload) {
+        $falhas[] = "Foto " . ($i+1) . ": " . $erroUpload;
         continue;
     }
 
-    $mime = finfo_file($finfo, $tmp);
-    if (!in_array($mime, $ALLOWED_MIME, true)) {
-        $falhas[] = "Foto " . ($i+1) . ": formato inválido (use JPG/PNG/WEBP).";
-        continue;
-    }
-
-    $ext = 'jpg';
-    if ($mime === 'image/png')  $ext = 'png';
-    if ($mime === 'image/webp') $ext = 'webp';
-
-    $safeName = "venda_" . $vendedor_id . "_" . bin2hex(random_bytes(8)) . "." . $ext;
-
-    $destPath = $UPLOAD_DIR . $safeName;
-    $destUrl  = $UPLOAD_URL . $safeName;
-
-    if (!move_uploaded_file($tmp, $destPath)) {
-        $falhas[] = "Foto " . ($i+1) . ": falha ao salvar no servidor.";
-        continue;
-    }
+    $destPath = $infoUpload['abs'];
+    $destUrl  = $infoUpload['rel'];
 
     mysqli_stmt_bind_param($stmtFoto, "is", $vendedor_id, $destUrl);
     if (!mysqli_stmt_execute($stmtFoto)) {
@@ -145,7 +134,6 @@ foreach ($validIndexes as $i) {
     $salvasPaths[] = $destPath;
 }
 
-finfo_close($finfo);
 mysqli_stmt_close($stmtFoto);
 
 // =====================

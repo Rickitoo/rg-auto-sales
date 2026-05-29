@@ -1,6 +1,14 @@
 Options -Indexes
+<Files "teste_login.php">
+    Require all denied
+</Files>
+
 RewriteEngine On
 RewriteBase /RG_AUTO_SALES/
+
+RewriteRule ^teste_login\.php$ - [F,L]
+RewriteRule ^(\.git|app|storage|vendor|scripts|includes)(/|$) - [F,L]
+RewriteRule \.(env|sql|bak|backup|zip|tar|gz|7z)$ - [F,L]
 
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d

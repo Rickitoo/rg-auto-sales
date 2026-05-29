@@ -7,19 +7,29 @@ if ($_SESSION['user']['role'] !== 'admin') {
     exit();
 }
 
-$id = intval($_GET['id'] ?? 0);
-$dir = $_GET['dir'] ?? '';
-$carro_id = intval($_GET['carro_id'] ?? 0);
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    redirect_to('admin/carros/listar_carros.php?msg=metodo_invalido');
+}
 
-if ($id <= 0 || !in_array($dir, ['up', 'down'])) {
-    die("Parâmetros inválidos.");
+$csrf = $_POST['csrf_token'] ?? '';
+if (!isset($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $csrf)) {
+    http_response_code(403);
+    exit("CSRF invalido.");
+}
+
+$id = intval($_POST['id'] ?? 0);
+$dir = $_POST['dir'] ?? '';
+$carro_id = intval($_POST['carro_id'] ?? 0);
+
+if ($id <= 0 || $carro_id <= 0 || !in_array($dir, ['up', 'down'], true)) {
+    die("Parametros invalidos.");
 }
 
 $sqlAtual = "SELECT id, carro_id, ordem FROM carros_fotos WHERE id = $id LIMIT 1";
 $resAtual = mysqli_query($conexao, $sqlAtual);
 
 if (!$resAtual || mysqli_num_rows($resAtual) == 0) {
-    die("Foto não encontrada.");
+    die("Foto nao encontrada.");
 }
 
 $fotoAtual = mysqli_fetch_assoc($resAtual);

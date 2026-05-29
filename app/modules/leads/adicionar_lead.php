@@ -10,6 +10,15 @@ if ($_SESSION['user']['role'] !== 'admin') {
 $erro = "";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $csrfToken = $_POST['csrf_token'] ?? '';
+    if (
+        !is_string($csrfToken) ||
+        empty($_SESSION['csrf_token']) ||
+        !hash_equals($_SESSION['csrf_token'], $csrfToken)
+    ) {
+        http_response_code(403);
+        exit('CSRF invalido.');
+    }
 
     $nome = trim($_POST['nome'] ?? '');
     $telefone = trim($_POST['telefone'] ?? '');
@@ -44,6 +53,7 @@ $carros = mysqli_query($conexao, "SELECT id, marca, modelo FROM carros");
 <?php endif; ?>
 
 <form method="POST">
+<?= csrf_input() ?>
 
 <label>Nome</label><br>
 <input type="text" name="nome" required><br><br>

@@ -16,6 +16,15 @@ function h($s){
 $msg = "";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $csrfToken = $_POST['csrf_token'] ?? '';
+    if (
+        !is_string($csrfToken) ||
+        empty($_SESSION['csrf_token']) ||
+        !hash_equals($_SESSION['csrf_token'], $csrfToken)
+    ) {
+        http_response_code(403);
+        exit('CSRF invalido.');
+    }
 
     // =========================
     // INPUT
@@ -163,6 +172,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
         <form method="POST">
+            <?= csrf_input() ?>
 
             <label>Marca</label>
             <input type="text" name="marca" placeholder="Ex: Toyota" required>

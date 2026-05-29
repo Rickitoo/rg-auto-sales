@@ -124,14 +124,36 @@ require_once __DIR__ . '/../includes/layout_top.php';
 document.querySelectorAll('.advance').forEach((button) => {
     button.addEventListener('click', async () => {
         const form = new FormData();
-        form.append('id', button.dataset.id);
+        form.append('lead_id', button.dataset.id);
         form.append('status', button.dataset.status);
+        form.append('csrf_token', '<?= h(csrf_token()) ?>');
 
         const res = await fetch('<?= h(url('admin/leads/lead_move.php')) ?>', {method: 'POST', body: form});
         const data = await res.json().catch(() => ({ok:false, error:'Resposta invalida'}));
 
         if (data.redirect) {
-            window.location.href = data.redirect;
+            const target = new URL(data.redirect, window.location.href);
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = target.pathname;
+
+            const csrf = document.createElement('input');
+            csrf.type = 'hidden';
+            csrf.name = 'csrf_token';
+            csrf.value = '<?= h(csrf_token()) ?>';
+            form.appendChild(csrf);
+
+            const leadId = target.searchParams.get('lead_id') || data.lead_id;
+            if (leadId) {
+                const leadInput = document.createElement('input');
+                leadInput.type = 'hidden';
+                leadInput.name = 'lead_id';
+                leadInput.value = leadId;
+                form.appendChild(leadInput);
+            }
+
+            document.body.appendChild(form);
+            form.submit();
             return;
         }
 

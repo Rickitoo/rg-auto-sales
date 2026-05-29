@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 require_once __DIR__ . '/../../app/core/bootstrap.php';
 require_admin();
 
@@ -28,7 +28,7 @@ function col_exists(mysqli $con, string $table, string $col): bool {
     return $q && mysqli_num_rows($q) > 0;
 }
 
-// Detecta colunas novas (pra não quebrar teu banco)
+// Detecta colunas novas (pra nÃ£o quebrar teu banco)
 $hasLucro   = col_exists($conexao, "vendas", "lucro");
 $hasTCustos = col_exists($conexao, "vendas", "total_custos");
 $hasCVend   = col_exists($conexao, "vendas", "comissao_vendedor");
@@ -36,7 +36,7 @@ $hasCRG     = col_exists($conexao, "vendas", "comissao_rg");
 $hasApv     = col_exists($conexao, "vendas", "precisa_aprovacao");
 
 // ==============================
-// AÇÕES (POST): pagar / cancelar / recalcular
+// AÃ‡Ã•ES (POST): pagar / cancelar / recalcular
 // ==============================
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $acao  = $_POST['acao'] ?? '';
@@ -44,14 +44,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $token = $_POST['token'] ?? '';
 
     if ($id <= 0) {
-        $flash = ["type" => "danger", "msg" => "ID inválido."];
+        $flash = ["type" => "danger", "msg" => "ID invÃ¡lido."];
     } elseif (!hash_equals($_SESSION['csrf_token'], $token)) {
-        $flash = ["type" => "danger", "msg" => "Ação bloqueada (token inválido)."];
+        $flash = ["type" => "danger", "msg" => "AÃ§Ã£o bloqueada (token invÃ¡lido)."];
     } elseif (!in_array($acao, ['pagar', 'cancelar', 'recalcular'], true)) {
-        $flash = ["type" => "danger", "msg" => "Ação inválida."];
+        $flash = ["type" => "danger", "msg" => "AÃ§Ã£o invÃ¡lida."];
     } else {
 
-        // ✅ Recalcular manualmente (sem mudar status)
+        // âœ… Recalcular manualmente (sem mudar status)
         if ($acao === "recalcular") {
             if (function_exists("recalcular_venda")) {
                 $calc = recalcular_venda($conexao, $id);
@@ -59,15 +59,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ? ["type"=>"success","msg"=>"Venda recalculada com sucesso."]
                     : ["type"=>"danger","msg"=>"Falhou recalcular: ".$calc["erro"]];
             } else {
-                $flash = ["type"=>"warning","msg"=>"financeiro.php não encontrado — não consegui recalcular."];
+                $flash = ["type"=>"warning","msg"=>"financeiro.php nÃ£o encontrado â€” nÃ£o consegui recalcular."];
             }
         }
 
-        // ✅ Pagar / Cancelar
+        // âœ… Pagar / Cancelar
         if ($acao === "pagar" || $acao === "cancelar") {
             $novoStatus = ($acao === 'pagar') ? 'PAGO' : 'CANCELADO';
 
-            // Se tiver regra de aprovação e quiseres travar:
+            // Se tiver regra de aprovaÃ§Ã£o e quiseres travar:
             if ($acao === "pagar" && $hasApv) {
                 $chk = mysqli_prepare($conexao, "SELECT precisa_aprovacao FROM vendas WHERE id=? LIMIT 1");
                 mysqli_stmt_bind_param($chk, "i", $id);
@@ -77,20 +77,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 mysqli_stmt_close($chk);
 
                 if ($row && (int)$row["precisa_aprovacao"] === 1) {
-                    $flash = ["type"=>"warning","msg"=>"Esta venda precisa de aprovação (lucro abaixo do mínimo). Não foi marcada como PAGA."];
+                    $flash = ["type"=>"warning","msg"=>"Esta venda precisa de aprovaÃ§Ã£o (lucro abaixo do mÃ­nimo). NÃ£o foi marcada como PAGA."];
                     $novoStatus = null;
                 }
             }
 
             if ($novoStatus) {
-                // Só atualiza se ainda não estiver PAGO/CANCELADO
+                // SÃ³ atualiza se ainda nÃ£o estiver PAGO/CANCELADO
                 $stmt = mysqli_prepare($conexao, "UPDATE vendas SET status = ? WHERE id = ? AND status = 'PENDENTE'");
                 mysqli_stmt_bind_param($stmt, "si", $novoStatus, $id);
 
                 if (mysqli_stmt_execute($stmt)) {
                     if (mysqli_stmt_affected_rows($stmt) > 0) {
 
-                        // tenta recalcular após mudar status
+                        // tenta recalcular apÃ³s mudar status
                         if (function_exists("recalcular_venda")) {
                             $calc = recalcular_venda($conexao, $id);
                             if (!$calc["ok"]) {
@@ -103,7 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         }
 
                     } else {
-                        $flash = ["type" => "warning", "msg" => "Nada mudou. Talvez a venda já não esteja PENDENTE."];
+                        $flash = ["type" => "warning", "msg" => "Nada mudou. Talvez a venda jÃ¡ nÃ£o esteja PENDENTE."];
                     }
                 } else {
                     $flash = ["type" => "danger", "msg" => "Erro ao atualizar: " . mysqli_error($conexao)];
@@ -213,7 +213,7 @@ while ($row = mysqli_fetch_assoc($resList)) $vendas[] = $row;
 mysqli_stmt_close($stmtList);
 
 // ==============================
-// Totais rápidos (usa comissao_rg se existir; senão usa comissao antiga)
+// Totais rÃ¡pidos (usa comissao_rg se existir; senÃ£o usa comissao antiga)
 // ==============================
 $campoComissao = $hasCRG ? "v.comissao_rg" : "v.comissao";
 
@@ -244,219 +244,9 @@ function buildQuery(array $extra = []) {
     foreach ($extra as $k => $v) $base[$k] = $v;
     return http_build_query($base);
 }
-?>
-<!doctype html>
-<html lang="pt">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Admin | Vendas - RG Auto Sales</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body { background: #eef3f8; }
-  </style>
-  <link rel="stylesheet" href="<?= h(asset('css/admin-modern.css')) ?>">
-</head>
-<body>
-<div class="container py-4 sales-page">
 
-  <div class="rg-page-hero">
-    <div>
-      <h3>Vendas</h3>
-      <small>Modelo comercial com lucro real, pagamentos e comissoes.</small>
-    </div>
-    <div class="rg-page-actions">
-      <a class="btn btn-success" href="<?= h(url('admin/vendas/nova_venda.php')) ?>">+ Nova venda</a>
-      <a class="btn btn-outline-light" href="<?= h(url('app/modules/finance/export_vendas_csv.php')) ?>">Exportar CSV</a>
-      <a class="btn btn-light" href="<?= h(url('admin/dashboard.php')) ?>">Dashboard</a>
-    </div>
-  </div>
+$pageTitle = 'Vendas';
+$pageSubtitle = 'Gestão comercial, pagamentos e histórico de vendas';
+$contentFile = BASE_PATH . '/app/views/admin/vendas/vendas_content.php';
 
-  <?php if ($flash): ?>
-    <div class="alert alert-<?php echo h($flash['type']); ?> alert-dismissible fade show" role="alert">
-      <?php echo h($flash['msg']); ?>
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
-    </div>
-  <?php endif; ?>
-
-  <!-- KPIs -->
-  <div class="rg-kpi-grid">
-    <div class="rg-kpi-card is-success">
-      <strong><?php echo $vendasPagas; ?></strong>
-      <span>Vendas pagas</span>
-    </div>
-
-    <div class="rg-kpi-card is-warning">
-      <strong><?php echo $vendasPend; ?></strong>
-      <span>Vendas pendentes</span>
-    </div>
-
-    <div class="rg-kpi-card is-info">
-      <strong><?php echo number_format($comissaoPaga, 2, ',', '.'); ?> MT</strong>
-      <span><?= $hasCRG ? "Comissão RG paga" : "Comissão paga" ?></span>
-    </div>
-
-    <div class="rg-kpi-card is-warning">
-      <strong><?php echo number_format($comissaoPend, 2, ',', '.'); ?> MT</strong>
-      <span><?= $hasCRG ? "Comissão RG pendente" : "Pendente a receber" ?></span>
-    </div>
-  </div>
-
-  <!-- Filtros -->
-  <div class="rg-panel">
-    <div class="rg-panel-body">
-      <form class="row g-2 align-items-end" method="GET" action="">
-        <div class="col-md-2">
-          <label class="form-label">Status</label>
-          <select name="status" class="form-select">
-            <option value="TODOS" <?php echo ($status==='TODOS')?'selected':''; ?>>Todos</option>
-            <option value="PENDENTE" <?php echo ($status==='PENDENTE')?'selected':''; ?>>Pendente</option>
-            <option value="PAGO" <?php echo ($status==='PAGO')?'selected':''; ?>>Pago</option>
-            <option value="CANCELADO" <?php echo ($status==='CANCELADO')?'selected':''; ?>>Cancelado</option>
-          </select>
-        </div>
-
-        <div class="col-md-2">
-          <label class="form-label">Data (de)</label>
-          <input type="date" name="data_de" class="form-control" value="<?php echo h($data_de); ?>">
-        </div>
-
-        <div class="col-md-2">
-          <label class="form-label">Data (até)</label>
-          <input type="date" name="data_ate" class="form-control" value="<?php echo h($data_ate); ?>">
-        </div>
-
-        <div class="col-md-4">
-          <label class="form-label">Pesquisar (nome/telefone/email)</label>
-          <input type="text" name="q" class="form-control" placeholder="Ex: Gani / 84... / email" value="<?php echo h($q); ?>">
-        </div>
-
-        <div class="col-md-2 d-grid">
-          <button class="btn btn-dark" type="submit">Filtrar</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Tabela -->
-  <div class="rg-table-wrap">
-    <table class="table table-hover mb-0 align-middle">
-      <thead class="table-light">
-        <tr>
-          <th>ID</th>
-          <th>Data</th>
-          <th>Cliente</th>
-          <th>Carro</th>
-          <th class="text-end">Valor</th>
-          <th class="text-end"><?= $hasCRG ? "RG" : "Comissão" ?></th>
-          <?php if($hasLucro): ?><th class="text-end">Lucro</th><?php endif; ?>
-          <th>Status</th>
-          <th class="text-end">Ações</th>
-        </tr>
-      </thead>
-      <tbody>
-      <?php if (count($vendas) === 0): ?>
-        <tr><td colspan="<?php echo $hasLucro?9:8; ?>" class="text-center py-4 text-muted">Nenhuma venda encontrada.</td></tr>
-      <?php else: ?>
-        <?php foreach ($vendas as $v): ?>
-          <tr>
-            <td><?php echo (int)$v['id']; ?></td>
-            <td><?php echo h($v['data_venda']); ?></td>
-            <td>
-              <div class="fw-semibold"><?php echo h($v['cliente_nome']); ?></div>
-              <div class="text-muted small"><?php echo h($v['cliente_telefone']); ?> · <?php echo h($v['cliente_email']); ?></div>
-            </td>
-            <td><?php echo h($v['marca']); ?> <?php echo h($v['modelo']); ?> (<?php echo h($v['ano']); ?>)</td>
-            <td class="text-end"><?php echo number_format((float)$v['valor_carro'], 2, ',', '.'); ?> MT</td>
-
-            <td class="text-end">
-              <?php
-                if ($hasCRG && isset($v['comissao_rg'])) echo number_format((float)$v['comissao_rg'], 2, ',', '.') . " MT";
-                else echo number_format((float)$v['comissao'], 2, ',', '.') . " MT";
-              ?>
-            </td>
-
-            <?php if($hasLucro): ?>
-              <td class="text-end"><?php echo number_format((float)$v['lucro'], 2, ',', '.'); ?> MT</td>
-            <?php endif; ?>
-
-            <td>
-              <?php
-                $st = $v['status'];
-                $badge = 'secondary';
-                if ($st === 'PENDENTE') $badge = 'warning';
-                if ($st === 'PAGO') $badge = 'success';
-                if ($st === 'CANCELADO') $badge = 'danger';
-              ?>
-              <span class="badge text-bg-<?php echo $badge; ?>"><?php echo h($st); ?></span>
-
-              <?php if ($hasApv && isset($v['precisa_aprovacao']) && (int)$v['precisa_aprovacao'] === 1): ?>
-                <span class="badge text-bg-dark ms-1">Precisa aprovação</span>
-              <?php endif; ?>
-            </td>
-
-            <td class="text-end">
-              <a class="btn btn-sm btn-outline-primary" href="<?= h(url('admin/vendas/venda_detalhe.php?id=' . (int)$v['id'])) ?>">Ver</a>
-
-              <!-- ✅ Custos por venda -->
-              <a class="btn btn-sm btn-outline-secondary" href="<?= h(url('app/modules/finance/custos.php?venda_id=' . (int)$v['id'])) ?>">Custos</a>
-
-              <!-- ✅ Recalcular (opcional) -->
-              <?php if (function_exists("recalcular_venda") && $st !== 'CANCELADO'): ?>
-                <form class="d-inline" method="POST" action="">
-                  <input type="hidden" name="id" value="<?php echo (int)$v['id']; ?>">
-                  <input type="hidden" name="acao" value="recalcular">
-                  <input type="hidden" name="token" value="<?php echo h($_SESSION['csrf_token']); ?>">
-                  <button class="btn btn-sm btn-outline-dark" type="submit">Recalcular</button>
-                </form>
-              <?php endif; ?>
-
-              <?php if ($st === 'PENDENTE'): ?>
-                <form class="d-inline" method="POST" action="">
-                  <input type="hidden" name="id" value="<?php echo (int)$v['id']; ?>">
-                  <input type="hidden" name="acao" value="pagar">
-                  <input type="hidden" name="token" value="<?php echo h($_SESSION['csrf_token']); ?>">
-                  <button class="btn btn-sm btn-success" type="submit" onclick="return confirm('Marcar esta venda como PAGA?');">
-                    Marcar Pago
-                  </button>
-                </form>
-
-                <form class="d-inline" method="POST" action="">
-                  <input type="hidden" name="id" value="<?php echo (int)$v['id']; ?>">
-                  <input type="hidden" name="acao" value="cancelar">
-                  <input type="hidden" name="token" value="<?php echo h($_SESSION['csrf_token']); ?>">
-                  <button class="btn btn-sm btn-outline-danger" type="submit" onclick="return confirm('Cancelar esta venda?');">
-                    Cancelar
-                  </button>
-                </form>
-              <?php endif; ?>
-            </td>
-          </tr>
-        <?php endforeach; ?>
-      <?php endif; ?>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- Paginação -->
-  <div class="d-flex justify-content-between align-items-center mt-3">
-    <div class="text-muted small">
-      Total: <?php echo $totalRows; ?> venda(s) · Página <?php echo $page; ?> de <?php echo $totalPages; ?>
-    </div>
-
-    <nav>
-      <ul class="pagination mb-0">
-        <li class="page-item <?php echo ($page<=1)?'disabled':''; ?>">
-          <a class="page-link" href="?<?php echo buildQuery(['page' => $page-1]); ?>">Anterior</a>
-        </li>
-        <li class="page-item <?php echo ($page>=$totalPages)?'disabled':''; ?>">
-          <a class="page-link" href="?<?php echo buildQuery(['page' => $page+1]); ?>">Próxima</a>
-        </li>
-      </ul>
-    </nav>
-  </div>
-
-</div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+require BASE_PATH . '/app/views/layouts/admin_layout.php';

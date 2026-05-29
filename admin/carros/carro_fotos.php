@@ -61,12 +61,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_fotos'])) {
     if (!isset($_FILES['fotos']) || empty($_FILES['fotos']['name'][0])) {
         $erroUpload = "Seleciona pelo menos uma foto.";
     } else {
-        $pastaFisica = realpath(__DIR__ . "/..") . "/uploads/carros/";
-        if (!is_dir($pastaFisica)) {
-            mkdir($pastaFisica, 0777, true);
-        }
-
-        $permitidas = ['jpg', 'jpeg', 'png', 'webp'];
+        $pastaFisica = __DIR__ . "/../uploads/carros/";
+        $maxSize = 3 * 1024 * 1024;
         $enviadas = 0;
 
         $stmtMax = mysqli_prepare($conexao, "SELECT COALESCE(MAX(ordem), 0) AS max_ordem FROM carros_fotos WHERE carro_id=?");
@@ -81,25 +77,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_fotos'])) {
         foreach ($_FILES['fotos']['tmp_name'] as $i => $tmpName) {
             $erro = $_FILES['fotos']['error'][$i] ?? UPLOAD_ERR_NO_FILE;
             $nomeOriginal = $_FILES['fotos']['name'][$i] ?? '';
+            $tamanho = (int)($_FILES['fotos']['size'][$i] ?? 0);
 
-            if ($erro !== UPLOAD_ERR_OK || !is_uploaded_file($tmpName)) {
+            if ($erro !== UPLOAD_ERR_OK) {
                 continue;
             }
 
-            $ext = strtolower(pathinfo($nomeOriginal, PATHINFO_EXTENSION));
-            if (!in_array($ext, $permitidas, true)) {
-                continue;
-            }
-
-            $novoNome = 'carro_' . $carro_id . '_' . time() . '_' . $i . '_' . bin2hex(random_bytes(3)) . '.' . $ext;
-            $destinoFisico = $pastaFisica . $novoNome;
-            $caminhoBD = 'uploads/carros/' . $novoNome;
-
-            if (!move_uploaded_file($tmpName, $destinoFisico)) {
+            $file = [
+                'name' => $nomeOriginal,
+                'tmp_name' => $tmpName,
+                'error' => $erro,
+                'size' => $tamanho,
+            ];
+            [$okUpload, $infoUpload] = secure_uploaded_image($file, $pastaFisica, 'uploads/carros', $maxSize, 'carro-' . $carro_id);
+            if (!$okUpload) {
                 continue;
             }
 
             $ordemAtual++;
+            $caminhoBD = $infoUpload['rel'];
 
             $stmtIns = mysqli_prepare($conexao, "INSERT INTO carros_fotos (carro_id, caminho, ordem) VALUES (?, ?, ?)");
             mysqli_stmt_bind_param($stmtIns, "isi", $carro_id, $caminhoBD, $ordemAtual);
@@ -340,7 +336,7 @@ if (grid) {
         fetch('carro_fotos_order.php', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ carro_id: carroId, ids })
+            body: JSON.stringify({ carro_id: carroId, ids, csrf_token: '<?= h(csrf_token()) ?>' })
         })
         .then(r => r.json())
         .then(data => {
@@ -393,7 +389,7 @@ if (grid) {
         fetch('carro_fotos_delete.php', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ id })
+            body: JSON.stringify({ id, csrf_token: '<?= h(csrf_token()) ?>' })
         })
         .then(r => r.json())
         .then(data => {

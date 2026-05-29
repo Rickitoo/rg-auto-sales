@@ -11,6 +11,12 @@ if ($_SESSION['user']['role'] !== 'admin') {
 
 header('Content-Type: application/json');
 
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo json_encode(['ok' => false, 'error' => 'Metodo invalido.']);
+    exit;
+}
+
 function caminhoFisicoFoto(string $caminho): string {
     $caminho = trim($caminho);
 
@@ -29,8 +35,21 @@ function caminhoFisicoFoto(string $caminho): string {
 
 $raw = file_get_contents("php://input");
 $data = json_decode($raw, true);
+if (!is_array($data)) {
+    $data = [];
+}
 
 $id = (int)($data['id'] ?? 0);
+$csrfToken = (string)($data['csrf_token'] ?? '');
+
+if (
+    empty($_SESSION['csrf_token']) ||
+    !hash_equals($_SESSION['csrf_token'], $csrfToken)
+) {
+    http_response_code(403);
+    echo json_encode(['ok' => false, 'error' => 'CSRF invalido.']);
+    exit;
+}
 
 if ($id <= 0) {
     echo json_encode(['ok' => false, 'error' => 'ID inválido.']);

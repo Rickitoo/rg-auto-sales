@@ -13,12 +13,39 @@ function respond($msg, $code = 200) {
     exit();
 }
 
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    respond("method_not_allowed", 405);
+}
+
+$csrfToken = $_POST['csrf_token'] ?? '';
+if (
+    empty($_SESSION['csrf_token']) ||
+    !hash_equals($_SESSION['csrf_token'], $csrfToken)
+) {
+    respond("csrf_invalid", 403);
+}
+
 // Receber dados
-$id = (int)($_POST['id'] ?? 0);
+$id = (int)($_POST['lead_id'] ?? 0);
 $status = $_POST['status'] ?? '';
 
 // Validação básica
-$allowed = ['novo','contactado','qualificado','agendado','negociacao','fechado','perdido'];
+$allowed = [
+    'novo',
+    'contactado',
+    'qualificado',
+    'agendado',
+    'orcamento',
+    'aguardando_opcoes',
+    'negociacao',
+    'pagamento',
+    'embarcado',
+    'em_transito',
+    'desalfandegamento',
+    'entregue',
+    'fechado',
+    'perdido',
+];
 
 if ($id <= 0 || !in_array($status, $allowed)) {
     respond("invalid", 400);
@@ -67,7 +94,7 @@ function setStatus(id, status) {
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
         },
-        body: 'id=' + id + '&status=' + status
+        body: 'lead_id=' + id + '&status=' + status + '&csrf_token=<?= h(csrf_token()) ?>'
     })
     .then(res => res.text())
     .then(res => {

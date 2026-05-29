@@ -8,7 +8,20 @@ if ($_SESSION['user']['role'] !== 'admin') {
 
 if (!function_exists('h')) { function h($s){ return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); } }
 
-$id = intval($_GET['id'] ?? $_POST['id'] ?? 0);
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    redirect_to('app/modules/finance/financeiro.php?msg=metodo_invalido');
+}
+
+$csrfToken = $_POST['csrf_token'] ?? '';
+if (
+    empty($_SESSION['csrf_token']) ||
+    !hash_equals($_SESSION['csrf_token'], $csrfToken)
+) {
+    http_response_code(403);
+    exit('CSRF inválido.');
+}
+
+$id = intval($_POST['id'] ?? $_POST['venda_id'] ?? 0);
 if ($id <= 0) die("ID inválido");
 
 $erro = "";
@@ -34,7 +47,7 @@ if (!$v) die("Venda não encontrada");
 // =========================
 // PROCESSAR PAGAMENTO
 // =========================
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if (isset($_POST['confirmar_pagamento'])) {
 
     $forma = $_POST['forma_pagamento'] ?? '';
 
@@ -90,7 +103,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <form method="POST">
 
+<?= csrf_input() ?>
 <input type="hidden" name="id" value="<?= $id ?>">
+<input type="hidden" name="confirmar_pagamento" value="1">
 
 <label>Forma de Pagamento</label>
 <select name="forma_pagamento" required>

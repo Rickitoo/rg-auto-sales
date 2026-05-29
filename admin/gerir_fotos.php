@@ -107,8 +107,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors = $_FILES['fotos']['error'] ?? [];
         $sizes = $_FILES['fotos']['size'] ?? [];
 
-        $permitidas = ['jpg','jpeg','png','webp'];
-
         $resMax = mysqli_query($conexao, "SELECT COALESCE(MAX(ordem),0) AS max_ordem FROM caminho WHERE carro_id=$id");
         $ordemAtual = (int)(mysqli_fetch_assoc($resMax)['max_ordem'] ?? 0);
 
@@ -122,22 +120,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $nomeOriginal = $nomes[$i];
             $size = (int)$sizes[$i];
 
-            if ($size <= 0 || $size > 8*1024*1024) continue;
+            $file = [
+                'name' => $nomeOriginal,
+                'tmp_name' => $tmp,
+                'error' => $errors[$i] ?? UPLOAD_ERR_NO_FILE,
+                'size' => $size,
+            ];
+            [$okUpload, $infoUpload] = secure_uploaded_image($file, $uploadDir, '', 8 * 1024 * 1024, 'carro-' . $id);
+            if (!$okUpload) continue;
 
-            $ext = strtolower(pathinfo($nomeOriginal, PATHINFO_EXTENSION));
-            if (!in_array($ext,$permitidas)) continue;
-
-            $mime = @mime_content_type($tmp);
-            if (!in_array($mime,['image/jpeg','image/png','image/webp'])) continue;
-
-            $novoNome = "carro_{$id}_" . time() . "_" . bin2hex(random_bytes(4)) . ".$ext";
-            $destino = $uploadDir . "/" . $novoNome;
-
-            if (move_uploaded_file($tmp,$destino)) {
-                $ordemAtual++;
-                mysqli_query($conexao,"INSERT INTO caminho (carro_id,foto,ordem) VALUES ($id,'$novoNome',$ordemAtual)");
-                $enviadas++;
-            }
+            $novoNome = $infoUpload['name'];
+            $ordemAtual++;
+            mysqli_query($conexao,"INSERT INTO caminho (carro_id,foto,ordem) VALUES ($id,'$novoNome',$ordemAtual)");
+            $enviadas++;
         }
 
         reordenarFotos($conexao,$id);

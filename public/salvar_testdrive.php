@@ -2,9 +2,6 @@
 require_once __DIR__ . '/../app/core/bootstrap.php';
 
 // salvar_testdrive.php
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-
 
 function clean($s){ return trim((string)$s); }
 
@@ -31,12 +28,16 @@ $stmt = mysqli_prepare($conexao, "
   VALUES ('testdrive', ?, ?, ?, ?, ?, ?, ?, ?, 'novo')
 ");
 
-if (!$stmt) die("Erro prepare: " . mysqli_error($conexao));
+if (!$stmt) {
+  http_response_code(500);
+  die("Não foi possível guardar o pedido de test drive neste momento. Tente novamente mais tarde.");
+}
 
 mysqli_stmt_bind_param($stmt, "ssssssis", $nome, $telefone, $email, $mensagem, $marca, $modelo, $ano, $origem);
 
 if (!mysqli_stmt_execute($stmt)) {
-  die("Erro ao salvar lead: " . mysqli_stmt_error($stmt));
+  http_response_code(500);
+  die("Não foi possível guardar o pedido de test drive neste momento. Tente novamente mais tarde.");
 }
 
 $lead_id = mysqli_insert_id($conexao);

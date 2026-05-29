@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 require_once __DIR__ . '/../../app/core/bootstrap.php';
 require_admin();
 
@@ -27,7 +27,7 @@ $inicioMes = date('Y-m-01');
 $fimMes    = date('Y-m-t');
 
 // ===============================
-// RECEITA (COMISSÕES)
+// RECEITA (COMISSÃ•ES)
 // ===============================
 $campoReceita = finance_col_exists($conexao, 'vendas', 'comissao_rg') ? 'comissao_rg' : 'comissao';
 $campoLucro = finance_col_exists($conexao, 'vendas', 'lucro') ? 'lucro' : $campoReceita;
@@ -81,62 +81,12 @@ if ($chk && mysqli_num_rows($chk) > 0) {
 $lucro = $lucroPago - $custosMes;
 
 // ===============================
-// PREVISÃO
+// PREVISÃƒO
 // ===============================
 $lucroPrevisto = $lucroTotal - $custosMes;
 
-require_once __DIR__ . '/../../includes/layout_top.php';
-?>
-<div class="rg-page-hero">
-    <div>
-        <h2>Dashboard Financeiro</h2>
-        <p>Visao do mes atual para recebidos, pendentes, custos e lucro real.</p>
-    </div>
-    <div class="rg-page-actions">
-        <a class="top-btn light" href="<?= h(url('admin/vendas/vendas.php')) ?>">Vendas</a>
-        <a class="top-btn primary" href="<?= h(url('admin/vendas/nova_venda.php')) ?>">Nova venda</a>
-    </div>
-</div>
+$pageTitle = 'Financeiro';
+$pageSubtitle = 'Controle de lucros, comissões e pagamentos';
+$contentFile = BASE_PATH . '/app/views/admin/financeiro/financeiro_content.php';
 
-<div class="rg-kpi-grid">
-    <div class="rg-kpi-card is-success">
-        <strong><?= money($recebido) ?></strong>
-        <span>Recebido no mes</span>
-    </div>
-
-    <div class="rg-kpi-card is-warning">
-        <strong><?= money($pendente) ?></strong>
-        <span>Pendente</span>
-    </div>
-
-    <div class="rg-kpi-card is-danger">
-        <strong><?= money($custosMes) ?></strong>
-        <span>Custos</span>
-    </div>
-
-    <div class="rg-kpi-card is-info">
-        <strong><?= money($lucro) ?></strong>
-        <span>Lucro real</span>
-    </div>
-</div>
-
-<div class="page-card finance-forecast">
-    <span>Previsao</span>
-    <strong style="display:block;font-size:32px;line-height:1.1;margin-top:8px;">
-        <?= money($lucroPrevisto) ?>
-    </strong>
-    <small>Se todas vendas forem pagas.</small>
-</div>
-
-<?php if($pendente > 0): ?>
-    <div class="rg-alert rg-alert-warning">
-        Tens dinheiro pendente. Foco em cobrar clientes.
-    </div>
-<?php endif; ?>
-
-<?php if($lucro < 0): ?>
-    <div class="rg-alert rg-alert-danger">
-        Estas no prejuizo este mes.
-    </div>
-<?php endif; ?>
-<?php require_once __DIR__ . '/../../includes/layout_bottom.php'; ?>
+require BASE_PATH . '/app/views/layouts/admin_layout.php';

@@ -15,6 +15,18 @@ function h($v){
 
 $lead_id = (int)($_GET['id'] ?? 0);
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $csrfToken = $_POST['csrf_token'] ?? '';
+    if (
+        !is_string($csrfToken) ||
+        empty($_SESSION['csrf_token']) ||
+        !hash_equals($_SESSION['csrf_token'], $csrfToken)
+    ) {
+        http_response_code(403);
+        exit('CSRF invalido.');
+    }
+}
+
 if ($lead_id <= 0) {
     die("Lead inválido");
 }
@@ -59,6 +71,15 @@ $statusClass = match($lead['status']) {
 // ENVIAR MENSAGEM
 // ======================
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $csrfToken = $_POST['csrf_token'] ?? '';
+    if (
+        !is_string($csrfToken) ||
+        empty($_SESSION['csrf_token']) ||
+        !hash_equals($_SESSION['csrf_token'], $csrfToken)
+    ) {
+        http_response_code(403);
+        exit('CSRF invalido.');
+    }
 
     $mensagem = trim($_POST['mensagem'] ?? '');
 
@@ -383,12 +404,13 @@ textarea{
                 💬 WhatsApp
             </a>
 
-            <a
-                href="<?= h(url('admin/vendas/marcar_venda.php?lead_id=' . (int)$lead_id)) ?>"
-                class="btn btn-blue"
-            >
+            <form method="POST" action="<?= h(url('admin/vendas/marcar_venda.php')) ?>" style="display:inline;">
+                <?= csrf_input() ?>
+                <input type="hidden" name="lead_id" value="<?= (int)$lead_id ?>">
+            <button type="submit" class="btn btn-blue">
                 💰 Fechar Venda
-            </a>
+            </button>
+            </form>
 
             <a
                 href="editar_lead.php?id=<?= $lead_id ?>"
@@ -424,6 +446,7 @@ textarea{
     <div class="card">
 
         <form method="POST">
+            <?= csrf_input() ?>
 
             <textarea
                 name="mensagem"

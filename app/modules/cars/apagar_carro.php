@@ -4,24 +4,20 @@ require_admin();
 
 // admin/apagar_carro.php
 
-if (!isset($_SESSION['admin'])) {
-    redirect_to('auth/login.php');
-    exit();
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    redirect_to('app/modules/cars/listar_carros.php?msg=metodo_invalido');
 }
 
-
-if (session_status() === PHP_SESSION_NONE) {
+$csrf = $_POST['csrf_token'] ?? '';
+if (!isset($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $csrf)) {
+    http_response_code(403);
+    exit("CSRF invalido.");
 }
 
-$id = intval($_GET['id'] ?? 0);
-$csrf = $_GET['csrf_token'] ?? '';
+$id = intval($_POST['id'] ?? 0);
 
 if ($id <= 0) {
-    die("ID inválido.");
-}
-
-if (!isset($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $csrf)) {
-    die("CSRF inválido.");
+    die("ID invalido.");
 }
 
 // Buscar imagem principal do carro

@@ -4,8 +4,24 @@ require_admin();
 
 header('Content-Type: application/json');
 
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo json_encode(['ok' => false, 'error' => 'Metodo invalido.']);
+    exit;
+}
+
 $raw = file_get_contents("php://input");
 $data = json_decode($raw, true);
+
+$csrfToken = (string)($data['csrf_token'] ?? '');
+if (
+    empty($_SESSION['csrf_token']) ||
+    !hash_equals($_SESSION['csrf_token'], $csrfToken)
+) {
+    http_response_code(403);
+    echo json_encode(['ok' => false, 'error' => 'CSRF invalido.']);
+    exit;
+}
 
 $carro_id = (int)($data['carro_id'] ?? 0);
 $ids = $data['ids'] ?? [];

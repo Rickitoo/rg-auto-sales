@@ -1,9 +1,6 @@
 <?php
 require_once __DIR__ . '/../app/core/bootstrap.php';
 
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-
 
 // ======================
 // FUNÇÃO LIMPAR
@@ -87,7 +84,8 @@ $stmt = mysqli_prepare($conexao, "
 ");
 
 if (!$stmt) {
-    die("Erro prepare: " . mysqli_error($conexao));
+    http_response_code(500);
+    die("Não foi possível guardar o agendamento neste momento. Tente novamente mais tarde.");
 }
 
 mysqli_stmt_bind_param(
@@ -107,7 +105,8 @@ mysqli_stmt_bind_param(
 );
 
 if (!mysqli_stmt_execute($stmt)) {
-    die("Erro ao guardar agendamento: " . mysqli_stmt_error($stmt));
+    http_response_code(500);
+    die("Não foi possível guardar o agendamento neste momento. Tente novamente mais tarde.");
 }
 
 $cliente_id = mysqli_insert_id($conexao);

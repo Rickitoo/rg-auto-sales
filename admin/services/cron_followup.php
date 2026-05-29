@@ -2,6 +2,21 @@
 require_once __DIR__ . '/../../app/core/bootstrap.php';
 require_admin();
 
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    exit('Metodo invalido.');
+}
+
+$csrfToken = $_POST['csrf_token'] ?? '';
+if (
+    !is_string($csrfToken) ||
+    empty($_SESSION['csrf_token']) ||
+    !hash_equals($_SESSION['csrf_token'], $csrfToken)
+) {
+    http_response_code(403);
+    exit('CSRF invalido.');
+}
+
 // buscar leads que precisam de ação
 $res = mysqli_query($conexao, "
     SELECT * FROM leads
@@ -10,11 +25,15 @@ $res = mysqli_query($conexao, "
     LIMIT 50
 ");
 
-while($lead = mysqli_fetch_assoc($res)) {
+while ($lead = mysqli_fetch_assoc($res)) {
+    $lead_id = (int)($lead['id'] ?? 0);
+
+    if ($lead_id <= 0) {
+        continue;
+    }
 
     $nome = $lead['nome'];
-    $telefone = preg_replace('/[^0-9]/','',$lead['telefone']);
-    $lead_id = $lead['id'];
+    $telefone = preg_replace('/[^0-9]/', '', $lead['telefone']);
 
     // escolher mensagem automaticamente
     $msg = "Olá $nome, estou a dar seguimento ao seu interesse no carro.";
@@ -38,7 +57,7 @@ while($lead = mysqli_fetch_assoc($res)) {
 
     // reagendar follow-up (24h depois)
     $stmt = mysqli_prepare($conexao, "
-        UPDATE leads 
+        UPDATE leads
         SET proximo_followup = DATE_ADD(NOW(), INTERVAL 1 DAY)
         WHERE id=?
     ");

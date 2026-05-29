@@ -327,14 +327,18 @@ require_once __DIR__ . '/../../../includes/layout_top.php';
                                 <a href="gerir_fotos.php?id=<?= $idCarro ?>" class="btn-dark">Fotos</a>
 
                                 <?php if ($carro['status'] !== 'vendido'): ?>
-                                    <a href="<?= h(url('admin/vendas/marcar_venda.php?id=' . $idCarro)) ?>" class="btn-success">Marcar Venda</a>
+                                    <form method="POST" action="<?= h(url('admin/vendas/marcar_venda.php')) ?>" style="display:inline;">
+                                        <?= csrf_input() ?>
+                                        <input type="hidden" name="id" value="<?= $idCarro ?>">
+                                        <button type="submit" class="btn-success">Marcar Venda</button>
+                                    </form>
                                 <?php endif; ?>
 
-                                <a href="apagar_carro.php?id=<?= $idCarro ?>&csrf_token=<?= h($_SESSION['csrf_token']) ?>"
-                                   class="btn-danger"
-                                   onclick="return confirm('Tens certeza que queres apagar este carro?')">
-                                   Apagar
-                                </a>
+                                <form method="POST" action="apagar_carro.php" style="display:inline;" onsubmit="return confirm('Tens certeza que queres apagar este carro?')">
+                                    <?= csrf_input() ?>
+                                    <input type="hidden" name="id" value="<?= $idCarro ?>">
+                                    <button type="submit" class="btn-danger">Apagar</button>
+                                </form>
                             </div>
                         </td>
                     </tr>

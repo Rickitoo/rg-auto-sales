@@ -38,6 +38,7 @@ require_once __DIR__ . '/../app/core/bootstrap.php';
               <li><a href="<?= h(public_url('account.php')) ?>">Conta</a></li>
               <li><a href="<?= h(public_url('test_drive.php')) ?>">Test Drive</a></li>
               <li><a href="<?= h(public_url('leasing.php')) ?>">Leasing</a></li>
+              <li><a href="<?= h(public_url('importar_carro.php')) ?>">Importar</a></li>
               <li><a href="<?= h(public_url('vender_carro.php')) ?>">Vender</a></li>
             </ul>
           </nav>
@@ -164,6 +165,7 @@ require_once __DIR__ . '/../app/core/bootstrap.php';
           <ul>
             <li><a href="<?= h(public_url('products.php')) ?>">Carros</a></li>
             <li><a href="<?= h(public_url('test_drive.php')) ?>">Agendar Test Drive</a></li>
+            <li><a href="<?= h(public_url('importar_carro.php')) ?>">Importar carro</a></li>
             <li><a href="<?= h(public_url('vender_carro.php')) ?>">Vender viatura</a></li>
             <li><a href="<?= h(public_url('contacto.php')) ?>">Contactos</a></li>
           </ul>

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 require_once __DIR__ . '/../../app/core/bootstrap.php';
 require_admin();
 
@@ -26,7 +26,7 @@ function col_exists(mysqli $con, string $table, string $col): bool {
 
 // ID
 $id = (int)($_GET["id"] ?? $_POST["id"] ?? 0);
-if ($id <= 0) die("ID inválido.");
+if ($id <= 0) die("ID invÃ¡lido.");
 
 // Detecta colunas
 $hasValorVenda  = col_exists($conexao, "vendas", "valor_venda");
@@ -55,7 +55,7 @@ if ($resP) while($r=mysqli_fetch_assoc($resP)) $pessoas[] = $r;
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $token = $_POST["token"] ?? "";
   if (!hash_equals($_SESSION["csrf_token"], $token)) {
-    $flash = ["type"=>"danger","msg"=>"Ação bloqueada (token inválido)."];
+    $flash = ["type"=>"danger","msg"=>"AÃ§Ã£o bloqueada (token invÃ¡lido)."];
   } else {
 
     $marca  = trim($_POST["marca"] ?? "");
@@ -68,7 +68,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $forma_pagamento = trim($_POST["forma_pagamento"] ?? "");
     $formas_ok = ['MPESA','E-MOLA','TRANSFERENCIA','CASH','OUTRO'];
     if (!in_array($forma_pagamento, $formas_ok, true)) {
-      $flash = ["type"=>"danger","msg"=>"Forma de pagamento inválida."];
+      $flash = ["type"=>"danger","msg"=>"Forma de pagamento invÃ¡lida."];
     }
 
     // valores (modelo novo)
@@ -88,24 +88,24 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if ($temVendedor) $vendedor_id = (($_POST["vendedor_id"] ?? "") === "") ? null : (int)$_POST["vendedor_id"];
     if ($temCaptador) $captador_id = (($_POST["captador_id"] ?? "") === "") ? null : (int)$_POST["captador_id"];
 
-    // validações mínimas
+    // validaÃ§Ãµes mÃ­nimas
     if (!$flash) {
       if ($marca === "" || $modelo === "" || $ano <= 0) {
         $flash = ["type"=>"danger","msg"=>"Preencha marca, modelo e ano."];
       } else {
-        // Se modelo novo existir, valor_venda é obrigatório
+        // Se modelo novo existir, valor_venda Ã© obrigatÃ³rio
         if ($hasValorVenda) {
-          if ($valor_venda <= 0) $flash = ["type"=>"danger","msg"=>"Informe um valor de venda válido."];
-          if ($valor_prop < 0)  $flash = ["type"=>"danger","msg"=>"Valor do proprietário não pode ser negativo."];
+          if ($valor_venda <= 0) $flash = ["type"=>"danger","msg"=>"Informe um valor de venda vÃ¡lido."];
+          if ($valor_prop < 0)  $flash = ["type"=>"danger","msg"=>"Valor do proprietÃ¡rio nÃ£o pode ser negativo."];
         } else {
           // banco antigo
-          if ($valor_carro <= 0) $flash = ["type"=>"danger","msg"=>"Informe um valor do carro válido."];
+          if ($valor_carro <= 0) $flash = ["type"=>"danger","msg"=>"Informe um valor do carro vÃ¡lido."];
         }
       }
     }
 
     if (!$flash) {
-      // monta UPDATE só com colunas existentes (sem quebrar)
+      // monta UPDATE sÃ³ com colunas existentes (sem quebrar)
       $sets = [];
       $vals = [];
       $types = "";
@@ -155,7 +155,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $sets[] = "captador_id=?"; $vals[] = $captador_id; $types .= "i";
       }
 
-      // (não mexemos em status aqui; status é pelo detalhe/lista)
+      // (nÃ£o mexemos em status aqui; status Ã© pelo detalhe/lista)
 
       $sql = "UPDATE vendas SET " . implode(", ", $sets) . " WHERE id=?";
       $vals[] = $id;
@@ -215,219 +215,18 @@ $res = mysqli_stmt_get_result($stmt);
 $v = mysqli_fetch_assoc($res);
 mysqli_stmt_close($stmt);
 
-if (!$v) die("Venda não encontrada.");
+if (!$v) die("Venda nÃ£o encontrada.");
 
-// avisos (se já existir lucro)
+// avisos (se jÃ¡ existir lucro)
 $warningLucro = null;
 if ($hasLucro) {
   $lucro = (float)($v["lucro"] ?? 0);
-  if ($lucro < 0) $warningLucro = "⚠️ Lucro negativo: verifica valor do proprietário e custos.";
-  elseif ($hasLucroMin && $lucro < (float)($v["lucro_minimo"] ?? 0)) $warningLucro = "⚠️ Lucro abaixo do mínimo definido.";
+  if ($lucro < 0) $warningLucro = "âš ï¸ Lucro negativo: verifica valor do proprietÃ¡rio e custos.";
+  elseif ($hasLucroMin && $lucro < (float)($v["lucro_minimo"] ?? 0)) $warningLucro = "âš ï¸ Lucro abaixo do mÃ­nimo definido.";
 }
-?>
-<!doctype html>
-<html lang="pt">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Admin | Editar Venda - RG Auto Sales</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body{background:#f6f7fb;}
-    .card{border:0;border-radius:16px;}
-  </style>
-</head>
-<body>
-<div class="container py-4">
 
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-      <h3 class="mb-0">Editar Venda #<?php echo (int)$v["id"]; ?></h3>
-      <small class="text-muted">
-        Cliente: <?php echo h($v["cliente_nome"]); ?> · <?php echo h($v["cliente_telefone"]); ?>
-      </small>
-    </div>
-    <div class="d-flex gap-2">
-      <a class="btn btn-outline-dark" href="<?= h(url('admin/vendas/venda_detalhe.php?id=' . (int)$v['id'])) ?>">Voltar ao detalhe</a>
-      <a class="btn btn-outline-secondary" href="<?= h(url('app/modules/finance/custos.php?venda_id=' . (int)$v['id'])) ?>">Custos</a>
-      <a class="btn btn-outline-primary" href="<?= h(url('admin/vendas/editar_venda.php?id=' . (int)$venda['id'])) ?>">
-        Editar
-      </a>
+$pageTitle = 'Editar Venda';
+$pageSubtitle = 'Atualização comercial e financeira da venda';
+$contentFile = BASE_PATH . '/app/views/admin/vendas/editar_venda_content.php';
 
-    </div>
-  </div>
-
-  <?php if ($flash): ?>
-    <div class="alert alert-<?php echo h($flash["type"]); ?> alert-dismissible fade show" role="alert">
-      <?php echo h($flash["msg"]); ?>
-      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-  <?php endif; ?>
-
-  <?php if ($warningLucro): ?>
-    <div class="alert alert-warning"><?php echo h($warningLucro); ?></div>
-  <?php endif; ?>
-
-  <div class="card shadow-sm">
-    <div class="card-body">
-      <form method="POST" class="row g-3">
-        <input type="hidden" name="token" value="<?php echo h($_SESSION["csrf_token"]); ?>">
-        <input type="hidden" name="id" value="<?php echo (int)$v["id"]; ?>">
-
-        <div class="col-md-4">
-          <label class="form-label">Marca</label>
-          <input class="form-control" name="marca" required value="<?php echo h($v["marca"]); ?>">
-        </div>
-
-        <div class="col-md-4">
-          <label class="form-label">Modelo</label>
-          <input class="form-control" name="modelo" required value="<?php echo h($v["modelo"]); ?>">
-        </div>
-
-        <div class="col-md-4">
-          <label class="form-label">Ano</label>
-          <input class="form-control" type="number" name="ano" required value="<?php echo h($v["ano"]); ?>">
-        </div>
-
-        <div class="col-md-6">
-          <label class="form-label">Data da venda</label>
-          <input class="form-control" type="date" name="data_venda" value="<?php echo h($v["data_venda"]); ?>">
-        </div>
-
-        <div class="col-md-6">
-          <label class="form-label">Forma de pagamento</label>
-          <select class="form-select" name="forma_pagamento" required>
-            <?php
-              $fp = $v["forma_pagamento"] ?? "";
-              $ops = ["MPESA"=>"M-Pesa","E-MOLA"=>"E-Mola","TRANSFERENCIA"=>"Transferência","CASH"=>"Cash","OUTRO"=>"Outro"];
-              echo '<option value="">-- Selecionar --</option>';
-              foreach($ops as $k=>$label){
-                $sel = ($fp===$k) ? "selected" : "";
-                echo '<option value="'.h($k).'" '.$sel.'>'.h($label).'</option>';
-              }
-            ?>
-          </select>
-        </div>
-
-        <?php if ($hasValorVenda): ?>
-          <div class="col-md-6">
-            <label class="form-label">Valor de venda (MT)</label>
-            <input class="form-control" type="number" step="0.01" name="valor_venda"
-                   value="<?php echo h($v["valor_venda"] ?? 0); ?>" required>
-          </div>
-        <?php else: ?>
-          <div class="col-md-6">
-            <label class="form-label">Valor do carro (MT) (modelo antigo)</label>
-            <input class="form-control" type="number" step="0.01" name="valor_carro"
-                   value="<?php echo h($v["valor_carro"] ?? 0); ?>" required>
-          </div>
-        <?php endif; ?>
-
-        <?php if ($hasValorProp): ?>
-          <div class="col-md-6">
-            <label class="form-label">Valor pago ao proprietário (MT)</label>
-            <input class="form-control" type="number" step="0.01" name="valor_proprietario"
-                   value="<?php echo h($v["valor_proprietario"] ?? 0); ?>">
-          </div>
-        <?php endif; ?>
-
-        <?php if ($hasPercVend || $hasPercRG || $hasLucroMin): ?>
-          <div class="col-12"><hr></div>
-          <div class="col-12"><div class="fw-semibold">Regras de comissão (opcional)</div></div>
-
-          <?php if ($hasPercVend): ?>
-            <div class="col-md-4">
-              <label class="form-label">% Vendedor</label>
-              <input class="form-control" type="number" step="0.01" name="perc_vendedor"
-                     value="<?php echo h($v["perc_vendedor"] ?? 20); ?>">
-            </div>
-          <?php endif; ?>
-
-          <?php if ($hasPercRG): ?>
-            <div class="col-md-4">
-              <label class="form-label">% RG</label>
-              <input class="form-control" type="number" step="0.01" name="perc_rg"
-                     value="<?php echo h($v["perc_rg"] ?? 80); ?>">
-            </div>
-          <?php endif; ?>
-
-          <?php if ($hasLucroMin): ?>
-            <div class="col-md-4">
-              <label class="form-label">Lucro mínimo (MT)</label>
-              <input class="form-control" type="number" step="0.01" name="lucro_minimo"
-                     value="<?php echo h($v["lucro_minimo"] ?? 30000); ?>">
-            </div>
-          <?php endif; ?>
-        <?php endif; ?>
-
-        <?php if ($temVendedor || $temCaptador): ?>
-          <div class="col-12"><hr></div>
-          <div class="col-12"><div class="fw-semibold">Equipa (opcional)</div></div>
-
-          <?php if ($temVendedor): ?>
-            <div class="col-md-6">
-              <label class="form-label">Vendedor</label>
-              <select class="form-select" name="vendedor_id">
-                <option value="">-- Nenhum --</option>
-                <?php foreach($pessoas as $p):
-                  $sel = ((int)($v["vendedor_id"] ?? 0) === (int)$p["id"]) ? "selected" : "";
-                ?>
-                  <option value="<?php echo (int)$p["id"]; ?>" <?php echo $sel; ?>>
-                    <?php echo h($p["nome"]); ?>
-                  </option>
-                <?php endforeach; ?>
-              </select>
-            </div>
-          <?php endif; ?>
-
-          <?php if ($temCaptador): ?>
-            <div class="col-md-6">
-              <label class="form-label">Captador</label>
-              <select class="form-select" name="captador_id">
-                <option value="">-- Nenhum --</option>
-                <?php foreach($pessoas as $p):
-                  $sel = ((int)($v["captador_id"] ?? 0) === (int)$p["id"]) ? "selected" : "";
-                ?>
-                  <option value="<?php echo (int)$p["id"]; ?>" <?php echo $sel; ?>>
-                    <?php echo h($p["nome"]); ?>
-                  </option>
-                <?php endforeach; ?>
-              </select>
-            </div>
-          <?php endif; ?>
-        <?php endif; ?>
-
-        <div class="col-12"><hr></div>
-
-        <?php if ($hasLucro): ?>
-          <div class="col-md-4">
-            <div class="text-muted small">Total custos</div>
-            <div class="fw-semibold"><?php echo $hasTCustos ? money($v["total_custos"] ?? 0) : "—"; ?></div>
-          </div>
-          <div class="col-md-4">
-            <div class="text-muted small">Lucro</div>
-            <div class="fw-semibold"><?php echo money($v["lucro"] ?? 0); ?></div>
-          </div>
-          <div class="col-md-4">
-            <div class="text-muted small">Status</div>
-            <div class="fw-semibold">
-              <?php echo h($v["status"]); ?>
-              <?php if ($hasApv && (int)($v["precisa_aprovacao"] ?? 0) === 1): ?>
-                <span class="badge text-bg-dark ms-1">Precisa aprovação</span>
-              <?php endif; ?>
-            </div>
-          </div>
-        <?php endif; ?>
-
-        <div class="col-12 d-grid">
-          <button class="btn btn-success btn-lg" type="submit">Salvar alterações</button>
-        </div>
-
-      </form>
-    </div>
-  </div>
-
-</div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+require BASE_PATH . '/app/views/layouts/admin_layout.php';

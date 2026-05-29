@@ -18,31 +18,11 @@ mysqli_stmt_execute($stmt);
 $res = mysqli_stmt_get_result($stmt);
 $row = mysqli_fetch_assoc($res);
 if(!$row) die("Lead não encontrado.");
-?>
-<!doctype html>
-<html lang="pt">
-<head>
-  <meta charset="utf-8">
-  <title>Lead #<?=h($row['id'])?></title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
-<div class="container py-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h3 class="m-0">Lead #<?=h($row['id'])?></h3>
-    <a class="btn btn-outline-dark" href="<?= h(url('admin/funil.php')) ?>">Voltar</a>
-  </div>
 
-  <div class="bg-white rounded shadow-sm p-3">
-    <p><b>Nome:</b> <?=h($row['nome'] ?? '')?></p>
-    <p><b>Telefone:</b> <?=h($row['telefone'] ?? '')?></p>
-    <p><b>Email:</b> <?=h($row['email'] ?? '')?></p>
-    <p><b>Tipo:</b> <?=h($row['tipo'] ?? '')?></p>
-    <p><b>Status:</b> <?=h($row['status'] ?? '')?></p>
-    <p><b>Carro:</b> <?=h(trim(($row['marca']??'').' '.($row['modelo']??'').' '.($row['ano']??'')))?></p>
-    <p><b>Mensagem:</b><br><?=nl2br(h($row['mensagem'] ?? ''))?></p>
-    <p class="text-muted m-0"><b>Criado em:</b> <?=h($row['criado_em'] ?? '')?></p>
-  </div>
-</div>
-</body>
-</html>
+$isImportacao = ($row['origem'] ?? '') === 'importacao';
+
+$pageTitle = 'Detalhe do Lead';
+$pageSubtitle = 'Acompanhamento completo da oportunidade';
+$contentFile = BASE_PATH . '/app/views/admin/leads/lead_detalhe_content.php';
+
+require BASE_PATH . '/app/views/layouts/admin_layout.php';

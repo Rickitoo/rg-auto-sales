@@ -128,10 +128,11 @@ $statuses = ['Novo','Em análise','Aprovado','Recusado','Publicado'];
           <a class="btn btn-view" href="vendedor_ver.php?id=<?php echo $id; ?>">Ver detalhes</a>
           <a class="btn btn-wa" href="<?php echo h($waLink); ?>" target="_blank">WhatsApp</a>
           <?php if ($st === 'Aprovado'): ?>
-            <a class="btn btn-view"
-              href="vendedor_converter.php?id=<?php echo $id; ?>">
-              Criar Venda
-            </a>
+            <form action="<?= h(url('admin/vendas/vendedor_converter.php')) ?>" method="POST" style="display:inline;">
+              <?= csrf_input() ?>
+              <input type="hidden" name="id" value="<?php echo $id; ?>">
+              <button class="btn btn-view" type="submit" onclick="return confirm('Criar venda a partir deste pedido?');">Criar Venda</button>
+            </form>
           <?php endif; ?>
 
           <!-- Mudar status -->

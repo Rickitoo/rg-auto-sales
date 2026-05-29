@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 require_once __DIR__ . '/../app/core/bootstrap.php';
 require_admin();
 
@@ -28,7 +28,7 @@ $leadsFechados = n(mysqli_fetch_assoc(mysqli_query($conexao,
 $taxaConversao = $totalLeads > 0 ? ($leadsFechados / $totalLeads) * 100 : 0;
 
 // =========================
-// VENDAS DO MÊS
+// VENDAS DO MÃŠS
 // =========================
 $stmt = mysqli_prepare($conexao, "
     SELECT COUNT(*) as total,
@@ -46,7 +46,7 @@ $vendasMes = n($r['total']);
 $lucroMes  = (float)($r['lucro'] ?? 0);
 
 // =========================
-// FOLLOW-UP REAL (ORDENADO POR URGÊNCIA)
+// FOLLOW-UP REAL (ORDENADO POR URGÃŠNCIA)
 // =========================
 $leadsFollow = [];
 $resFollow = mysqli_query($conexao, "
@@ -90,7 +90,7 @@ while($r = mysqli_fetch_assoc($resTop)){
 // =========================
 $alertas = [];
 
-if ($taxaConversao < 10) $alertas[] = "Taxa de conversão baixa";
+if ($taxaConversao < 10) $alertas[] = "Taxa de conversÃ£o baixa";
 
 $pendentes = n(mysqli_fetch_assoc(mysqli_query($conexao,
     "SELECT COUNT(*) as total FROM vendas WHERE status='PENDENTE'"
@@ -101,7 +101,7 @@ if ($pendentes > 5) $alertas[] = "Muitas vendas pendentes";
 if (count($leadsFollow) > 5) $alertas[] = "Muitos leads sem resposta";
 
 // =========================
-// ÚLTIMAS VENDAS
+// ÃšLTIMAS VENDAS
 // =========================
 $vendas = [];
 $resV = mysqli_query($conexao, "
@@ -116,98 +116,8 @@ while($row = mysqli_fetch_assoc($resV)){
     $vendas[] = $row;
 }
 
-require_once __DIR__ . '/../includes/layout_top.php';
-?>
+$pageTitle = 'Dashboard';
+$pageSubtitle = 'Visão geral da operação RG Auto Sales';
+$contentFile = BASE_PATH . '/app/views/admin/dashboard/dashboard_content.php';
 
-<h2>📊 Dashboard RG Auto Sales</h2>
-
-<!-- KPIs -->
-<div style="display:flex;gap:20px;flex-wrap:wrap;">
-    <div style="background:#0d6efd;color:#fff;padding:15px;border-radius:10px;">
-        <h4>Vendas</h4>
-        <p><?= $vendasMes ?></p>
-    </div>
-
-    <div style="background:#16a34a;color:#fff;padding:15px;border-radius:10px;">
-        <h4>Lucro</h4>
-        <p><?= money($lucroMes) ?></p>
-    </div>
-
-    <div style="background:#9333ea;color:#fff;padding:15px;border-radius:10px;">
-        <h4>Conversão</h4>
-        <p><?= number_format($taxaConversao,1) ?>%</p>
-    </div>
-</div>
-
-<!-- ALERTAS -->
-<h3 class="mt-4">⚠️ Alertas</h3>
-
-<?php if(empty($alertas)): ?>
-<p>Tudo sob controlo ✔</p>
-<?php else: ?>
-<?php foreach($alertas as $a): ?>
-<div style="color:red;">⚠ <?= h($a) ?></div>
-<?php endforeach; ?>
-<?php endif; ?>
-
-<!-- FOLLOW-UP -->
-<h3 class="mt-4">🔥 Follow-up Prioritário</h3>
-
-<?php foreach($leadsFollow as $l): ?>
-<?php
-$tel = preg_replace('/[^0-9]/','',$l['telefone']);
-$msg = urlencode("Olá {$l['nome']}, estou a dar seguimento ao seu interesse.");
-?>
-
-<div style="margin-bottom:8px;">
-<strong><?= h($l['nome']) ?></strong>
-
-<a target="_blank"
-href="https://wa.me/<?= h(str_starts_with($tel, '258') ? $tel : '258' . ltrim($tel, '0')) ?>?text=<?= $msg ?>">
-💬 WhatsApp
-</a>
-
-<a href="<?= h(url('admin/leads/ver_lead.php?id=' . (int)$l['id'])) ?>">
-👁 Ver
-</a>
-</div>
-
-<?php endforeach; ?>
-
-<!-- TOP CARROS -->
-<h3 class="mt-4">🚗 Top Carros</h3>
-
-<?php foreach($topCarros as $c): ?>
-<div><?= h($c['marca'].' '.$c['modelo']) ?> — <?= $c['total'] ?></div>
-<?php endforeach; ?>
-
-<!-- VENDAS -->
-<h3 class="mt-4">💰 Últimas vendas</h3>
-
-<table border="1" cellpadding="10">
-<tr>
-<th>Cliente</th>
-<th>Carro</th>
-<th>Comissão</th>
-<th>Status</th>
-</tr>
-
-<?php foreach($vendas as $v): ?>
-<tr>
-<td><?= h($v['cliente']) ?></td>
-<td><?= h($v['marca'].' '.$v['modelo']) ?></td>
-<td><?= money($v['comissao_rg']) ?></td>
-<td>
-<?php if($v['status']=='PENDENTE'): ?>
-<a href="<?= h(url('admin/vendas/pagar_venda.php?id=' . (int)$v['id'])) ?>">Marcar pago</a>
-<?php else: ?>
-<a class="btn btn-sm btn-success"
-href="<?= h(url('admin/vendas/venda_detalhe.php?id=' . (int)$v['id'])) ?>">PAGO</a>
-<?php endif; ?>
-</td>
-</tr>
-<?php endforeach; ?>
-
-</table>
-
-<?php require_once __DIR__ . '/../includes/layout_bottom.php'; ?>
+require BASE_PATH . '/app/views/layouts/admin_layout.php';

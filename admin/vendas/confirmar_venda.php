@@ -9,14 +9,28 @@ if ($_SESSION['user']['role'] !== 'admin') {
     exit();
 }
 
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    redirect_to('admin/funil.php?msg=metodo_invalido');
+}
+
+$csrfToken = $_POST['csrf_token'] ?? '';
+if (
+    !is_string($csrfToken) ||
+    empty($_SESSION['csrf_token']) ||
+    !hash_equals($_SESSION['csrf_token'], $csrfToken)
+) {
+    http_response_code(403);
+    die("Ação bloqueada (token inválido).");
+}
+
 
 if (!function_exists('h')) { function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); } }
 function money($v){ return number_format((float)$v, 2, ',', '.'); }
 
-$lead_id = (int)($_GET['lead_id'] ?? 0);
+$lead_id = (int)($_POST['lead_id'] ?? 0);
 if ($lead_id <= 0) die("lead_id inválido.");
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if (isset($_POST['valor_venda'], $_POST['valor_proprietario'], $_POST['forma_pagamento'])) {
   $lead_id = (int)($_POST['lead_id'] ?? 0);
   $valor_venda = (float)($_POST['valor_venda'] ?? 0);
   $valor_proprietario = (float)($_POST['valor_proprietario'] ?? 0);
@@ -177,6 +191,7 @@ if (!$lead) die("Lead não encontrado.");
   </div>
 
   <form method="POST" class="bg-white rounded shadow-sm p-3">
+    <?= csrf_input() ?>
     <input type="hidden" name="lead_id" value="<?=h($lead_id)?>">
 
     <div class="row g-3">

@@ -18,10 +18,35 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
   exit;
 }
 
-$id = (int)($_POST['id'] ?? 0);
+$csrfToken = $_POST['csrf_token'] ?? '';
+if (
+  empty($_SESSION['csrf_token']) ||
+  !hash_equals($_SESSION['csrf_token'], $csrfToken)
+) {
+  http_response_code(403);
+  echo json_encode(['ok' => false, 'error' => 'CSRF inválido']);
+  exit;
+}
+
+$id = (int)($_POST['lead_id'] ?? 0);
 $status = $_POST['status'] ?? '';
 
-$allowed = ['novo','contactado','qualificado','agendado','negociacao','fechado','perdido'];
+$allowed = [
+    'novo',
+    'contactado',
+    'qualificado',
+    'agendado',
+    'orcamento',
+    'aguardando_opcoes',
+    'negociacao',
+    'pagamento',
+    'embarcado',
+    'em_transito',
+    'desalfandegamento',
+    'entregue',
+    'fechado',
+    'perdido',
+];
 
 if ($id <= 0 || !in_array($status, $allowed, true)) {
   http_response_code(400);
@@ -44,13 +69,12 @@ if (!mysqli_stmt_execute($stmt)) {
   exit;
 }
 
-echo json_encode(['ok' => true, 'id' => $id, 'status' => $status]);
-
 // Depois de atualizar o status...
 if ($status === 'fechado') {
   echo json_encode([
     'ok' => true,
-    'redirect' => 'confirmar_venda.php?lead_id=' . $id
+    'redirect' => url('admin/vendas/confirmar_venda.php'),
+    'lead_id' => $id
   ]);
   exit;
 }
