@@ -108,6 +108,85 @@ $recentes = array_slice($carros, 4, 4);
             background:#01203f;
             color:#fff;
         }
+        .header--rg{
+            background:
+                linear-gradient(90deg, rgba(1, 32, 63, .96) 0%, rgba(1, 32, 63, .78) 46%, rgba(0, 0, 0, .25) 100%),
+                url("<?= h(asset('ImagensRG/import1.jpeg')) ?>") center/cover no-repeat;
+            margin-top: 20px;
+            min-height: 620px;
+            position: relative;
+        }
+        .header--rg .header__overlay{
+            min-height: 620px;
+            background: linear-gradient(180deg, rgba(0, 0, 0, .22), rgba(0, 0, 0, .5));
+        }
+        .import-home-hero{
+            display: flex;
+            align-items: center;
+            min-height: 520px;
+            padding: 76px 0 86px;
+        }
+        .import-home-hero__content{
+            max-width: 650px;
+        }
+        .import-home-hero__eyebrow{
+            color: #00aeef;
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: .08em;
+            margin: 0 0 14px;
+            text-align: left;
+            text-transform: uppercase;
+        }
+        .import-home-hero h1{
+            color: #fff;
+            font-size: 54px;
+            line-height: 1.08;
+            margin: 0 0 16px;
+            text-align: left;
+        }
+        .import-home-hero p{
+            color: #f4fbff;
+            font-size: 20px;
+            line-height: 1.55;
+            margin: 0;
+            max-width: 590px;
+            text-align: left;
+        }
+        .import-home-hero .btn{
+            box-shadow: 0 14px 32px rgba(0, 174, 239, .25);
+            margin-top: 28px;
+        }
+        @media(max-width: 900px){
+            .header--rg{
+                background:
+                    linear-gradient(180deg, rgba(1, 32, 63, .96) 0%, rgba(1, 32, 63, .78) 55%, rgba(0, 0, 0, .35) 100%),
+                    url("<?= h(asset('ImagensRG/import1.jpeg')) ?>") center/cover no-repeat;
+            }
+            .import-home-hero{
+                min-height: 480px;
+                padding: 52px 0 64px;
+            }
+            .import-home-hero h1{
+                font-size: 38px;
+            }
+            .import-home-hero p{
+                font-size: 17px;
+            }
+        }
+        @media(max-width: 560px){
+            .header--rg,
+            .header--rg .header__overlay{
+                min-height: 560px;
+            }
+            .import-home-hero__eyebrow{
+                font-size: 12px;
+                letter-spacing: .04em;
+            }
+            .import-home-hero h1{
+                font-size: 32px;
+            }
+        }
     </style>
 </head>
 
@@ -163,6 +242,15 @@ $currentSearch = trim($_GET['q'] ?? '');
                     <i class="fa-solid fa-bars"></i>
                 </button>
             </div>
+
+            <section class="import-home-hero" aria-label="Importacao de carros do Japao">
+                <div class="import-home-hero__content">
+                    <p class="import-home-hero__eyebrow">Importacao RG Auto Sales</p>
+                    <h1>Importe o seu carro do Jap&atilde;o com seguran&ccedil;a</h1>
+                    <p>Processo acompanhado pela RG Auto Sales</p>
+                    <a class="btn" href="<?= h(public_url('importar_carro.php#pedido')) ?>">Quero Importar um Carro</a>
+                </div>
+            </section>
         </div>
     </div>
 </header>

@@ -7,7 +7,13 @@ error_reporting(E_ALL);
 
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-    redirect_to('public/vender_carro.php');
+    http_response_code(405);
+    exit('Metodo invalido');
+}
+
+if (!csrf_verify($_POST['csrf_token'] ?? null)) {
+    http_response_code(403);
+    exit('CSRF invalido');
 }
 
 // =====================
@@ -273,6 +279,7 @@ if (!empty($falhas)) {
       </div>
 
       <form class="vender-form" action="<?= h(public_url('vender_carro.php')) ?>" method="POST" enctype="multipart/form-data">
+        <?= csrf_input() ?>
 
         <div class="vender-grid">
           <div class="vender-field">

@@ -3,7 +3,13 @@ require_once __DIR__ . '/../app/core/bootstrap.php';
 require_admin();
 
 if (!is_post()) {
-    redirect("/admin/carros/adicionar.php");
+    http_response_code(405);
+    exit('Metodo invalido');
+}
+
+if (!csrf_verify($_POST['csrf_token'] ?? null)) {
+    http_response_code(403);
+    exit('CSRF invalido');
 }
 
 $marca = clean($_POST['marca']);

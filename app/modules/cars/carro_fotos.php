@@ -58,6 +58,11 @@ function fotoSrc(string $caminho): string {
 
 // UPLOAD DE NOVAS FOTOS
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_fotos'])) {
+    if (!csrf_verify($_POST['csrf_token'] ?? null)) {
+        http_response_code(403);
+        exit('CSRF invalido');
+    }
+
     if (!isset($_FILES['fotos']) || empty($_FILES['fotos']['name'][0])) {
         $erroUpload = "Seleciona pelo menos uma foto.";
     } else {
@@ -275,6 +280,7 @@ mysqli_stmt_close($stmt);
     <div class="upload-box">
         <h3 style="margin-top:0;">Adicionar novas fotos</h3>
         <form method="POST" enctype="multipart/form-data">
+            <?= csrf_input() ?>
             <input type="hidden" name="upload_fotos" value="1">
 
             <div class="upload-row">
