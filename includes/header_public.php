@@ -45,10 +45,32 @@ $user = current_user();
                     </button>
                 </form>
 
-                <button class="menu-icon" type="button" onclick="menutoggle()" aria-label="Abrir menu">
+                <button class="menu-icon" type="button" onclick="menutoggle()" aria-label="Abrir menu" aria-controls="MenuItems" aria-expanded="false">
                     <i class="fa-solid fa-bars"></i>
                 </button>
             </div>
         </div>
     </div>
 </header>
+<script>
+    window.menutoggle = function () {
+        const menu = document.getElementById("MenuItems");
+        const button = document.querySelector(".menu-icon");
+        if (!menu) return;
+
+        const isOpen = menu.classList.toggle("show");
+        if (button) {
+            button.setAttribute("aria-expanded", isOpen ? "true" : "false");
+        }
+    };
+
+    document.addEventListener("click", function (event) {
+        const menu = document.getElementById("MenuItems");
+        const button = document.querySelector(".menu-icon");
+        if (!menu || !button || !menu.classList.contains("show")) return;
+        if (menu.contains(event.target) || button.contains(event.target)) return;
+
+        menu.classList.remove("show");
+        button.setAttribute("aria-expanded", "false");
+    });
+</script>

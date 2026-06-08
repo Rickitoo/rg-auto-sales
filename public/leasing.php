@@ -1,9 +1,9 @@
 
 <?php
 require_once __DIR__ . '/../app/core/bootstrap.php';
-require_once __DIR__ . '/../includes/header_public.php';
 
 $carro = null;
+$id = 0;
 
 if (isset($_GET['carro_id'])) {
     $id = (int)$_GET['carro_id'];
@@ -16,6 +16,21 @@ if (isset($_GET['carro_id'])) {
     }
 }
 ?>
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="<?= h(asset('ImagensRG/logo.png')) ?>">
+    <title>Leasing | RG Auto Sales</title>
+    <link rel="stylesheet" href="<?= h(asset('css/style.css')) ?>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+<?php require_once __DIR__ . '/../includes/header_public.php'; ?>
 
 <div class="small-container" style="margin-top:40px;">
 
@@ -61,6 +76,7 @@ if (isset($_GET['carro_id'])) {
         <h2 class="title">Simular Leasing</h2>
 
         <form class="card" style="padding:20px; max-width:600px; margin:auto;">
+            <?= public_honeypot_input() ?>
             
             <label>Preço do carro (MT)</label>
             <input type="number" id="preco" placeholder="Digite o valor do carro">
@@ -169,8 +185,10 @@ function enviarLeasing(){
     data.append("entrada", document.getElementById("entrada").value);
     data.append("meses", document.getElementById("meses").value);
     data.append("prestacao", window.prestacaoAtual || 0);
+    data.append("csrf_token", "<?= h(csrf_token()) ?>");
+    data.append("website", document.querySelector('input[name="website"]')?.value || "");
 
-    fetch("processa_leasing.php", {
+    fetch("<?= h(url('auth/processa_leasing.php')) ?>", {
         method: "POST",
         body: data
     })
@@ -186,3 +204,5 @@ function enviarLeasing(){
    
 </script>
 
+</body>
+</html>

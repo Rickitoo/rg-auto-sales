@@ -9,6 +9,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+$securityError = public_form_security_error('register', 5, 300);
+if ($securityError !== '') {
+    http_response_code($securityError === 'Muitas tentativas. Aguarde alguns minutos e tente novamente.' ? 429 : 400);
+    echo json_encode(['status' => 'erro', 'message' => $securityError]);
+    exit;
+}
+
 auth_ensure_users_table($conexao);
 
 $username = trim($_POST['username'] ?? '');

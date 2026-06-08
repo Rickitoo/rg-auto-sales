@@ -77,6 +77,8 @@ if (is_logged_in()) {
             </div>
 
             <form id="loginForm" class="form active" method="post">
+                <?= csrf_input() ?>
+                <?= public_honeypot_input() ?>
                 <div class="field">
                     <label for="login_username">Email ou utilizador</label>
                     <input id="login_username" name="username" autocomplete="username" required>
@@ -89,6 +91,8 @@ if (is_logged_in()) {
             </form>
 
             <form id="registerForm" class="form" method="post">
+                <?= csrf_input() ?>
+                <?= public_honeypot_input() ?>
                 <div class="field">
                     <label for="reg_username">Nome</label>
                     <input id="reg_username" name="username" autocomplete="name" required>

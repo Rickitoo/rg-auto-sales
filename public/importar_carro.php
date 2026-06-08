@@ -20,6 +20,8 @@ $portosPermitidos = ['Maputo', 'Beira'];
 $tiposPermitidos = ['importacao', 'consulta', 'orcamento'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    public_require_form_security('importar_carro', 5, 300);
+
     foreach ($old as $key => $value) {
         $old[$key] = trim((string)($_POST[$key] ?? $value));
     }
@@ -34,6 +36,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($old['email'] !== '' && !filter_var($old['email'], FILTER_VALIDATE_EMAIL)) {
         $errors['email'] = 'Email invalido.';
+    }
+
+    if (!public_valid_phone($old['telefone'])) {
+        $errors['telefone'] = 'Telefone invalido.';
     }
 
     if (!in_array($old['porto'], $portosPermitidos, true)) {
@@ -191,6 +197,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <form id="pedido" class="import-form-card" method="POST" novalidate>
+                <?= csrf_input() ?>
+                <?= public_honeypot_input() ?>
                 <h2>Pedido de importacao</h2>
                 <p>Preencha os dados e a equipa RG entra em contacto para alinhar opcoes e proximos passos.</p>
 

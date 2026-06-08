@@ -78,6 +78,22 @@ if (!function_exists('csrf_verify')) {
     }
 }
 
+if (!function_exists('require_post_csrf')) {
+    function require_post_csrf(string $tokenField = 'csrf_token'): void
+    {
+        if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
+            http_response_code(405);
+            exit('Metodo invalido');
+        }
+
+        $token = $_POST[$tokenField] ?? null;
+        if (!csrf_verify(is_string($token) ? $token : null)) {
+            http_response_code(403);
+            exit('CSRF invalido');
+        }
+    }
+}
+
 if (!function_exists('db_table_exists')) {
     function db_table_exists(mysqli $conexao, string $table): bool
     {

@@ -8,12 +8,6 @@ if ($_SESSION['user']['role'] !== 'admin') {
     redirect_to('auth/login.php');
     exit();
 }
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-
-
-
-
 function fail($msg){ die($msg); }
 
 $id    = isset($_POST['id']) ? (int)$_POST['id'] : 0;

@@ -73,6 +73,8 @@ require_once __DIR__ . '/../app/core/bootstrap.php';
 
     <div class="card" style="padding:18px;">
       <form id="formulario" action="<?= h(public_url('Formulario_cliente.php')) ?>" method="POST">
+        <?= csrf_input() ?>
+        <?= public_honeypot_input() ?>
         <div class="row" style="margin-top:0; align-items:flex-start;">
           <div class="col-2">
             <label for="nome"><strong>Nome</strong></label>

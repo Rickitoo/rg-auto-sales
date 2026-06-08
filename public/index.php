@@ -108,85 +108,8 @@ $recentes = array_slice($carros, 4, 4);
             background:#01203f;
             color:#fff;
         }
-        .header--rg{
-            background:
-                linear-gradient(90deg, rgba(1, 32, 63, .96) 0%, rgba(1, 32, 63, .78) 46%, rgba(0, 0, 0, .25) 100%),
-                url("<?= h(asset('ImagensRG/import1.jpeg')) ?>") center/cover no-repeat;
-            margin-top: 20px;
-            min-height: 620px;
-            position: relative;
-        }
-        .header--rg .header__overlay{
-            min-height: 620px;
-            background: linear-gradient(180deg, rgba(0, 0, 0, .22), rgba(0, 0, 0, .5));
-        }
-        .import-home-hero{
-            display: flex;
-            align-items: center;
-            min-height: 520px;
-            padding: 76px 0 86px;
-        }
-        .import-home-hero__content{
-            max-width: 650px;
-        }
-        .import-home-hero__eyebrow{
-            color: #00aeef;
-            font-size: 14px;
-            font-weight: 800;
-            letter-spacing: .08em;
-            margin: 0 0 14px;
-            text-align: left;
-            text-transform: uppercase;
-        }
-        .import-home-hero h1{
-            color: #fff;
-            font-size: 54px;
-            line-height: 1.08;
-            margin: 0 0 16px;
-            text-align: left;
-        }
-        .import-home-hero p{
-            color: #f4fbff;
-            font-size: 20px;
-            line-height: 1.55;
-            margin: 0;
-            max-width: 590px;
-            text-align: left;
-        }
-        .import-home-hero .btn{
-            box-shadow: 0 14px 32px rgba(0, 174, 239, .25);
-            margin-top: 28px;
-        }
-        @media(max-width: 900px){
-            .header--rg{
-                background:
-                    linear-gradient(180deg, rgba(1, 32, 63, .96) 0%, rgba(1, 32, 63, .78) 55%, rgba(0, 0, 0, .35) 100%),
-                    url("<?= h(asset('ImagensRG/import1.jpeg')) ?>") center/cover no-repeat;
-            }
-            .import-home-hero{
-                min-height: 480px;
-                padding: 52px 0 64px;
-            }
-            .import-home-hero h1{
-                font-size: 38px;
-            }
-            .import-home-hero p{
-                font-size: 17px;
-            }
-        }
-        @media(max-width: 560px){
-            .header--rg,
-            .header--rg .header__overlay{
-                min-height: 560px;
-            }
-            .import-home-hero__eyebrow{
-                font-size: 12px;
-                letter-spacing: .04em;
-            }
-            .import-home-hero h1{
-                font-size: 32px;
-            }
-        }
+        .header--rg{ margin-top:20px; min-height:auto; background:#01203f; }
+        .header--rg .header__overlay{ min-height:auto; background:transparent; }
     </style>
 </head>
 
@@ -243,12 +166,47 @@ $currentSearch = trim($_GET['q'] ?? '');
                 </button>
             </div>
 
-            <section class="import-home-hero" aria-label="Importacao de carros do Japao">
-                <div class="import-home-hero__content">
-                    <p class="import-home-hero__eyebrow">Importacao RG Auto Sales</p>
-                    <h1>Importe o seu carro do Jap&atilde;o com seguran&ccedil;a</h1>
-                    <p>Processo acompanhado pela RG Auto Sales</p>
-                    <a class="btn" href="<?= h(public_url('importar_carro.php#pedido')) ?>">Quero Importar um Carro</a>
+            <section class="home-carousel" data-home-carousel aria-label="Destaques RG Auto Sales">
+                <div class="home-carousel__track">
+                    <article class="home-carousel__slide is-active" style="--slide-bg:url('<?= h(asset('ImagensRG/Mercedes.jpeg')) ?>')" aria-hidden="false">
+                        <div class="home-carousel__content">
+                            <p class="home-carousel__eyebrow">RG Auto Sales</p>
+                            <h1>Comprar carros com confianca</h1>
+                            <p>Escolha viaturas selecionadas, fale com a equipa RG e agende o seu test drive com facilidade.</p>
+                            <a class="btn" href="<?= h(public_url('products.php')) ?>">Ver Carros</a>
+                        </div>
+                    </article>
+
+                    <article class="home-carousel__slide" style="--slide-bg:url('<?= h(asset('ImagensRG/import1.jpeg')) ?>')" aria-hidden="true">
+                        <div class="home-carousel__content">
+                            <p class="home-carousel__eyebrow">Importacao</p>
+                            <h1>Importar carro do Japao</h1>
+                            <p>Acompanhamento comercial para encontrar opcoes, alinhar orcamento e seguir o processo ate Mocambique.</p>
+                            <a class="btn" href="<?= h(public_url('importar_carro.php#pedido')) ?>">Importar Agora</a>
+                        </div>
+                    </article>
+
+                    <article class="home-carousel__slide" style="--slide-bg:url('<?= h(asset('ImagensRG/import3.jpeg')) ?>')" aria-hidden="true">
+                        <div class="home-carousel__content">
+                            <p class="home-carousel__eyebrow">Venda com apoio</p>
+                            <h1>Vender seu carro na RG</h1>
+                            <p>Envie os dados da viatura e receba acompanhamento para transformar interesse em proposta.</p>
+                            <a class="btn" href="<?= h(public_url('vender_carro.php')) ?>">Vender Meu Carro</a>
+                        </div>
+                    </article>
+                </div>
+
+                <button class="home-carousel__arrow home-carousel__arrow--prev" type="button" data-carousel-prev aria-label="Banner anterior">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <button class="home-carousel__arrow home-carousel__arrow--next" type="button" data-carousel-next aria-label="Proximo banner">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+
+                <div class="home-carousel__indicators" aria-label="Selecionar banner">
+                    <button class="is-active" type="button" data-carousel-index="0" aria-current="true" aria-label="Comprar carros com confianca"></button>
+                    <button type="button" data-carousel-index="1" aria-current="false" aria-label="Importar carro do Japao"></button>
+                    <button type="button" data-carousel-index="2" aria-current="false" aria-label="Vender seu carro na RG"></button>
                 </div>
             </section>
         </div>
@@ -324,58 +282,7 @@ $currentSearch = trim($_GET['q'] ?? '');
         </div>
     </div>
 
-    <div class="footer">
-    <div class="container">
-      <div class="row">
-
-        <div class="footer-col-1">
-          <h3>Download do App</h3>
-          <p>Disponível para Android e iOS.</p>
-          <div class="app-logo">
-            <img src="<?= h(asset('ImagensRG/AppStore.png')) ?>" alt="App Store" />
-            <img src="<?= h(asset('ImagensRG/pngtree-google-play-store-vector-png-image_9183318.png')) ?>" alt="Google Play" />
-          </div>
-        </div>
-
-        <div class="footer-col-2">
-          <img src="<?= h(asset('ImagensRG/logo.png')) ?>" alt="RG Auto Sales" />
-          <p>Nosso objetivo é tornar acessível o prazer de dirigir veículos de qualidade, com transparência e confiança.</p>
-        </div>
-
-        <div class="footer-col-1">
-          <h3>Links úteis</h3>
-          <ul>
-            <li><a href="<?= h(public_url('products.php')) ?>">Carros</a></li>
-            <li><a href="<?= h(public_url('test_drive.php')) ?>">Agendar Test Drive</a></li>
-            <li><a href="<?= h(public_url('importar_carro.php')) ?>">Importar carro</a></li>
-            <li><a href="<?= h(public_url('vender_carro.php')) ?>">Vender viatura</a></li>
-            <li><a href="<?= h(public_url('contacto.php')) ?>">Contactos</a></li>
-          </ul>
-        </div>
-
-        <div class="footer-col-4">
-          <h3>Siga a RG</h3>
-          <ul>
-            <li><a href="https://www.facebook.com/profile.php?id=61588204178280&locale=pt_BR">Facebook</a></li>
-            <li><a href="https://www.instagram.com/rgauto_sales/">Instagram</a></li>
-            <li><a href="#">TikTok</a></li>
-            <li><a href="#">YouTube</a></li>
-          </ul>
-        </div>
-
-      </div>
-
-      <hr />
-      <p class="copyright">Copyright 2026 - RG SALES</p>
-    </div>
-  </div>
-
-
-    <script>
-        const menuItems = document.getElementById("MenuItems");
-        function menutoggle() {
-            menuItems.classList.toggle("show");
-        }
-    </script>
+        <?php require_once __DIR__ . '/../includes/footer_public.php'; ?>
+    <script src="<?= h(asset('js/main.js')) ?>"></script>
 </body>
 </html>

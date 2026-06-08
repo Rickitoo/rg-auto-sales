@@ -246,6 +246,63 @@ if ($res) {
                 grid-template-columns:1fr;
             }
         }
+
+        .product-card{
+            position:relative;
+        }
+        .badge-novo{
+            display:inline-block;
+            margin-top:8px;
+            padding:4px 10px;
+            border-radius:999px;
+            background:#01203f;
+            color:#fff;
+            font-size:12px;
+            font-weight:700;
+        }
+
+        @media (max-width: 768px){
+            body{
+                overflow-x:hidden;
+            }
+
+            .small-container,
+            .container{
+                width:100%;
+                max-width:100%;
+                padding-left:16px;
+                padding-right:16px;
+                box-sizing:border-box;
+            }
+
+            .row{
+                flex-direction:column;
+            }
+
+            .col-2,
+            .col-3,
+            .col-4{
+                flex-basis:100%;
+                min-width:100%;
+            }
+
+            .product-card{
+                width:100%;
+                margin-bottom:18px;
+            }
+
+            .product-actions .btn,
+            .filters-actions .btn{
+                width:100%;
+                text-align:center;
+            }
+
+            .page-hero h1{
+                font-size:30px;
+                line-height:1.15;
+            }
+        }
+
     </style>
 </head>
 
@@ -265,45 +322,12 @@ if ($res) {
                        target="_blank" rel="noopener">
                         WhatsApp
                     </a>
-                    <a class="btn btn--outline" href="Test_drive.html">Agendar Test Drive</a>
+                    <a class="btn btn--outline" href="<?= h(public_url('test_drive.php')) ?>">Agendar Test Drive</a>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-<header class="header header--rg">
-    <div class="header__overlay">
-        <div class="container">
-
-            <div class="navbar">
-                <div class="logo">
-                    <a href="<?= h(public_url('index.php')) ?>">
-                        <img src="<?= h(asset('ImagensRG/logo.png')) ?>" alt="RG Auto Sales" width="120" />
-                    </a>
-                </div>
-
-                <nav>
-                    <ul id="MenuItems">
-                        <li><a href="<?= h(public_url('index.php')) ?>">Início</a></li>
-                        <li><a href="<?= h(public_url('products.php')) ?>">Carros</a></li>
-                        <li><a href="<?= h(public_url('about.php')) ?>">Sobre</a></li>
-                        <li><a href="<?= h(public_url('contacto.php')) ?>">Contacto</a></li>
-                        <li><a href="<?= h(public_url('account.php')) ?>">Conta</a></li>
-                        <li><a href="<?= h(public_url('test_drive.php')) ?>">Test Drive</a></li>
-                        <li><a href="<?= h(public_url('leasing.php')) ?>">Leasing</a></li>
-                        <li><a href="<?= h(public_url('importar_carro.php')) ?>">Importar</a></li>
-                        <li><a href="<?= h(public_url('vender_carro.php')) ?>">Vender</a></li>
-                    </ul>
-                </nav>
-
-                <button class="menu-icon" type="button" onclick="menutoggle()" aria-label="Abrir menu">
-                    <i class="fa-solid fa-bars"></i>
-                </button>
-            </div>
-        </div>
-    </div>
-</header>
 
     <div class="small-container">
         <div class="filters-box">
@@ -396,7 +420,10 @@ if ($res) {
                     <div class="col-4 product-card">
                         <a href="<?= h(public_url('product-details.php?id=' . (int)$c['id'])) ?>" class="product-link">
                             <img src="<?= h($img) ?>" alt="<?= h($titulo) ?>" />
-                            <h4><?= h($titulo) ?>(<?= $ano ?>)</h4>
+                            <?php if ($novo): ?>
+                                <span class="badge-novo">Novo</span>
+                            <?php endif; ?>
+                            <h4><?= h($titulo) ?><?= $ano > 0 ? ' (' . h((string)$ano) . ')' : '' ?></h4>
                         </a>
 
                         <p><?= $preco ?> MT</p>
@@ -408,9 +435,6 @@ if ($res) {
                         </div>
                     </div>
                 <?php endforeach; ?>
-            <?php endif; ?>
-            <?php if (($c['novo'] ?? 0) == 1): ?>
-                <span class="badge-novo">Novo</span>
             <?php endif; ?>
         </div>
     </div>

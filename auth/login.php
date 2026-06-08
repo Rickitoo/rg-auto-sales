@@ -44,6 +44,8 @@ if (is_logged_in()) {
         <p>Acesso ao painel RG Auto Sales</p>
 
         <form id="loginForm" method="post">
+            <?= csrf_input() ?>
+            <?= public_honeypot_input() ?>
             <input type="hidden" name="next" value="<?= h($safeNext) ?>">
 
             <label for="username">Email ou utilizador</label>

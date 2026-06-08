@@ -15,6 +15,8 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     exit;
 }
 
+public_require_form_security('test_drive', 5, 300);
+
 // ======================
 // RECEBER DADOS
 // ======================
@@ -48,6 +50,14 @@ if (
     $ano <= 0
 ) {
     die("Preencha todos os campos obrigatórios.");
+}
+
+if (!public_valid_phone($telefone)) {
+    die("Telefone inválido.");
+}
+
+if (!public_valid_email($email, false)) {
+    die("Email inválido.");
 }
 
 if ($data < date('Y-m-d')) {

@@ -9,6 +9,8 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
   redirect_to('public/test_drive.php');
 }
 
+public_require_form_security('salvar_testdrive', 5, 300);
+
 $nome     = clean($_POST['nome'] ?? '');
 $telefone = clean($_POST['telefone'] ?? '');
 $email    = clean($_POST['email'] ?? '');
@@ -20,6 +22,14 @@ $origem   = clean($_POST['origem'] ?? 'site'); // opcional (podes passar hidden 
 
 if ($nome === '' || $telefone === '' || $marca === '' || $modelo === '' || $ano <= 0) {
   die("Preencha os campos obrigatórios.");
+}
+
+if (!public_valid_phone($telefone)) {
+  die("Telefone inválido.");
+}
+
+if (!public_valid_email($email, false)) {
+  die("Email inválido.");
 }
 
 // 1) grava lead no banco

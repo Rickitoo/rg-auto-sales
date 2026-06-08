@@ -2,9 +2,6 @@
 require_once __DIR__ . '/../app/core/bootstrap.php';
 require_admin();
 
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-
 
 
 // CARROS

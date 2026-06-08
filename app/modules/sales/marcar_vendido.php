@@ -1,9 +1,7 @@
 <?php
 require_once __DIR__ . '/../../core/bootstrap.php';
 require_admin();
-
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
+require_post_csrf('token');
 
 
 $id = intval($_POST['id'] ?? 0);

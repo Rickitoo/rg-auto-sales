@@ -1,20 +1,7 @@
 <?php
 require_once __DIR__ . '/../../../core/bootstrap.php';
 require_admin();
-
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-
-
-if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-    http_response_code(405);
-    exit('Metodo invalido');
-}
-
-if (!csrf_verify($_POST['csrf_token'] ?? null)) {
-    http_response_code(403);
-    exit('CSRF invalido');
-}
+require_post_csrf();
 
 // =====================
 // Config Upload

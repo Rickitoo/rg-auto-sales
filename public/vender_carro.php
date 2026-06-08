@@ -5,6 +5,8 @@ $sucesso = false;
 $erro = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    public_require_form_security('vender_carro_simples', 5, 300);
+
     $nome = trim($_POST['nome'] ?? '');
     $telefone = trim($_POST['telefone'] ?? '');
     $email = trim($_POST['email'] ?? '');
@@ -16,6 +18,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($nome === '' || $telefone === '' || $marca === '' || $modelo === '') {
         $erro = 'Preencha pelo menos nome, telefone, marca e modelo.';
+    } elseif (!public_valid_phone($telefone)) {
+        $erro = 'Telefone invalido.';
+    } elseif (!public_valid_email($email, false)) {
+        $erro = 'Email invalido.';
     } else {
         $mensagem = "Cliente quer vender carro: {$marca} {$modelo}, ano {$ano}, preço desejado {$preco}. {$descricao}";
 
@@ -44,6 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <title>Vender o Meu Carro | RG Auto Sales</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="<?= h(asset('css/style.css')) ?>">
 
     <style>
         * {
@@ -277,6 +284,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php endif; ?>
 
             <form method="POST">
+                <?= csrf_input() ?>
+                <?= public_honeypot_input() ?>
                 <div class="field">
                     <label>Nome completo *</label>
                     <input type="text" name="nome" required>

@@ -42,6 +42,7 @@ if ($id <= 0) {
   <meta charset="UTF-8">
   <title>Confirmação | RG Auto Sales</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     body{ font-family: Arial, sans-serif; background:#f2f2f2; margin:0; padding:20px; }
     .wrap{ max-width:760px; margin:0 auto; }
@@ -49,7 +50,7 @@ if ($id <= 0) {
     .brand span{ color:#0a7cff; }
     .card{ background:#fff; padding:18px; border-radius:12px; box-shadow:0 8px 22px rgba(0,0,0,.08); }
     .ok{ display:flex; align-items:center; gap:10px; font-size:20px; font-weight:800; margin:0 0 12px; }
-    .badge{ background:#12b76a; color:#fff; padding:6px 10px; border-radius:999px; font-size:13px; font-weight:700; }
+    .badge{ background:#12b76a; color:#fff; width:30px; height:30px; border-radius:999px; font-size:13px; font-weight:700; display:inline-flex; align-items:center; justify-content:center; }
     .grid{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:12px; }
     .item{ background:#f7f7f7; border:1px solid #e6e6e6; padding:10px; border-radius:10px; font-size:14px; }
     .item b{ display:block; margin-bottom:4px; }
@@ -66,10 +67,10 @@ if ($id <= 0) {
 
   <div class="card">
     <?php if (!empty($erro)) { ?>
-      <p class="ok">Agendamento confirmado <span class="badge">✅</span></p>
+      <p class="ok">Agendamento confirmado <span class="badge"><i class="fa-solid fa-check" aria-hidden="true"></i></span></p>
       <p style="color:#b42318; font-weight:700;"><?php echo htmlspecialchars($erro); ?></p>
     <?php } else { ?>
-      <p class="ok">Agendamento confirmado <span class="badge">✅</span></p>
+      <p class="ok">Agendamento confirmado <span class="badge"><i class="fa-solid fa-check" aria-hidden="true"></i></span></p>
       <p>Olá, <b><?php echo htmlspecialchars($dados['nome']); ?></b>! O teu pedido de test drive foi registado com sucesso.</p>
 
       <div class="grid">

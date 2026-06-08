@@ -1,16 +1,17 @@
 <?php
 require_once __DIR__ . '/../app/core/bootstrap.php';
 
-
 $id = (int)($_GET['id'] ?? 0);
 if ($id <= 0) {
-    die("Carro inválido.");
+    header('Location: ' . public_url('products.php'));
+    exit;
 }
 
 /*
 |--------------------------------------------------------------------------
 | CARRO ATUAL
 |--------------------------------------------------------------------------
+| Nota: usar carros_fotos.caminho, igual ao catálogo products.php.
 */
 $sql = "
     SELECT 
@@ -18,7 +19,7 @@ $sql = "
         COALESCE(
             NULLIF(c.imagem, ''),
             (
-                SELECT cf.foto
+                SELECT cf.caminho
                 FROM carros_fotos cf
                 WHERE cf.carro_id = c.id
                 ORDER BY cf.ordem ASC, cf.id ASC
@@ -26,13 +27,22 @@ $sql = "
             )
         ) AS imagem_principal
     FROM carros c
-    WHERE c.id = $id
+    WHERE c.id = ?
     LIMIT 1
 ";
 
-$res = mysqli_query($conexao, $sql);
+$stmt = mysqli_prepare($conexao, $sql);
+if (!$stmt) {
+    die("Erro ao preparar detalhe do carro.");
+}
+
+mysqli_stmt_bind_param($stmt, 'i', $id);
+mysqli_stmt_execute($stmt);
+$res = mysqli_stmt_get_result($stmt);
+
 if (!$res || mysqli_num_rows($res) === 0) {
-    die("Carro não encontrado.");
+    header('Location: ' . public_url('products.php'));
+    exit;
 }
 
 $carro = mysqli_fetch_assoc($res);
@@ -41,7 +51,6 @@ $nome = trim(($carro['marca'] ?? '') . ' ' . ($carro['modelo'] ?? ''));
 $ano = (int)($carro['ano'] ?? 0);
 $precoFmt = number_format((float)($carro['preco'] ?? 0), 0, ',', '.');
 $desc = $carro['descricao'] ?? '';
-
 $fotoPrincipal = fotoCarroUrl($carro);
 
 /*
@@ -50,34 +59,42 @@ $fotoPrincipal = fotoCarroUrl($carro);
 |--------------------------------------------------------------------------
 */
 $fotos = [];
-$resFotos = mysqli_query($conexao, "
-    SELECT id, foto, ordem
+$sqlFotos = "
+    SELECT id, caminho, ordem
     FROM carros_fotos
-    WHERE carro_id = $id
+    WHERE carro_id = ?
     ORDER BY ordem ASC, id ASC
-");
+";
 
-if ($resFotos) {
-    while ($row = mysqli_fetch_assoc($resFotos)) {
-        $foto = trim((string)($row['foto'] ?? ''));
-        if ($foto !== '') {
-            $fotos[] = "uploads/" . $foto;
+$stmtFotos = mysqli_prepare($conexao, $sqlFotos);
+if ($stmtFotos) {
+    mysqli_stmt_bind_param($stmtFotos, 'i', $id);
+    mysqli_stmt_execute($stmtFotos);
+    $resFotos = mysqli_stmt_get_result($stmtFotos);
+
+    if ($resFotos) {
+        while ($row = mysqli_fetch_assoc($resFotos)) {
+            $caminho = trim((string)($row['caminho'] ?? ''));
+            if ($caminho !== '') {
+                $fotos[] = fotoCarroUrl(['imagem_principal' => $caminho, 'imagem' => $caminho]);
+            }
         }
     }
 }
 
-// garante que a principal aparece primeiro
 $galeria = [];
 if (!empty($fotoPrincipal)) {
     $galeria[] = $fotoPrincipal;
 }
+
 foreach ($fotos as $f) {
-    if ($f !== $fotoPrincipal) {
+    if ($f !== '' && !in_array($f, $galeria, true)) {
         $galeria[] = $f;
     }
 }
+
 if (empty($galeria)) {
-    $galeria[] = "assets/img/sem-foto.jpg";
+    $galeria[] = asset('img/sem-foto.jpg');
 }
 
 /*
@@ -104,7 +121,7 @@ $sqlMais = "
         COALESCE(
             NULLIF(c.imagem, ''),
             (
-                SELECT cf.foto
+                SELECT cf.caminho
                 FROM carros_fotos cf
                 WHERE cf.carro_id = c.id
                 ORDER BY cf.ordem ASC, cf.id ASC
@@ -112,12 +129,18 @@ $sqlMais = "
             )
         ) AS imagem_principal
     FROM carros c
-    WHERE c.status = 'disponivel' AND c.id <> $id
-    ORDER BY c.data_registo DESC
+    WHERE c.status = 'disponivel' AND c.id <> ?
+    ORDER BY c.data_registo DESC, c.id DESC
     LIMIT 4
 ";
 
-$mais = mysqli_query($conexao, $sqlMais);
+$stmtMais = mysqli_prepare($conexao, $sqlMais);
+$mais = false;
+if ($stmtMais) {
+    mysqli_stmt_bind_param($stmtMais, 'i', $id);
+    mysqli_stmt_execute($stmtMais);
+    $mais = mysqli_stmt_get_result($stmtMais);
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt">
@@ -134,95 +157,167 @@ $mais = mysqli_query($conexao, $sqlMais);
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
     <style>
+        .product-detail-page{
+            padding:35px 0;
+        }
+
+        .product-detail-grid{
+            display:grid;
+            grid-template-columns:1.15fr .85fr;
+            gap:30px;
+            align-items:start;
+        }
+
+        .product-gallery,
+        .product-info-card,
+        .related-card{
+            background:#fff;
+            border-radius:18px;
+            box-shadow:0 8px 24px rgba(1,32,63,.10);
+            padding:18px;
+        }
+
+        #mainImg{
+            width:100%;
+            max-height:480px;
+            object-fit:cover;
+            border-radius:14px;
+            background:#f5f5f5;
+            display:block;
+        }
+
+        .small-img-row{
+            display:grid;
+            grid-template-columns:repeat(auto-fill, minmax(76px, 1fr));
+            gap:10px;
+            margin-top:12px;
+        }
+
+        .thumb{
+            width:100%;
+            height:72px;
+            object-fit:cover;
+            border-radius:10px;
+            cursor:pointer;
+            border:2px solid transparent;
+            background:#f5f5f5;
+        }
+
+        .thumb:hover{
+            border-color:#01203f;
+        }
+
+        .product-info-card h1{
+            text-align:left;
+            color:#01203f;
+            margin-bottom:8px;
+            line-height:1.15;
+        }
+
+        .price-tag{
+            color:#f97316;
+            font-size:24px;
+            font-weight:700;
+            margin:10px 0;
+        }
+
+        .product-desc{
+            color:#334155;
+            margin-top:12px;
+            line-height:1.7;
+        }
+
         .product-actions{
             display:flex;
             gap:10px;
             flex-wrap:wrap;
+            margin:18px 0;
         }
+
         .btn--outline{
             background:transparent;
             border:2px solid #01203f;
             color:#01203f;
         }
+
         .btn--outline:hover{
             background:#01203f;
             color:#fff;
         }
-        .small-img-row{
-            display:flex;
-            gap:10px;
-            flex-wrap:wrap;
-            margin-top:12px;
+
+        .features-list{
+            color:#01203f;
+            margin-top:10px;
+            padding-left:18px;
+            line-height:1.9;
         }
-        .small-img-col{
-            width:90px;
+
+        .related-grid{
+            display:grid;
+            grid-template-columns:repeat(4, 1fr);
+            gap:18px;
+            margin-top:18px;
         }
-        .thumb{
+
+        .related-card img{
             width:100%;
-            height:70px;
-            object-fit:cover;
-            border-radius:8px;
-            cursor:pointer;
-            border:1px solid #ddd;
-        }
-        #mainImg{
-            width:100%;
-            max-height:460px;
+            height:170px;
             object-fit:cover;
             border-radius:12px;
             background:#f5f5f5;
+        }
+
+        .related-card h4{
+            margin-top:10px;
+        }
+
+        @media (max-width: 900px){
+            .product-detail-grid{
+                grid-template-columns:1fr;
+            }
+
+            .related-grid{
+                grid-template-columns:repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px){
+            .product-detail-page{
+                padding:20px 0;
+            }
+
+            .product-gallery,
+            .product-info-card,
+            .related-card{
+                padding:14px;
+                border-radius:14px;
+            }
+
+            .product-info-card h1{
+                font-size:26px;
+            }
+
+            .price-tag{
+                font-size:21px;
+            }
+
+            .product-actions .btn{
+                width:100%;
+                text-align:center;
+            }
+
+            .related-grid{
+                grid-template-columns:1fr;
+            }
+
+            #mainImg{
+                max-height:330px;
+            }
         }
     </style>
 </head>
 
 <body>
-    <!-- HEADER -->
-     <header class="header header--rg">
-        <div class="header__overlay">
-        <div class="container">
-
-            <div class="navbar">
-            <div class="logo">
-                <a href="<?= h(public_url('index.php')) ?>">
-                <img src="<?= h(asset('ImagensRG/logo.png')) ?>" alt="RG Auto Sales" width="120" />
-                </a>
-            </div>
-
-            <nav>
-                <ul id="MenuItems">
-                <li><a href="<?= h(public_url('index.php')) ?>">Início</a></li>
-                <li><a href="<?= h(public_url('products.php')) ?>">Carros</a></li>
-                <li><a href="<?= h(public_url('about.php')) ?>">Sobre</a></li>
-                <li><a href="<?= h(public_url('contacto.php')) ?>">Contacto</a></li>
-                <li><a href="<?= h(public_url('account.php')) ?>">Conta</a></li>
-                <li><a href="<?= h(public_url('test_drive.php')) ?>">Test Drive</a></li>
-                <li><a href="<?= h(public_url('leasing.php')) ?>">Leasing</a></li>
-                <li><a href="<?= h(public_url('vender_carro.php')) ?>">Vender</a></li>
-                </ul>
-            </nav>
-
-            <a href="<?= h(public_url('cart.php')) ?>" aria-label="Carrinho">
-                <img src="<?= h(asset('ImagensRG/png-transparent-computer-icons-shopping-cart-basket-shopping-cart-text-hand-share-icon.png')) ?>" alt="Carrinho" width="28" height="30" />
-            </a>
-
-            <button class="menu-icon" type="button" onclick="menutoggle()" aria-label="Abrir menu">
-                <i class="fa-solid fa-bars"></i>
-            </button>
-            </div>
-
-            <div class="row header__hero">
-                <div class="col-2">
-                    <h1 id="carTitle">Detalhes do Carro</h1>
-                    <p id="carSubtitle">Veja fotos, características e agende o seu test drive.</p>
-                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                        <a class="btn" id="whatsHeader" href="#" target="_blank" rel="noopener">WhatsApp</a>
-                        <a class="btn btn--outline" href="<?= h(public_url('test_drive.php')) ?>">Agendar Test Drive</a>
-                    </div>
-                </div>
-            </div>
-            </div>
-        </div>
-    </header>
     <?php require_once __DIR__ . '/../includes/header_public.php'; ?>
 
     <div class="page-hero">
@@ -230,7 +325,7 @@ $mais = mysqli_query($conexao, $sqlMais);
             <div class="row header__hero">
                 <div class="col-2">
                     <h1><?= h($nome) ?></h1>
-                    <p>Veja fotos, características e agende o seu test drive.</p>
+                    <p>Veja fotos, características e fale com a RG Auto Sales.</p>
                     <div style="display:flex; gap:10px; flex-wrap:wrap;">
                         <a class="btn" href="<?= h($wa) ?>" target="_blank" rel="noopener">WhatsApp</a>
                         <a class="btn btn--outline" href="<?= h(public_url('test_drive.php')) ?>">Agendar Test Drive</a>
@@ -240,81 +335,71 @@ $mais = mysqli_query($conexao, $sqlMais);
         </div>
     </div>
 
-    <!-- DETALHES -->
-    <div class="small-container">
-        <h2 class="title">Detalhes</h2>
-
-        <div class="row single-products">
-            <!-- Imagem -->
-            <div class="col-2">
+    <main class="small-container product-detail-page">
+        <div class="product-detail-grid">
+            <section class="product-gallery">
                 <img id="mainImg" src="<?= h($galeria[0]) ?>" alt="<?= h($nome) ?>" />
 
                 <div class="small-img-row">
                     <?php foreach ($galeria as $thumb): ?>
-                        <div class="small-img-col">
-                            <img class="thumb" src="<?= h($thumb) ?>" alt="Miniatura">
-                        </div>
+                        <img class="thumb" src="<?= h($thumb) ?>" alt="Miniatura de <?= h($nome) ?>">
                     <?php endforeach; ?>
                 </div>
-            </div>
+            </section>
 
-            <!-- Info -->
-            <div class="col-2">
-                <h1 style="text-align:left; color:#01203f;"><?= h($nome) ?></h1>
-                <h4 style="color:#f97316;">Preço: <?= $precoFmt ?> MT</h4>
+            <section class="product-info-card">
+                <h1><?= h($nome) ?></h1>
+                <div class="price-tag"><?= $precoFmt ?> MT</div>
 
-                <p style="color:#01203f; margin-top:12px;">
-                    <?= nl2br(h($desc)) ?>
+                <p class="product-desc">
+                    <?= $desc !== '' ? nl2br(h($desc)) : 'Sem descrição detalhada por enquanto. Fale com a RG Auto Sales para confirmar estado, documentos e disponibilidade.' ?>
                 </p>
 
-                <div class="rating" style="margin:10px 0;">
-                    <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star-o"></i>
-                </div>
-
-                <div class="product-actions" style="justify-content:flex-start;">
+                <div class="product-actions">
                     <a class="btn" href="<?= h($wa) ?>" target="_blank" rel="noopener">Falar no WhatsApp</a>
                     <a class="btn btn--outline" href="tel:+258862934721">Ligar</a>
-                    <a class="btn btn--outline" href="Test_drive.html">Test Drive</a>
+                    <a class="btn btn--outline" href="<?= h(public_url('test_drive.php')) ?>">Test Drive</a>
                 </div>
 
                 <h3 style="margin-top:18px; text-align:left; color:#01203f;">Características</h3>
-                <ul style="color:#01203f; margin-top:10px; padding-left:18px;">
-                    <li><strong>Ano:</strong> <?= h((string)$ano) ?></li>
-                    <li><strong>Combustível:</strong> —</li>
-                    <li><strong>Câmbio:</strong> —</li>
-                    <li><strong>Tração:</strong> —</li>
+                <ul class="features-list">
+                    <li><strong>Marca:</strong> <?= h($carro['marca'] ?? '—') ?></li>
+                    <li><strong>Modelo:</strong> <?= h($carro['modelo'] ?? '—') ?></li>
+                    <li><strong>Ano:</strong> <?= $ano > 0 ? h((string)$ano) : '—' ?></li>
+                    <li><strong>Estado:</strong> Disponível</li>
                 </ul>
 
                 <p style="margin-top:12px; color:#01203f;">
                     <strong>Quer fechar rápido?</strong> Clique no WhatsApp e diga: “Quero este carro do site”.
                 </p>
-            </div>
+            </section>
         </div>
 
         <h2 class="title">Mais opções</h2>
-        <div class="row">
+
+        <div class="related-grid">
             <?php if ($mais && mysqli_num_rows($mais) > 0): ?>
                 <?php while ($m = mysqli_fetch_assoc($mais)): ?>
                     <?php
                     $mNome = trim(($m['marca'] ?? '') . ' ' . ($m['modelo'] ?? ''));
+                    $mAno = (int)($m['ano'] ?? 0);
                     $mPreco = number_format((float)($m['preco'] ?? 0), 0, ',', '.');
                     $mImg = fotoCarroUrl($m);
                     ?>
-                    <div class="col-4 product-card">
+                    <article class="related-card">
                         <a href="<?= h(public_url('product-details.php?id=' . (int)$m['id'])) ?>" class="product-link">
                             <img src="<?= h($mImg) ?>" alt="<?= h($mNome) ?>" />
-                            <h4><?= h($mNome) ?></h4>
+                            <h4><?= h($mNome) ?><?= $mAno > 0 ? ' (' . h((string)$mAno) . ')' : '' ?></h4>
                             <p><?= $mPreco ?> MT</p>
                         </a>
-                    </div>
+                    </article>
                 <?php endwhile; ?>
             <?php else: ?>
                 <p style="padding:10px;">Sem mais opções por agora.</p>
             <?php endif; ?>
         </div>
-    </div>
+    </main>
 
-    <!-- FOOTER -->
     <div class="footer">
         <div class="container">
             <div class="row">
@@ -335,9 +420,9 @@ $mais = mysqli_query($conexao, $sqlMais);
                 <div class="footer-col-4">
                     <h3>Siga a RG</h3>
                     <ul>
-                        <li><a href="#">Instagram</a></li>
+                        <li><a href="https://www.instagram.com/rgauto_sales/">Instagram</a></li>
                         <li><a href="https://www.facebook.com/profile.php?id=61588204178280&locale=pt_BR">Facebook</a></li>
-                        <li><a href="https://www.instagram.com/rgauto_sales/">TikTok</a></li>
+                        <li><a href="#">TikTok</a></li>
                         <li><a href="#">YouTube</a></li>
                     </ul>
                 </div>
@@ -352,12 +437,13 @@ $mais = mysqli_query($conexao, $sqlMais);
     <script>
         const menuItems = document.getElementById("MenuItems");
         function menutoggle() {
-            menuItems.classList.toggle("show");
+            if (menuItems) menuItems.classList.toggle("show");
         }
 
         document.querySelectorAll(".thumb").forEach(t => {
             t.addEventListener("click", () => {
-                document.getElementById("mainImg").src = t.src;
+                const mainImg = document.getElementById("mainImg");
+                if (mainImg) mainImg.src = t.src;
             });
         });
     </script>
@@ -370,6 +456,5 @@ $mais = mysqli_query($conexao, $sqlMais);
         <i class="fa-brands fa-whatsapp"></i>
         <span>WhatsApp RG</span>
     </a>
-
 </body>
 </html>

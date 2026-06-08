@@ -9,6 +9,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+$securityError = public_form_security_error('login', 10, 300);
+if ($securityError !== '') {
+    http_response_code($securityError === 'Muitas tentativas. Aguarde alguns minutos e tente novamente.' ? 429 : 400);
+    echo json_encode(['status' => 'erro', 'message' => $securityError]);
+    exit;
+}
+
 $login = trim($_POST['username'] ?? $_POST['email'] ?? '');
 $password = $_POST['password'] ?? '';
 $next = $_POST['next'] ?? '';

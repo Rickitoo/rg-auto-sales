@@ -80,6 +80,8 @@ require_once __DIR__ . '/../app/core/bootstrap.php';
       <!-- Form -->
       <div class="col-2">
         <form action="#" method="post">
+          <?= csrf_input() ?>
+          <?= public_honeypot_input() ?>
           <input type="text" name="nome" placeholder="Seu nome" required /><br /><br />
           <input type="email" name="email" placeholder="Seu email" required /><br /><br />
           <textarea name="mensagem" rows="6" placeholder="Sua mensagem" required></textarea><br /><br />
