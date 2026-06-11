@@ -28,6 +28,7 @@ if (!function_exists('rg_admin_nav_active')) {
         <a href="<?= h(url('admin/carros/adicionar_carro.php')) ?>" class="<?= rg_admin_nav_active('admin/carros/adicionar_carro.php') ?>">Adicionar Carro</a>
         <a href="<?= h(url('admin/vendas/vendas.php')) ?>" class="<?= rg_admin_nav_active('admin/vendas/vendas.php') ?>">Vendas</a>
         <a href="<?= h(url('admin/vendas/nova_venda.php')) ?>" class="<?= rg_admin_nav_active('admin/vendas/nova_venda.php') ?>">Nova Venda</a>
+        <a href="<?= h(url('admin/parceiros/index.php')) ?>" class="<?= rg_admin_nav_active('admin/parceiros/index.php') ?>">Parceiros</a>
         <a href="<?= h(url('admin/financeiro/dashboard_financeiro.php')) ?>" class="<?= rg_admin_nav_active('admin/financeiro/dashboard_financeiro.php') ?>">Financeiro</a>
 
         <span class="rg-admin-nav__label">Gestao</span>

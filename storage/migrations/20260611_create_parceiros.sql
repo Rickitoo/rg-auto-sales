@@ -1,0 +1,20 @@
+CREATE TABLE IF NOT EXISTS parceiros (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(160) NOT NULL,
+    telefone VARCHAR(40) NULL,
+    whatsapp VARCHAR(40) NULL,
+    email VARCHAR(160) NULL,
+    cidade VARCHAR(100) NULL,
+    tipo ENUM('captador','revendedor','importacao','marketing','fornecedor','outro') NOT NULL DEFAULT 'captador',
+    origem VARCHAR(120) NULL,
+    estado ENUM('ativo','inativo','pendente') NOT NULL DEFAULT 'ativo',
+    nivel ENUM('principal','regular','comunidade') NOT NULL DEFAULT 'regular',
+    comissao_padrao DECIMAL(10,2) NULL,
+    notas TEXT NULL,
+    criado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    atualizado_em DATETIME NULL ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_parceiros_tipo (tipo),
+    INDEX idx_parceiros_estado (estado),
+    INDEX idx_parceiros_nivel (nivel),
+    INDEX idx_parceiros_cidade (cidade)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
