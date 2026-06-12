@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../app/core/bootstrap.php';
+require_once __DIR__ . '/../includes/public_car_images.php';
 
 
 function nomeCarro($row) {
@@ -408,7 +409,7 @@ if ($res) {
                 <?php foreach ($carros as $c): ?>
                     <?php
                     $titulo = nomeCarro($c);
-                    $img = fotoCarroUrl($c);
+                    $img = public_car_image_url($c);
                     $preco = precoFmt($c);
                     $ano = (int)($c['ano'] ?? 0);
                     $novo = ($c['novo'] ?? 0) == 1;
@@ -419,7 +420,7 @@ if ($res) {
                     ?>
                     <div class="col-4 product-card">
                         <a href="<?= h(public_url('product-details.php?id=' . (int)$c['id'])) ?>" class="product-link">
-                            <img src="<?= h($img) ?>" alt="<?= h($titulo) ?>" />
+                            <img src="<?= h($img) ?>" alt="<?= h($titulo !== '' ? $titulo : 'Carro RG Auto Sales') ?>" width="320" height="220" loading="lazy" onerror="<?= h(public_car_img_fallback_attr()) ?>" />
                             <?php if ($novo): ?>
                                 <span class="badge-novo">Novo</span>
                             <?php endif; ?>
@@ -439,65 +440,7 @@ if ($res) {
         </div>
     </div>
 
-    <div class="footer">
-        <div class="container">
-            <div class="row">
-
-                <div class="footer-col-1">
-                    <h3>Contactos</h3>
-                    <p>
-                        WhatsApp: <a href="https://wa.me/258862934721" target="_blank" rel="noopener">+258 862 934 721</a><br />
-                        Email: <a href="mailto:rgSolutions420@gmail.com">rgSolutions420@gmail.com</a>
-                    </p>
-                </div>
-
-                <div class="footer-col-2">
-                    <img src="<?= h(asset('ImagensRG/logo.png')) ?>" alt="RG Auto Sales" />
-                    <p>Nosso objetivo é tornar acessível o prazer de dirigir veículos de qualidade, com transparência e confiança.</p>
-                </div>
-
-                <div class="footer-col-1">
-                    <h3>Links úteis</h3>
-                    <ul>
-                        <li><a href="<?= h(public_url('products.php')) ?>">Carros</a></li>
-                        <li><a href="<?= h(public_url('test_drive.php')) ?>">Test Drive</a></li>
-                        <li><a href="<?= h(public_url('importar_carro.php')) ?>">Importar carro</a></li>
-                        <li><a href="<?= h(public_url('vender_carro.php')) ?>">Vender</a></li>
-                        <li><a href="<?= h(public_url('contacto.php')) ?>">Contactos</a></li>
-                    </ul>
-                </div>
-
-                <div class="footer-col-4">
-                    <h3>Siga a RG</h3>
-                    <ul>
-                        <li><a href="https://www.instagram.com/rgauto_sales/">Instagram</a></li>
-                        <li><a href="https://www.facebook.com/profile.php?id=61588204178280&locale=pt_BR">Facebook</a></li>
-                        <li><a href="#">TikTok</a></li>
-                        <li><a href="#">YouTube</a></li>
-                    </ul>
-                </div>
-
-            </div>
-
-            <hr />
-            <p class="copyright">Copyright 2026 - RG SALES</p>
-        </div>
-    </div>
-
-    <script>
-        const menuItems = document.getElementById("MenuItems");
-        function menutoggle() {
-            menuItems.classList.toggle("show");
-        }
-    </script>
-
-    <a class="wa-float"
-       href="https://wa.me/258862934721?text=Olá%20RG%20Auto%20Sales,%20quero%20informações."
-       target="_blank"
-       rel="noopener"
-       aria-label="Falar no WhatsApp com a RG Auto Sales">
-        <i class="fa-brands fa-whatsapp"></i>
-        <span>WhatsApp RG</span>
-    </a>
+    <?php require_once __DIR__ . '/../includes/footer_public.php'; ?>
+    <?php require_once __DIR__ . '/includes/wa_float.php'; ?>
 </body>
 </html> 

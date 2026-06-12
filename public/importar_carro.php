@@ -279,28 +279,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <a class="btn" href="https://wa.me/258862934721?text=Ola%20RG%20Auto%20Sales,%20quero%20importar%20um%20carro%20do%20Japao." target="_blank" rel="noopener">WhatsApp RG</a>
     </section>
 
-    <div class="footer">
-        <div class="container">
-            <div class="row">
-                <div class="footer-col-2">
-                    <img src="<?= h(asset('ImagensRG/logo.png')) ?>" alt="RG Auto Sales">
-                    <p>Viaturas, importacao e acompanhamento comercial com transparencia.</p>
-                </div>
-                <div class="footer-col-1">
-                    <h3>Links uteis</h3>
-                    <ul>
-                        <li><a href="<?= h(public_url('products.php')) ?>">Carros</a></li>
-                        <li><a href="<?= h(public_url('test_drive.php')) ?>">Test Drive</a></li>
-                        <li><a href="<?= h(public_url('leasing.php')) ?>">Leasing</a></li>
-                        <li><a href="<?= h(public_url('contacto.php')) ?>">Contactos</a></li>
-                    </ul>
-                </div>
-            </div>
-            <hr>
-            <p class="copyright">Copyright 2026 - RG SALES</p>
-        </div>
-    </div>
-
+    <?php require_once __DIR__ . '/../includes/footer_public.php'; ?>
     <script>
         const menuItems = document.getElementById("MenuItems");
         function menutoggle(){

@@ -25,21 +25,66 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $mensagem = "Cliente quer vender carro: {$marca} {$modelo}, ano {$ano}, preço desejado {$preco}. {$descricao}";
 
-        $stmt = mysqli_prepare($conexao, "
-            INSERT INTO leads 
-            (nome, telefone, email, mensagem, status, origem, criado_em)
-            VALUES (?, ?, ?, ?, 'novo', 'vender_carro', NOW())
-        ");
+        mysqli_begin_transaction($conexao);
 
-        mysqli_stmt_bind_param($stmt, "ssss", $nome, $telefone, $email, $mensagem);
+        try {
+            $stmtCarro = mysqli_prepare($conexao, "
+                INSERT INTO carros (marca, modelo, ano, preco, descricao, status, data_registo)
+                VALUES (?, ?, ?, ?, ?, 'disponivel', NOW())
+            ");
 
-        if (mysqli_stmt_execute($stmt)) {
+            if (!$stmtCarro) {
+                throw new Exception('Erro ao preparar carro: ' . mysqli_error($conexao));
+            }
+
+            mysqli_stmt_bind_param($stmtCarro, "ssids", $marca, $modelo, $ano, $preco, $descricao);
+
+            if (!mysqli_stmt_execute($stmtCarro)) {
+                throw new Exception('Erro ao gravar carro: ' . mysqli_error($conexao));
+            }
+
+            $carroId = mysqli_insert_id($conexao);
+            mysqli_stmt_close($stmtCarro);
+
+            $stmt = mysqli_prepare($conexao, "
+                INSERT INTO vendedores (nome, telefone, email, marca, modelo, ano, preco, mensagem, carro_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ");
+
+            if (!$stmt) {
+                throw new Exception('Erro ao preparar pedido: ' . mysqli_error($conexao));
+            }
+
+            mysqli_stmt_bind_param($stmt, "sssssidsi", $nome, $telefone, $email, $marca, $modelo, $ano, $preco, $descricao, $carroId);
+
+            if (!mysqli_stmt_execute($stmt)) {
+                throw new Exception('Erro ao gravar pedido: ' . mysqli_error($conexao));
+            }
+
+            mysqli_stmt_close($stmt);
+
+            $stmtLead = mysqli_prepare($conexao, "
+                INSERT INTO leads (tipo, nome, telefone, email, mensagem, marca, modelo, ano, carro_id, origem, status, criado_em)
+                VALUES ('venda', ?, ?, ?, ?, ?, ?, ?, ?, 'site', 'novo', NOW())
+            ");
+
+            if (!$stmtLead) {
+                throw new Exception('Erro ao preparar lead: ' . mysqli_error($conexao));
+            }
+
+            mysqli_stmt_bind_param($stmtLead, "ssssssii", $nome, $telefone, $email, $mensagem, $marca, $modelo, $ano, $carroId);
+
+            if (!mysqli_stmt_execute($stmtLead)) {
+                throw new Exception('Erro ao gravar lead: ' . mysqli_error($conexao));
+            }
+
+            mysqli_stmt_close($stmtLead);
+            mysqli_commit($conexao);
             $sucesso = true;
-        } else {
+        } catch (Exception $e) {
+            mysqli_rollback($conexao);
             $erro = 'Erro ao enviar pedido. Tente novamente.';
         }
-
-        mysqli_stmt_close($stmt);
     }
 }
 ?>
@@ -70,7 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             padding: 40px 20px;
             background:
                 linear-gradient(rgba(5, 11, 20, .92), rgba(5, 11, 20, .96)),
-                url('assets/img/hero-car.jpg') center/cover no-repeat;
+                url('assets/ImagensRG/Mercedes.jpeg') center/cover no-repeat;
         }
 
         .container {

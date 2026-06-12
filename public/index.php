@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../app/core/bootstrap.php';
+require_once __DIR__ . '/../includes/public_car_images.php';
 
 
 function h_local($s) {
@@ -224,7 +225,7 @@ $currentSearch = trim($_GET['q'] ?? '');
                 <?php
                 $id = (int)$c['id'];
                 $titulo = nome_carro($c);
-                $img = fotoCarroUrl($c);
+                $img = public_car_image_url($c);
                 $preco = money_mt($c['preco'] ?? 0);
                 $ano = (int)($c['ano'] ?? 0);
 
@@ -234,7 +235,7 @@ $currentSearch = trim($_GET['q'] ?? '');
                 ?>
                 <div class="col-4 home-car-card">
                     <a href="<?= h(public_url('product-details.php?id=' . $id)) ?>">
-                        <img src="<?= h($img) ?>" alt="<?= h_local($titulo) ?>" />
+                        <img src="<?= h($img) ?>" alt="<?= h_local($titulo !== '' ? $titulo : 'Carro RG Auto Sales') ?>" width="320" height="220" loading="lazy" onerror="<?= h(public_car_img_fallback_attr()) ?>" />
                     </a>
                     <h4><?= h_local($titulo) ?></h4>
                     <p><?= $preco ?></p>
@@ -258,7 +259,7 @@ $currentSearch = trim($_GET['q'] ?? '');
                 <?php
                 $id = (int)$c['id'];
                 $titulo = nome_carro($c);
-                $img = fotoCarroUrl($c);
+                $img = public_car_image_url($c);
                 $preco = money_mt($c['preco'] ?? 0);
 
                 $wa = "https://wa.me/258862934721?text=" . urlencode(
@@ -267,7 +268,7 @@ $currentSearch = trim($_GET['q'] ?? '');
                 ?>
                 <div class="col-4 home-car-card">
                     <a href="<?= h(public_url('product-details.php?id=' . $id)) ?>">
-                        <img src="<?= h($img) ?>" alt="<?= h_local($titulo) ?>" />
+                        <img src="<?= h($img) ?>" alt="<?= h_local($titulo !== '' ? $titulo : 'Carro RG Auto Sales') ?>" width="320" height="220" loading="lazy" onerror="<?= h(public_car_img_fallback_attr()) ?>" />
                     </a>
                     <h4><?= h_local($titulo) ?></h4>
                     <p><?= $preco ?></p>

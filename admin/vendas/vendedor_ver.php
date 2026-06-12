@@ -15,8 +15,21 @@ function money($v){ return number_format((float)$v, 2, ',', '.') . " MT"; }
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 if ($id <= 0) die("ID inválido.");
 
-// Buscar pedido
-$stmt = mysqli_prepare($conexao, "SELECT * FROM vendedores WHERE id = ? LIMIT 1");
+// Buscar pedido com o carro associado quando existir.
+$stmt = mysqli_prepare($conexao, "
+  SELECT
+    v.*,
+    COALESCE(c.marca, v.marca) AS marca,
+    COALESCE(c.modelo, v.modelo) AS modelo,
+    COALESCE(c.ano, v.ano) AS ano,
+    COALESCE(c.preco, v.preco) AS preco,
+    c.descricao AS carro_descricao,
+    c.status AS carro_status
+  FROM vendedores v
+  LEFT JOIN carros c ON c.id = v.carro_id
+  WHERE v.id = ?
+  LIMIT 1
+");
 mysqli_stmt_bind_param($stmt, "i", $id);
 mysqli_stmt_execute($stmt);
 $res = mysqli_stmt_get_result($stmt);
@@ -95,10 +108,14 @@ $waLink = $waBase . "?text=" . $msg;
   <div class="grid">
     <div class="box">
       <strong>Carro</strong>
+      <div class="muted">ID no sistema: <?php echo !empty($v['carro_id']) ? '#' . (int)$v['carro_id'] : 'Sem associacao'; ?></div>
       <div class="muted">Marca: <?php echo h($v['marca']); ?></div>
       <div class="muted">Modelo: <?php echo h($v['modelo']); ?></div>
       <div class="muted">Ano: <?php echo h($v['ano']); ?></div>
       <div class="muted">Preço pretendido: <?php echo money($v['preco']); ?></div>
+      <?php if (!empty($v['carro_status'])): ?>
+        <div class="muted">Estado no stock: <?php echo h($v['carro_status']); ?></div>
+      <?php endif; ?>
       <div class="muted">Status: <strong><?php echo h($v['status'] ?? 'Novo'); ?></strong></div>
     </div>
 
@@ -115,6 +132,13 @@ $waLink = $waBase . "?text=" . $msg;
     <div class="note">
       <strong>Observações do dono</strong><br>
       <?php echo nl2br(h($v['mensagem'])); ?>
+    </div>
+  <?php endif; ?>
+
+  <?php if (!empty($v['carro_descricao']) && $v['carro_descricao'] !== ($v['mensagem'] ?? '')): ?>
+    <div class="note">
+      <strong>Descricao do carro</strong><br>
+      <?php echo nl2br(h($v['carro_descricao'])); ?>
     </div>
   <?php endif; ?>
 

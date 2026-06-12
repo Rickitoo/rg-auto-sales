@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../app/core/bootstrap.php';
+require_once __DIR__ . '/../includes/public_car_images.php';
 
 $id = (int)($_GET['id'] ?? 0);
 if ($id <= 0) {
@@ -51,7 +52,7 @@ $nome = trim(($carro['marca'] ?? '') . ' ' . ($carro['modelo'] ?? ''));
 $ano = (int)($carro['ano'] ?? 0);
 $precoFmt = number_format((float)($carro['preco'] ?? 0), 0, ',', '.');
 $desc = $carro['descricao'] ?? '';
-$fotoPrincipal = fotoCarroUrl($carro);
+$fotoPrincipal = public_car_image_url($carro);
 
 /*
 |--------------------------------------------------------------------------
@@ -76,7 +77,7 @@ if ($stmtFotos) {
         while ($row = mysqli_fetch_assoc($resFotos)) {
             $caminho = trim((string)($row['caminho'] ?? ''));
             if ($caminho !== '') {
-                $fotos[] = fotoCarroUrl(['imagem_principal' => $caminho, 'imagem' => $caminho]);
+                $fotos[] = public_car_image_url(['imagem_principal' => $caminho, 'imagem' => $caminho]);
             }
         }
     }
@@ -94,7 +95,7 @@ foreach ($fotos as $f) {
 }
 
 if (empty($galeria)) {
-    $galeria[] = asset('img/sem-foto.jpg');
+    $galeria[] = public_car_placeholder_url();
 }
 
 /*
@@ -338,11 +339,11 @@ if ($stmtMais) {
     <main class="small-container product-detail-page">
         <div class="product-detail-grid">
             <section class="product-gallery">
-                <img id="mainImg" src="<?= h($galeria[0]) ?>" alt="<?= h($nome) ?>" />
+                <img id="mainImg" src="<?= h($galeria[0]) ?>" alt="<?= h($nome !== '' ? $nome : 'Carro RG Auto Sales') ?>" width="720" height="480" onerror="<?= h(public_car_img_fallback_attr()) ?>" />
 
                 <div class="small-img-row">
                     <?php foreach ($galeria as $thumb): ?>
-                        <img class="thumb" src="<?= h($thumb) ?>" alt="Miniatura de <?= h($nome) ?>">
+                        <img class="thumb" src="<?= h($thumb) ?>" alt="Miniatura de <?= h($nome !== '' ? $nome : 'Carro RG Auto Sales') ?>" width="96" height="72" loading="lazy" onerror="<?= h(public_car_img_fallback_attr()) ?>">
                     <?php endforeach; ?>
                 </div>
             </section>
@@ -384,11 +385,11 @@ if ($stmtMais) {
                     $mNome = trim(($m['marca'] ?? '') . ' ' . ($m['modelo'] ?? ''));
                     $mAno = (int)($m['ano'] ?? 0);
                     $mPreco = number_format((float)($m['preco'] ?? 0), 0, ',', '.');
-                    $mImg = fotoCarroUrl($m);
+                    $mImg = public_car_image_url($m);
                     ?>
                     <article class="related-card">
                         <a href="<?= h(public_url('product-details.php?id=' . (int)$m['id'])) ?>" class="product-link">
-                            <img src="<?= h($mImg) ?>" alt="<?= h($mNome) ?>" />
+                            <img src="<?= h($mImg) ?>" alt="<?= h($mNome !== '' ? $mNome : 'Carro RG Auto Sales') ?>" width="260" height="170" loading="lazy" onerror="<?= h(public_car_img_fallback_attr()) ?>" />
                             <h4><?= h($mNome) ?><?= $mAno > 0 ? ' (' . h((string)$mAno) . ')' : '' ?></h4>
                             <p><?= $mPreco ?> MT</p>
                         </a>
@@ -400,46 +401,8 @@ if ($stmtMais) {
         </div>
     </main>
 
-    <div class="footer">
-        <div class="container">
-            <div class="row">
-
-                <div class="footer-col-1">
-                    <h3>Contactos</h3>
-                    <p>
-                        WhatsApp: <a href="https://wa.me/258862934721" target="_blank" rel="noopener">+258 862 934 721</a><br />
-                        Email: <a href="mailto:rgSolutions420@gmail.com">rgSolutions420@gmail.com</a>
-                    </p>
-                </div>
-
-                <div class="footer-col-2">
-                    <img src="<?= h(asset('ImagensRG/logo.png')) ?>" alt="RG Auto Sales" />
-                    <p>Nosso objetivo é tornar acessível o prazer de dirigir veículos de qualidade, com transparência e confiança.</p>
-                </div>
-
-                <div class="footer-col-4">
-                    <h3>Siga a RG</h3>
-                    <ul>
-                        <li><a href="https://www.instagram.com/rgauto_sales/">Instagram</a></li>
-                        <li><a href="https://www.facebook.com/profile.php?id=61588204178280&locale=pt_BR">Facebook</a></li>
-                        <li><a href="#">TikTok</a></li>
-                        <li><a href="#">YouTube</a></li>
-                    </ul>
-                </div>
-
-            </div>
-
-            <hr />
-            <p class="copyright">Copyright 2026 - RG SALES</p>
-        </div>
-    </div>
-
+    <?php require_once __DIR__ . '/../includes/footer_public.php'; ?>
     <script>
-        const menuItems = document.getElementById("MenuItems");
-        function menutoggle() {
-            if (menuItems) menuItems.classList.toggle("show");
-        }
-
         document.querySelectorAll(".thumb").forEach(t => {
             t.addEventListener("click", () => {
                 const mainImg = document.getElementById("mainImg");
@@ -448,13 +411,6 @@ if ($stmtMais) {
         });
     </script>
 
-    <a class="wa-float"
-       href="<?= h($wa) ?>"
-       target="_blank"
-       rel="noopener"
-       aria-label="Falar no WhatsApp com a RG Auto Sales">
-        <i class="fa-brands fa-whatsapp"></i>
-        <span>WhatsApp RG</span>
-    </a>
+    <?php $waFloatHref = $wa; require_once __DIR__ . '/includes/wa_float.php'; ?>
 </body>
 </html>

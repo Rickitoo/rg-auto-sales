@@ -55,20 +55,47 @@ $total = count($validIndexes);
 if ($total < 1) die("Envie pelo menos 1 foto.");
 if ($total > $MAX_FILES) die("Máximo permitido: {$MAX_FILES} fotos.");
 
+mysqli_begin_transaction($conexao);
+
 // =====================
-// 1) Inserir pedido em vendedores
+// 1) Inserir carro e associar ao pedido
 // =====================
-$sql = "INSERT INTO vendedores (nome, telefone, email, marca, modelo, ano, preco, mensagem)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+$stmtCarro = mysqli_prepare($conexao, "
+    INSERT INTO carros (marca, modelo, ano, preco, descricao, status, data_registo)
+    VALUES (?, ?, ?, ?, ?, 'disponivel', NOW())
+");
+
+if (!$stmtCarro) {
+    mysqli_rollback($conexao);
+    die("Erro ao preparar carro: " . mysqli_error($conexao));
+}
+
+mysqli_stmt_bind_param($stmtCarro, "ssids", $marca, $modelo, $ano, $preco, $mensagem);
+
+if (!mysqli_stmt_execute($stmtCarro)) {
+    mysqli_rollback($conexao);
+    die("Erro ao gravar carro: " . mysqli_error($conexao));
+}
+
+$carro_id = mysqli_insert_id($conexao);
+mysqli_stmt_close($stmtCarro);
+
+// =====================
+// 2) Inserir pedido em vendedores
+// =====================
+$sql = "INSERT INTO vendedores (nome, telefone, email, marca, modelo, ano, preco, mensagem, carro_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 $stmt = mysqli_prepare($conexao, $sql);
 if (!$stmt) {
+    mysqli_rollback($conexao);
     die("Erro ao preparar: " . mysqli_error($conexao));
 }
 
-mysqli_stmt_bind_param($stmt, "sssssids", $nome, $telefone, $email, $marca, $modelo, $ano, $preco, $mensagem);
+mysqli_stmt_bind_param($stmt, "sssssidsi", $nome, $telefone, $email, $marca, $modelo, $ano, $preco, $mensagem, $carro_id);
 
 if (!mysqli_stmt_execute($stmt)) {
+    mysqli_rollback($conexao);
     die("Erro ao gravar: " . mysqli_error($conexao));
 }
 
@@ -80,6 +107,7 @@ mysqli_stmt_close($stmt);
 // =====================
 $stmtFoto = mysqli_prepare($conexao, "INSERT INTO vendedores_fotos (vendedor_id, arquivo) VALUES (?, ?)");
 if (!$stmtFoto) {
+    mysqli_rollback($conexao);
     die("Erro ao preparar fotos: " . mysqli_error($conexao));
 }
 
@@ -133,8 +161,8 @@ mysqli_stmt_close($stmtFoto);
 // Garantir que pelo menos 1 foto foi salva
 // =====================
 if ($salvas < 1) {
+    mysqli_rollback($conexao);
     // apaga pedido (evita pedido órfão)
-    mysqli_query($conexao, "DELETE FROM vendedores WHERE id=" . (int)$vendedor_id);
 
     // apaga arquivos que por acaso tenham sido salvos (normalmente 0 aqui)
     foreach ($salvasPaths as $p) {
@@ -148,6 +176,7 @@ if ($salvas < 1) {
 // =====================
 // Sucesso
 // =====================
+mysqli_commit($conexao);
 mysqli_close($conexao);
 $nome_url = urlencode($nome);
 $marca_url = urlencode($marca);

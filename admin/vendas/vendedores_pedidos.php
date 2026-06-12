@@ -18,10 +18,16 @@ function money($v){ return number_format((float)$v, 2, ',', '.') . " MT"; }
 
 $sql = "
   SELECT
-    v.id, v.nome, v.telefone, v.email, v.marca, v.modelo, v.ano, v.preco, v.mensagem, v.data_registo,
+    v.id, v.nome, v.telefone, v.email, v.mensagem, v.data_registo, v.carro_id,
+    COALESCE(c.marca, v.marca) AS marca,
+    COALESCE(c.modelo, v.modelo) AS modelo,
+    COALESCE(c.ano, v.ano) AS ano,
+    COALESCE(c.preco, v.preco) AS preco,
+    c.descricao AS carro_descricao,
     v.status,
     COUNT(f.id) AS total_fotos
   FROM vendedores v
+  LEFT JOIN carros c ON c.id = v.carro_id
   LEFT JOIN vendedores_fotos f ON f.vendedor_id = v.id
   GROUP BY v.id
   ORDER BY v.id DESC
@@ -109,6 +115,7 @@ $statuses = ['Novo','Em análise','Aprovado','Recusado','Publicado'];
 
           <div>
             <div><strong><?php echo h($r['marca']); ?> <?php echo h($r['modelo']); ?></strong></div>
+            <div class="muted">Carro no sistema: <?php echo !empty($r['carro_id']) ? '#' . (int)$r['carro_id'] : 'Sem associacao'; ?></div>
             <div class="muted">Ano: <?php echo h($r['ano']); ?></div>
             <div class="muted">Preço: <?php echo money($r['preco']); ?></div>
             <div class="muted">

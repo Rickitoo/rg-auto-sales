@@ -243,16 +243,7 @@ if (count($ids) > 0) {
     window.onload = atualizarTotal;
 </script>
 
-<a
-  class="wa-float"
-  href="https://wa.me/258862934721?text=Olá%20RG%20Auto%20Sales,%20quero%20informações."
-  target="_blank"
-  rel="noopener"
-  aria-label="Falar no WhatsApp com a RG Auto Sales"
->
-  <i class="fa-brands fa-whatsapp"></i>
-  <span>WhatsApp RG</span>
-</a>
+<?php require_once __DIR__ . '/includes/wa_float.php'; ?>
 
 </body>
 </html>

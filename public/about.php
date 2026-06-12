@@ -99,69 +99,14 @@ require_once __DIR__ . '/../app/core/bootstrap.php';
   </div>
 
   <!-- FOOTER -->
-  <div class="footer">
-    <div class="container">
-      <div class="row">
-
-        <div class="footer-col-1">
-          <h3>Download do App</h3>
-          <p>Disponível para Android e iOS.</p>
-          <div class="app-logo">
-            <img src="<?= h(asset('ImagensRG/AppStore.png')) ?>" alt="App Store" />
-            <img src="<?= h(asset('ImagensRG/pngtree-google-play-store-vector-png-image_9183318.png')) ?>" alt="Google Play" />
-          </div>
-        </div>
-
-        <div class="footer-col-2">
-          <img src="<?= h(asset('ImagensRG/logo.png')) ?>" alt="RG Auto Sales" />
-          <p>Nosso objetivo é tornar acessível o prazer de dirigir veículos de qualidade, com transparência e confiança.</p>
-        </div>
-
-        <div class="footer-col-1">
-          <h3>Links úteis</h3>
-          <ul>
-            <li><a href="<?= h(public_url('products.php')) ?>">Carros</a></li>
-            <li><a href="<?= h(public_url('test_drive.php')) ?>">Test Drive</a></li>
-            <li><a href="<?= h(public_url('importar_carro.php')) ?>">Importar carro</a></li>
-            <li><a href="<?= h(public_url('vender_carro.php')) ?>">Vender</a></li>
-            <li><a href="<?= h(public_url('contacto.php')) ?>">Contactos</a></li>
-          </ul>
-        </div>
-
-        <div class="footer-col-4">
-          <h3>Siga a RG</h3>
-          <ul>
-            <li><a href="https://www.facebook.com/profile.php?id=61588204178280&locale=pt_BR">Facebook</a></li>
-            <li><a href="https://www.instagram.com/rgauto_sales/">Instagram</a></li>
-            <li><a href="#">Twitter</a></li>
-            <li><a href="#">Youtube</a></li>
-          </ul>
-        </div>
-
-      </div>
-
-      <hr />
-      <p class="copyright">Copyright 2026 - RG SALES</p>
-    </div>
-  </div>
-
-  <!-- JS menu (compatível com teu CSS corrigido) -->
+    <?php require_once __DIR__ . '/../includes/footer_public.php'; ?>
   <script>
     const menuItems = document.getElementById("MenuItems");
     function menutoggle(){
       menuItems.classList.toggle("show");
     }
   </script>
-  <a
-  class="wa-float"
-  href="https://wa.me/258862934721?text=Olá%20RG%20Auto%20Sales,%20quero%20informações."
-  target="_blank"
-  rel="noopener"
-  aria-label="Falar no WhatsApp com a RG Auto Sales"
->
-  <i class="fa-brands fa-whatsapp"></i>
-  <span>WhatsApp RG</span>
-</a>
+  <?php require_once __DIR__ . '/includes/wa_float.php'; ?>
 
 </body>
 </html>
