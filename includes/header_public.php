@@ -4,6 +4,49 @@ $currentSearch = trim($_GET['q'] ?? '');
 $user = current_user();
 ?>
 
+<style>
+@media (max-width: 900px) {
+    .navbar {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        align-items: center !important;
+        gap: 10px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    .navbar .logo {
+        order: 1 !important;
+        flex: 0 0 auto !important;
+    }
+    .navbar .menu-icon {
+        display: inline-flex !important;
+        visibility: visible !important;
+        order: 2 !important;
+        flex: 0 0 44px !important;
+        margin-left: auto !important;
+        background: #00aeef !important;
+        color: #fff !important;
+        position: fixed !important;
+        left: min(calc(100vw - 60px), 315px) !important;
+        right: auto !important;
+        top: 18px !important;
+        z-index: 9999 !important;
+    }
+    .navbar .header-search {
+        order: 3 !important;
+        flex: 1 1 100% !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+    .navbar > nav {
+        order: 4 !important;
+        flex: 1 1 100% !important;
+        width: 100% !important;
+    }
+}
+</style>
+
 <header class="header header--rg">
     <div class="header__overlay">
         <div class="container">
@@ -23,6 +66,7 @@ $user = current_user();
                         <li><a href="<?= h(public_url('test_drive.php')) ?>">Test Drive</a></li>
                         <li><a href="<?= h(public_url('leasing.php')) ?>">Leasing</a></li>
                         <li><a href="<?= h(public_url('importar_carro.php')) ?>">Importar</a></li>
+                        <li><a href="<?= h(public_url('vender_carro.php')) ?>">Vender</a></li>
                         <?php if ($user): ?>
                             <li><a href="<?= h(is_admin() ? url('admin/dashboard.php') : public_url('dashboard.php')) ?>"><?= h($user['nome']) ?></a></li>
                             <li><a href="<?= h(url('auth/logout.php')) ?>">Sair</a></li>

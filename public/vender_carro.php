@@ -96,10 +96,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Vender o Meu Carro | RG Auto Sales</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="<?= h(asset('css/style.css')) ?>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <style>
-        * {
+        .sell-page,
+        .sell-page * {
             box-sizing: border-box;
+        }
+
+        .sell-page * {
             margin: 0;
             padding: 0;
         }
@@ -110,7 +118,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: #fff;
         }
 
-        .page {
+        .sell-page {
             min-height: 100vh;
             padding: 40px 20px;
             background:
@@ -118,7 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 url('assets/ImagensRG/Mercedes.jpeg') center/cover no-repeat;
         }
 
-        .container {
+        .sell-container {
             max-width: 1100px;
             margin: auto;
             display: grid;
@@ -127,7 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             align-items: center;
         }
 
-        .badge {
+        .sell-badge {
             display: inline-block;
             background: #007bff;
             color: #fff;
@@ -138,17 +146,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-weight: bold;
         }
 
-        h1 {
+        .sell-text h1 {
             font-size: 46px;
             line-height: 1.1;
             margin-bottom: 20px;
         }
 
-        h1 span {
+        .sell-text h1 span {
             color: #007bff;
         }
 
-        .text p {
+        .sell-text p {
             color: #cbd5e1;
             font-size: 17px;
             line-height: 1.6;
@@ -189,14 +197,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             margin-bottom: 15px;
         }
 
-        label {
+        .form-box label {
             display: block;
             margin-bottom: 7px;
             color: #cbd5e1;
             font-size: 14px;
         }
 
-        input, textarea {
+        .form-box input,
+        .form-box textarea {
             width: 100%;
             padding: 14px;
             border-radius: 12px;
@@ -206,11 +215,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             outline: none;
         }
 
-        input:focus, textarea:focus {
+        .form-box input:focus,
+        .form-box textarea:focus {
             border-color: #007bff;
         }
 
-        textarea {
+        .form-box textarea {
             min-height: 110px;
             resize: vertical;
         }
@@ -221,7 +231,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             gap: 14px;
         }
 
-        button {
+        .form-box button {
             width: 100%;
             padding: 15px;
             border: none;
@@ -234,7 +244,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             margin-top: 8px;
         }
 
-        button:hover {
+        .form-box button:hover {
             background: #005fd1;
         }
 
@@ -269,16 +279,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         @media (max-width: 850px) {
-            .container {
+            .sell-container {
                 grid-template-columns: 1fr;
+                max-width: 100%;
+                overflow: hidden;
             }
 
-            h1 {
-                font-size: 34px;
+            .sell-text h1 {
+                font-size: 30px;
+                overflow-wrap: anywhere;
             }
 
             .grid-2 {
                 grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .sell-page {
+                padding-left: 16px;
+                padding-right: 16px;
+            }
+
+            .sell-container,
+            .sell-text,
+            .sell-text h1,
+            .sell-text p,
+            .form-box,
+            .benefits div {
+                width: 100% !important;
+                max-width: 343px !important;
+            }
+
+            .sell-container {
+                margin-left: 0 !important;
+                margin-right: 0 !important;
             }
         }
     </style>
@@ -286,11 +321,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <body>
 
-<div class="page">
-    <div class="container">
+<?php require_once __DIR__ . '/../includes/header_public.php'; ?>
 
-        <div class="text">
-            <div class="badge">RG Auto Sales</div>
+<div class="sell-page">
+    <div class="sell-container">
+
+        <div class="sell-text">
+            <div class="sell-badge">RG Auto Sales</div>
 
             <h1>Venda o seu carro com <span>segurança e rapidez</span></h1>
 
@@ -387,6 +424,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     </div>
 </div>
+
+<?php require_once __DIR__ . '/../includes/footer_public.php'; ?>
+<?php require_once __DIR__ . '/includes/wa_float.php'; ?>
 
 </body>
 </html>

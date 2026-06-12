@@ -126,7 +126,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <style>
         body.import-page{background:#050b14;color:#fff;padding-top:0;text-align:left}
         .import-hero{background:linear-gradient(120deg,rgba(0,0,0,.88),rgba(1,32,63,.82)),url("<?= h(asset('ImagensRG/Mercedes.jpeg')) ?>") center/cover no-repeat;min-height:680px}
-        .import-hero .navbar{background:rgba(1,32,63,.9)}
         .import-hero-inner{display:grid;grid-template-columns:minmax(0,1fr) 440px;gap:34px;align-items:center;padding:70px 25px 54px;max-width:1240px;margin:0 auto}
         .import-copy h1{color:#fff;font-size:52px;line-height:1.05;margin:0 0 18px;text-align:left}
         .import-copy p{color:#d9edff;font-size:17px;line-height:1.7;max-width:680px;text-align:left}
@@ -156,34 +155,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .import-cta-band h2{color:#fff;margin:0 0 10px}
         .import-cta-band p{color:#d9edff;margin:0 auto 14px;max-width:760px;text-align:center}
         @media(max-width:980px){.import-hero-inner{grid-template-columns:1fr}.import-copy h1{font-size:40px}.import-steps{grid-template-columns:repeat(2,minmax(0,1fr))}}
-        @media(max-width:620px){.import-hero-inner{padding:36px 18px}.import-copy h1{font-size:32px}.import-form-grid,.import-steps{grid-template-columns:1fr}.import-form-grid .full{grid-column:auto}}
+        @media(max-width:900px){.import-copy,.import-form-card,.import-badges span,.import-copy h1,.import-copy p{width:100%!important;max-width:343px!important}}
+        @media(max-width:620px){.import-hero-inner{padding:36px 16px;max-width:100%;overflow:hidden}.import-copy h1{font-size:30px;overflow-wrap:anywhere}.import-copy p{overflow-wrap:break-word}.import-form-grid,.import-steps{grid-template-columns:1fr}.import-form-grid .full{grid-column:auto}}
     </style>
 </head>
 <body class="import-page">
-    <header class="import-hero">
-        <div class="navbar">
-            <div class="logo">
-                <a href="<?= h(public_url('index.php')) ?>">
-                    <img src="<?= h(asset('ImagensRG/logo.png')) ?>" alt="RG Auto Sales" width="120">
-                </a>
-            </div>
+    <?php require_once __DIR__ . '/../includes/header_public.php'; ?>
 
-            <nav>
-                <ul id="MenuItems">
-                    <li><a href="<?= h(public_url('index.php')) ?>">Inicio</a></li>
-                    <li><a href="<?= h(public_url('products.php')) ?>">Carros</a></li>
-                    <li><a href="<?= h(public_url('importar_carro.php')) ?>">Importar</a></li>
-                    <li><a href="<?= h(public_url('leasing.php')) ?>">Leasing</a></li>
-                    <li><a href="<?= h(public_url('vender_carro.php')) ?>">Vender</a></li>
-                    <li><a href="<?= h(public_url('contacto.php')) ?>">Contacto</a></li>
-                </ul>
-            </nav>
-
-            <button class="menu-icon" type="button" onclick="menutoggle()" aria-label="Abrir menu">
-                <i class="fa-solid fa-bars"></i>
-            </button>
-        </div>
-
+    <main class="import-hero">
         <div class="import-hero-inner">
             <div class="import-copy">
                 <h1>Importe o seu carro do Japao para Mocambique com a RG Auto Sales</h1>
@@ -261,7 +240,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <button class="btn import-submit" type="submit">Enviar pedido</button>
             </form>
         </div>
-    </header>
+    </main>
 
     <section class="import-section">
         <h2>Como funciona</h2>
@@ -280,11 +259,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </section>
 
     <?php require_once __DIR__ . '/../includes/footer_public.php'; ?>
-    <script>
-        const menuItems = document.getElementById("MenuItems");
-        function menutoggle(){
-            menuItems.classList.toggle("show");
-        }
-    </script>
 </body>
 </html>

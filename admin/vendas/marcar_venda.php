@@ -205,39 +205,196 @@ if (isset($_POST['preco_venda'], $_POST['data_venda'])) {
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="pt">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Marcar Venda</title>
+<style>
+    :root {
+        --rg-navy: #07192f;
+        --rg-blue: #00aeef;
+        --rg-bg: #eef3f8;
+        --rg-line: #dde5ef;
+        --rg-text: #101828;
+        --rg-muted: #667085;
+        --rg-danger: #b42318;
+    }
+    * { box-sizing: border-box; }
+    body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--rg-bg);
+        color: var(--rg-text);
+        font-family: Arial, sans-serif;
+    }
+    .sale-page {
+        width: min(980px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 34px 0;
+    }
+    .sale-header { margin-bottom: 22px; }
+    .sale-header a {
+        color: var(--rg-blue);
+        display: inline-flex;
+        font-weight: 700;
+        margin-bottom: 14px;
+        text-decoration: none;
+    }
+    .sale-header h1 {
+        color: var(--rg-navy);
+        font-size: clamp(28px, 4vw, 40px);
+        line-height: 1.1;
+        margin: 0 0 8px;
+    }
+    .sale-header p {
+        color: var(--rg-muted);
+        font-size: 15px;
+        margin: 0;
+    }
+    .sale-card {
+        background: #fff;
+        border: 1px solid var(--rg-line);
+        border-radius: 12px;
+        box-shadow: 0 16px 42px rgba(16, 24, 40, .08);
+        overflow: hidden;
+    }
+    .sale-summary {
+        display: grid;
+        gap: 14px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        padding: 24px;
+    }
+    .sale-summary__item {
+        background: #f8fbff;
+        border: 1px solid var(--rg-line);
+        border-radius: 10px;
+        padding: 16px;
+    }
+    .sale-summary__item span,
+    .sale-form label {
+        color: var(--rg-muted);
+        display: block;
+        font-size: 13px;
+        font-weight: 700;
+        margin-bottom: 7px;
+    }
+    .sale-summary__item strong {
+        color: var(--rg-navy);
+        display: block;
+        font-size: 18px;
+        line-height: 1.35;
+    }
+    .sale-form {
+        border-top: 1px solid var(--rg-line);
+        display: grid;
+        gap: 16px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        padding: 24px;
+    }
+    .sale-form input {
+        border: 1px solid #cfd8e3;
+        border-radius: 10px;
+        color: var(--rg-text);
+        font-size: 16px;
+        min-height: 48px;
+        padding: 12px 14px;
+        width: 100%;
+    }
+    .sale-form input:focus {
+        border-color: var(--rg-blue);
+        box-shadow: 0 0 0 3px rgba(0, 174, 239, .14);
+        outline: none;
+    }
+    .sale-actions {
+        align-items: center;
+        display: flex;
+        gap: 12px;
+        grid-column: 1 / -1;
+        justify-content: flex-end;
+        margin-top: 4px;
+    }
+    .sale-actions button {
+        background: var(--rg-blue);
+        border: 0;
+        border-radius: 10px;
+        color: #fff;
+        cursor: pointer;
+        font-size: 15px;
+        font-weight: 800;
+        min-height: 48px;
+        padding: 0 22px;
+    }
+    .sale-alert {
+        background: #fee4e2;
+        border: 1px solid #fecdca;
+        border-radius: 10px;
+        color: var(--rg-danger);
+        font-weight: 700;
+        margin: 0 0 18px;
+        padding: 13px 15px;
+    }
+    @media (max-width: 720px) {
+        .sale-page {
+            width: 343px;
+            margin-left: 16px;
+            margin-right: 0;
+        }
+
+        .sale-summary,
+        .sale-form {
+            grid-template-columns: 1fr;
+            padding: 18px;
+        }
+        .sale-actions { justify-content: stretch; }
+        .sale-actions button { width: 100%; }
+    }
+</style>
 </head>
 <body>
 
-<h2>Marcar Venda</h2>
+<main class="sale-page">
+    <header class="sale-header">
+        <a href="<?= h(url('admin/leads/leads.php')) ?>">Voltar aos leads</a>
+        <h1>Marcar Venda</h1>
+        <p>Confirme os dados do cliente e registe a venda deste carro.</p>
+    </header>
 
 <?php if ($erro): ?>
-<p style="color:red"><?= h($erro) ?></p>
+    <p class="sale-alert"><?= h($erro) ?></p>
 <?php endif; ?>
 
-<p><strong>Cliente:</strong> <?= h($lead['nome']) ?></p>
-<p><strong>Carro:</strong> <?= h($carro['marca']) ?> <?= h($carro['modelo']) ?></p>
+    <section class="sale-card">
+        <div class="sale-summary">
+            <div class="sale-summary__item">
+                <span>Cliente</span>
+                <strong><?= h($lead['nome']) ?></strong>
+            </div>
+            <div class="sale-summary__item">
+                <span>Carro</span>
+                <strong><?= h($carro['marca']) ?> <?= h($carro['modelo']) ?></strong>
+            </div>
+        </div>
 
-<form method="POST">
-<?= csrf_input() ?>
-<input type="hidden" name="lead_id" value="<?= (int)$lead_id ?>">
+        <form class="sale-form" method="POST">
+            <?= csrf_input() ?>
+            <input type="hidden" name="lead_id" value="<?= (int)$lead_id ?>">
 
-<label>Preço de Venda</label>
-<input type="number" step="0.01" name="preco_venda" value="<?= h($carro['preco']) ?>" required>
+            <label>Preço de Venda
+                <input type="number" step="0.01" name="preco_venda" value="<?= h($carro['preco']) ?>" required>
+            </label>
 
-<br><br>
+            <label>Data da Venda
+                <input type="datetime-local" name="data_venda" required>
+            </label>
 
-<label>Data da Venda</label>
-<input type="datetime-local" name="data_venda" required>
+            <div class="sale-actions">
+                <button type="submit">Confirmar Venda</button>
+            </div>
 
-<br><br>
-
-<button type="submit">Confirmar Venda</button>
-
-</form>
+        </form>
+    </section>
+</main>
 
 </body>
 </html>
